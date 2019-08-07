@@ -1,0 +1,7 @@
+{
+    "eslint.enable": false,
+    "vetur.format.defaultFormatter.html": "js-beautify-html",
+    "prettier.singleQuote": true,
+    "prettier.eslintIntegration": true,
+    "prettier.semi": false
+}
