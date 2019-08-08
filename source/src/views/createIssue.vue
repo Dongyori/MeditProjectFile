@@ -14,10 +14,13 @@
                       <b-form-input type="text" id="input1" placeholder="Summary"></b-form-input>
                     </b-form-group>
                     <b-form-group label="Description" label-for="input3">
-                      <b-form-textarea id="input3" v-model="text" placeholder="Description" :rows="10" :max-rows="20" style="height: 360px"></b-form-textarea>
+                      <b-form-textarea id="input3" v-model="text" placeholder="Description" :rows="10" :max-rows="20" style="height: 380px"></b-form-textarea>
                     </b-form-group>
                   </div>
                   <div class="col-md-4 grid-margin">
+                    <b-form-group horizontal label="Project">
+                      <b-form-select v-model="selected" :options="IssueType" placeholder="Select IssueType" />
+                    </b-form-group>
                     <b-form-group horizontal label="Issue Type">
                       <b-form-select v-model="selected" :options="IssueType" placeholder="Select IssueType" />
                     </b-form-group>
@@ -37,7 +40,7 @@
                       <b-form-select v-model="selected" :options="Assignee" placeholder="Select Reference" />
                     </b-form-group>
                     <b-form-group horizontal label="Deadline">
-                      <datepicker placeholder="Select Date"></datepicker>
+                      <datepicker id="deadline" placeholder="Select Date"></datepicker>
                     </b-form-group>
                     <b-button type="submit" variant="success" class="mr-2" v-on:click="OpenTab()">Create</b-button>
                     <b-button variant="light">Cancel</b-button>
@@ -99,7 +102,7 @@
                   </div>
                 </div>
               </div>
-              <div class="row" style="margin-left:120px;">
+              <div class="row" style="margin-left:350px;">
                 <i class="mdi mdi-account-search"></i>
                 <input data-v-a65342b6="" id="input1" type="text" placeholder="Search" class="col-4 mr-2 form-control">
                 <button data-v-35f42b37="" type="button" class="col-1 btn btn-fw btn-inverse-light btn-secondary mr-5">Search</button>

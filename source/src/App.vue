@@ -2,7 +2,7 @@
   <div id="app" style="background-color: rgb(42, 119, 209)">
     <div v-if="isLoginPage">
       <app-login/>
-      </div>
+    </div>
     <div v-else class="container-scroller">
       <app-header/>
       <div class="container-fluid page-body-wrapper">
@@ -24,14 +24,13 @@
 <script lang="js">
   import AppHeader from '../src/components/partials/AppHeader'
   import AppSidebar from '../src/components/partials/AppSidebar'
-  // import AppFooter from '../src/components/partials/AppFooter'
   import AppLogin from '../src/views/sample-pages/login.vue'
+
   export default{
     name: 'main',
     components: {
       AppHeader,
       AppSidebar,
-      // AppFooter,
       AppLogin
     },
     data () {

@@ -135,7 +135,7 @@
               </table>
             </div>
             </div>
-              <div class="col-6 grid-margin" style="margin-left:30%;">
+              <div class="col-6 grid-margin" style="margin-left:50%;">
                 <div class="card">
                   <div class="card-body">
                     <b-pagination :total-rows="100" v-model="currentPage" :per-page="5" @change="processFile($event)">

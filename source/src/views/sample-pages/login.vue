@@ -20,7 +20,7 @@
                   <i class="mdi mdi-eye"></i>
                 </div>
                 <div class="mt-5">
-                  <a class="btn btn-block btn-warning btn-lg font-weight-medium" @click="checkLogin()">Login</a>
+                  <a class="btn btn-block btn-warning btn-lg font-weight-medium" @click="LoginCheck()">Login</a>
                 </div>
                 <div class="mt-3 text-center">
                   <a href="#" class="auth-link text-white">Forgot password?</a>
@@ -36,11 +36,32 @@
 </template>
 
 <script lang="js">
+  import axios from 'axios'
+
   export default {
     name: 'login',
+    data: () => {
+      return {
+        toDoItems: []
+      }
+    },
     methods: {
-      checkLogin () {
-        this.$parent.isLoginPage = false
+      LoginCheck () {
+      var email = document.getElementById('exampleInputEmail1').value
+      var pw = document.getElementById('exampleInputPassword1').value
+      axios.post('http://192.168.1.26:1337/login',
+        {'email': email, 'password': pw})
+        .then(response => {
+          this.toDoItems = response.data
+          console.log(JSON.stringify(response.data))
+          console.log(this.toDoItems.resultCode)
+          if (this.toDoItems.resultCode === 0){
+              this.$parent.isLoginPage = false
+          }
+        })
+        .catch(e => {
+          console.log('error : ', e)
+        })
       }
     }
   }
@@ -48,6 +69,5 @@
 
 <style scoped lang="scss">
 .login {
-
 }
 </style>
