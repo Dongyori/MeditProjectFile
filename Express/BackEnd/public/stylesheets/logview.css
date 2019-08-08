@@ -1,0 +1,27 @@
+﻿body {
+}
+
+table {
+    border-collapse: separate;
+    margin: 5px;
+}
+
+text-decoration: none; {
+    border: 3px solid black;
+    padding: 3px;
+}
+
+table.inner {
+    border: 2px solid black;
+    cursor: default;
+}
+
+table.inner text-decoration: none; {
+    border: 3px solid black;
+    padding: 5px;
+    transition-duration: 0.2s;
+}
+
+table.inner td:hover {
+    background-color: #B2E76D;
+}
