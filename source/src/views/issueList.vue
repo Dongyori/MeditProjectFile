@@ -15,7 +15,7 @@
                 <button data-v-35f42b37="" type="button" class="col-1 mr-5 btn btn-fw btn-inverse-light btn-secondary">Resolved</button>
                 <i class="mdi mdi-account-search"></i>
                 <input data-v-a65342b6="" id="input1" type="text" placeholder="Search" class="col-2 mr-2 form-control">
-                <a data-v-35f42b37="" target="_self" href="#" class="btn btn-fw btn-link btn-rounded btn-secondary col-1 mr-5">Search</a>
+                <button data-v-35f42b37="" type="button" class="col-1 mr-5 btn btn-fw btn-inverse-light btn-secondary">Search</button>
                 </div>
                 <div class="table-responsive">
               <table class="table center-aligned-table">
@@ -84,7 +84,7 @@
                 <button data-v-35f42b37="" type="button" class="col-1 mr-5 btn btn-fw btn-inverse-light btn-secondary">Resolved</button>
                 <i class="mdi mdi-account-search"></i>
                 <input data-v-a65342b6="" id="input1" type="text" placeholder="Search" class="col-2 mr-2 form-control">
-                <a data-v-35f42b37="" target="_self" href="#" class="btn btn-fw btn-link btn-rounded btn-secondary col-1 mr-5">Search</a>
+                <button data-v-35f42b37="" type="button" class="col-1 mr-5 btn btn-fw btn-inverse-light btn-secondary">Search</button>
                 </div>
                 <div class="table-responsive">
               <table class="table center-aligned-table">
