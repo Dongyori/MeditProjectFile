@@ -91,7 +91,7 @@
                   </table>
                 </div>
               </div>
-              <div class="col-6 ml-12 grid-margin">
+              <div class="col-6 ml-12 grid-margin" style="margin-left:550px;">
                 <div class="card">
                   <div class="card-body">
                     <b-pagination :total-rows="100" v-model="currentPage" :per-page="5" @change="processFile($event)">
@@ -99,12 +99,12 @@
                   </div>
                 </div>
               </div>
-              <div class="row">
+              <div class="row" style="margin-left:120px;">
                 <i class="mdi mdi-account-search"></i>
                 <input data-v-a65342b6="" id="input1" type="text" placeholder="Search" class="col-4 mr-2 form-control">
-                <a data-v-35f42b37="" target="_self" href="#" class="btn btn-fw btn-link btn-rounded btn-secondary col-3 mr-5">Search</a>
-                <button data-v-35f42b37="" type="button" class="col-2 btn btn-outline-success mr-1">Success</button>
-                <button data-v-35f42b37="" type="button" class="col-2 btn btn-outline-danger">Reset</button>
+                <button data-v-35f42b37="" type="button" class="col-1 btn btn-fw btn-inverse-light btn-secondary mr-5">Search</button>
+                <button data-v-186e931c="" type="submit" class="btn mr-3 btn-success">Succes</button>
+                <button data-v-186e931c="" type="button" class="btn btn-light">Cancel</button>
               </div>
             </b-tab>
           </b-tabs>

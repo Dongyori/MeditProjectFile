@@ -68,11 +68,11 @@
         </b-nav-item-dropdown> -->
         <b-nav-item-dropdown right>
           <template slot="button-content">
-            <div class="count-indicator">
-              <i class="icon mdi mdi-plus-circle"></i>
-            </div>
-          </template>
-          <b-dropdown-item href="#">Admin Page</b-dropdown-item>
+  <div class="count-indicator">
+    <i class="icon mdi mdi-plus-circle"></i>
+  </div>
+</template>
+          <b-dropdown-item href="/AdminPage/">Admin Page</b-dropdown-item>
           <b-dropdown-item href="/createIssue/">Issue Create</b-dropdown-item>
           <b-dropdown-item href="#">Logout</b-dropdown-item>
         </b-nav-item-dropdown>

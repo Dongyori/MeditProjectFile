@@ -88,7 +88,7 @@
       <div class="col-12 grid-margin">
         <div class="card">
           <div class="card-body">
-            <h5 class="card-title mb-4">Issue Created</h5>
+            <h5 class="card-title mb-4">Created Issue</h5>
             <div class="table-responsive">
               <table class="table center-aligned-table">
                 <thead>
