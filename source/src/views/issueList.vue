@@ -9,7 +9,7 @@
             <b-tab title="Created Issue" active>
               <div data-v-19c9d02c="" class="card-body">
                 <div class="row mb-5">
-                <button data-v-35f42b37="" type="button" class="col-1 btn btn-fw btn-inverse-light btn-secondary">All</button>
+                <button data-v-35f42b37="" type="button" class="col-1 btn btn-fw btn-inverse-light btn-secondary" v-on:click="clickList()">All</button>
                 <button data-v-35f42b37="" type="button" class="col-1 btn btn-fw btn-inverse-light btn-secondary">Waiting</button>
                 <button data-v-35f42b37="" type="button" class="col-1 btn btn-fw btn-inverse-light btn-secondary">In Progress</button>
                 <button data-v-35f42b37="" type="button" class="col-1 mr-5 btn btn-fw btn-inverse-light btn-secondary">Resolved</button>
@@ -18,7 +18,7 @@
                 <a data-v-35f42b37="" target="_self" href="#" class="btn btn-fw btn-link btn-rounded btn-secondary col-1 mr-5">Search</a>
                 </div>
                 <div class="table-responsive">
-              <table class="table center-aligned-table">
+              <table class="table center-aligned-table" >
                 <thead>
                   <tr>
                     <th class="border-bottom-0">Issue No</th>
@@ -26,8 +26,8 @@
                     <th class="border-bottom-0">Issue Status</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr>
+                <tbody style="cursor: pointer">
+                  <tr v-on:click="clickList()">
                     <td>034</td>
                     <td>Iphone 7</td>
                     <td><label class="badge badge-teal">Approved</label></td>
@@ -96,7 +96,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
+                  <tr class="clickable-row">
                     <td>034</td>
                     <td>Iphone 7</td>
                     <td><label class="badge badge-teal">Approved</label></td>
@@ -326,6 +326,9 @@
       }
     },
     methods: {
+      clickList () {
+        window.open("http://localhost:8080/ClickIssueDetail")
+      },
       processFile (event) {
       },
       highlightTo (val) {
