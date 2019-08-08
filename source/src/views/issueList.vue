@@ -75,7 +75,7 @@
                 </div>
               </div>
             </b-tab>
-            <b-tab title="Assigned Tab">
+            <b-tab title="Assigned Issue">
               <div data-v-19c9d02c="" class="card-body">
                 <div class="row mb-5">
                 <button data-v-35f42b37="" type="button" class="col-1 btn btn-fw btn-inverse-light btn-secondary">All</button>

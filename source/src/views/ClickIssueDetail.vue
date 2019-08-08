@@ -113,8 +113,8 @@
                 <i class="mdi mdi-account-search"></i>
                 <input data-v-a65342b6="" id="input1" type="text" placeholder="Search" class="col-4 mr-2 form-control">
                 <button data-v-35f42b37="" type="button" class="btn btn-fw btn-inverse-light btn-secondary mr-5">Search</button>
-                <button data-v-35f42b37="" type="button" class="col-2 btn btn-outline-success mr-1">Success</button>
-                <button data-v-35f42b37="" type="button" class="col-2 btn btn-outline-danger">Reset</button>
+                <button data-v-186e931c="" type="submit" class="btn mr-3 btn-success">Success</button>
+                <button data-v-186e931c="" type="button" class="btn btn-light">Cancel</button>
               </div>
             </b-tab>
           </b-tabs>
