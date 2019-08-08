@@ -5,7 +5,7 @@
     <div class="col-md-12 grid-margin stretch-card">
       <div class="card">
         <div class="card-body">
-          <b-tabs class="autoTab">
+          <b-tabs>
             <b-tab title="Issue Detail" active>
               <form class="forms-sample">
                 <div class="row">
@@ -55,7 +55,7 @@
                 </div>
               </form>
             </b-tab>
-            <b-tab v-if="isFileSelected" title="Resource Tab">
+            <b-tab title="Resource Tab">
               <div data-v-19c9d02c="" class="card-body">
                 <h5 data-v-19c9d02c="" class="card-title mb-4">Resource Edit</h5>
                 <div data-v-19c9d02c="" class="table-responsive">
@@ -275,19 +275,6 @@
       }
     }
   }
-
-  $(document).ready(function (){
-    console.log("hi")
-    $($(".autoTab").find("li")[1]).hide()
-    // if($('.autoTab label').value == Attachment)
-    //   alert("hh");
-    // $('.autoTab li:hidden').show()
-    // $('.autoTab attachment').click(function () {
-    //   $('.autoTab li:hidden').show()
-    // })
-    // $(".resourceTab").css("visibility", "hidden")
-  })
-
 </script>
 
 <style scoped lang="scss">

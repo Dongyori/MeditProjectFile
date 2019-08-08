@@ -4,7 +4,7 @@ import Router from 'vue-router'
 // Dashboard Components
 import dashboard from '../views/dashboard'
 
-// Create Issue Page
+// Issue Detail Page (after clicking Issue List)
 import ClickIssueDetail from '../views/ClickIssueDetail'
 
 // Create Issue Page
@@ -12,9 +12,6 @@ import createIssue from '../views/createIssue'
 
 // Issue List Page
 import issueList from '../views/issueList'
-
-// Issue Detail Page
-import issueDetail from '../views/issueDetail'
 
 // Widgets
 import widgets from '../views/widgets'
@@ -68,11 +65,6 @@ export default new Router({
     path: '/issueList',
     name: 'issueList',
     component: issueList
-  },
-  {
-    path: '/issueDetail',
-    name: 'issueDetail',
-    component: issueDetail
   },
   {
     path: '/404',

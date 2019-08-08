@@ -8,8 +8,8 @@
     </div>
     <b-collapse is-nav id="nav_collapse">
       <b-navbar-nav class="header-links">
-        <b-nav-item href="#" active><i class="mdi mdi-image-filter"></i>Main DashBoard</b-nav-item>
-        <b-nav-item href="/issueList/" @click="changeActive()"><i class="mdi mdi-email-outline"></i>Issue List</b-nav-item>
+        <b-nav-item href="/" :active='$route.name =="dashboard"'><i class="mdi mdi-image-filter"></i>Main DashBoard</b-nav-item>
+        <b-nav-item href="/issueList/" :active='$route.name =="issueList"'><i class="mdi mdi-email-outline"></i>Issue List</b-nav-item>
       </b-navbar-nav>
       <!-- Right aligned nav items -->
       <b-navbar-nav class="ml-auto">
@@ -68,12 +68,11 @@
         </b-nav-item-dropdown> -->
         <b-nav-item-dropdown right>
           <template slot="button-content">
-  <div class="count-indicator">
-    <i class="icon mdi mdi-plus-circle"></i>
-  </div>
-</template>
+            <div class="count-indicator">
+              <i class="icon mdi mdi-plus-circle"></i>
+            </div>
+          </template>
           <b-dropdown-item href="#">Admin Page</b-dropdown-item>
-          <!-- <b-dropdown-item href="/createIssue/"><router-link class="nav-link" to="/createIssue/" style="color: black">Issue Create</router-link></b-dropdown-item> -->
           <b-dropdown-item href="/createIssue/">Issue Create</b-dropdown-item>
           <b-dropdown-item href="#">Logout</b-dropdown-item>
         </b-nav-item-dropdown>
@@ -85,27 +84,8 @@
 
 <script lang="js">
   export default {
-    name: 'app-header',
-    methods: {
-      changeActive (event) {
-        // $("#issueList").addClass("active")
-        // $(event).addClass("active")
-        // alert("clicked")
-        // $(".navbar-nav").find(".active").removeClass("active")
-        // $(this).parent().addClass("active")
-        $(this).parent().find(".a").addClass('active').siblings().removeClass('active')
-      }
-    }
+    name: 'app-header'
   }
-  $(document).ready(function () {
-    $(".navbar-nav a").on("click", function () {
-      // $(".nav-item").find(".active").removeClass("active")
-      // alert($(".nav-item").find(".active").name)
-      // $(this).parent().addClass("active")
-      $(this).parent().addClass('active').siblings().removeClass('active')
-    })
-  })
-
 </script>
 
 <style scoped lang="scss">

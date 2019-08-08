@@ -327,7 +327,7 @@
     },
     methods: {
       clickList () {
-        window.open("http://localhost:8080/ClickIssueDetail")
+        window.open("http://localhost:8080/ClickIssueDetail", "_self")
       },
       processFile (event) {
       },
