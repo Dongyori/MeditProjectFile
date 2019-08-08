@@ -68,10 +68,10 @@
         </b-nav-item-dropdown> -->
         <b-nav-item-dropdown right>
           <template slot="button-content">
-            <div class="count-indicator">
-              <i class="icon mdi mdi-plus-circle"></i>
-            </div>
-          </template>
+  <div class="count-indicator">
+    <i class="icon mdi mdi-plus-circle"></i>
+  </div>
+</template>
           <b-dropdown-item href="#">Admin Page</b-dropdown-item>
           <!-- <b-dropdown-item href="/createIssue/"><router-link class="nav-link" to="/createIssue/" style="color: black">Issue Create</router-link></b-dropdown-item> -->
           <b-dropdown-item href="/createIssue/">Issue Create</b-dropdown-item>
@@ -94,7 +94,6 @@
         // $(".navbar-nav").find(".active").removeClass("active")
         // $(this).parent().addClass("active")
         $(this).parent().find(".a").addClass('active').siblings().removeClass('active')
-        alert('change')
       }
     }
   }

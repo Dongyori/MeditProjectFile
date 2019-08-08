@@ -24,14 +24,12 @@
 <script lang="js">
   import AppHeader from '../src/components/partials/AppHeader'
   import AppSidebar from '../src/components/partials/AppSidebar'
-  import AppFooter from '../src/components/partials/AppFooter'
   import AppLogin from '../src/views/sample-pages/login.vue'
   export default{
     name: 'main',
     components: {
       AppHeader,
       AppSidebar,
-      AppFooter,
       AppLogin
     },
     data () {
@@ -43,9 +41,9 @@
 </script>
 
 <style>
-  @import "../node_modules/mdi/css/materialdesignicons.min.css";
-  @import "../node_modules/flag-icon-css/css/flag-icon.min.css";
-  @import "../node_modules/font-awesome/css/font-awesome.min.css";
+@import "../node_modules/mdi/css/materialdesignicons.min.css";
+@import "../node_modules/flag-icon-css/css/flag-icon.min.css";
+@import "../node_modules/font-awesome/css/font-awesome.min.css";
 </style>
 
 <style lang="scss">

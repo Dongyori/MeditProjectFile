@@ -9,7 +9,7 @@
             <b-tab title="Created Issue" active>
               <div data-v-19c9d02c="" class="card-body">
                 <div class="row mb-5">
-                <button data-v-35f42b37="" type="button" class="col-1 btn btn-fw btn-inverse-light btn-secondary" v-on:click="clickList()">All</button>
+                <button data-v-35f42b37="" type="button" class="col-1 btn btn-fw btn-inverse-light btn-secondary">All</button>
                 <button data-v-35f42b37="" type="button" class="col-1 btn btn-fw btn-inverse-light btn-secondary">Waiting</button>
                 <button data-v-35f42b37="" type="button" class="col-1 btn btn-fw btn-inverse-light btn-secondary">In Progress</button>
                 <button data-v-35f42b37="" type="button" class="col-1 mr-5 btn btn-fw btn-inverse-light btn-secondary">Resolved</button>
@@ -69,7 +69,7 @@
               <div class="col-6 grid-margin" style="margin-left:30%;">
                 <div class="card">
                   <div class="card-body">
-                    <b-pagination :total-rows="100" v-model="currentPage" :per-page="5" @change="processFile($event)">
+                    <b-pagination :total-rows="10" v-model="currentPage" :per-page="3" @change="processFile($event)">
                     </b-pagination>
                   </div>
                 </div>
