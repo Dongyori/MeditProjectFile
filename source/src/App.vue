@@ -24,14 +24,14 @@
 <script lang="js">
   import AppHeader from '../src/components/partials/AppHeader'
   import AppSidebar from '../src/components/partials/AppSidebar'
-  import AppFooter from '../src/components/partials/AppFooter'
+  // import AppFooter from '../src/components/partials/AppFooter'
   import AppLogin from '../src/views/sample-pages/login.vue'
   export default{
     name: 'main',
     components: {
       AppHeader,
       AppSidebar,
-      AppFooter,
+      // AppFooter,
       AppLogin
     },
     data () {

@@ -3,7 +3,7 @@
     <b-navbar-toggle target="nav_collapse"></b-navbar-toggle>
     <div class="text-center navbar-brand-wrapper d-flex align-items-top justify-content-center">
       <!-- <img src="../../assets/images/medit.png" alt="logo"/> -->
-      <a class="navbar-brand brand-logo" href="/"><img src="../../assets/images/logo.svg" alt="logo"/></a>
+      <a class="navbar-brand brand-logo" href="/"><img src="../../assets/images/medit_logo.png" alt="logo"/></a>
       <a class="navbar-brand brand-logo-mini" href="/"><img src="../../assets/images/logo-mini.svg" alt="logo"/></a>
     </div>
     <b-collapse is-nav id="nav_collapse">
@@ -76,7 +76,7 @@
           <b-dropdown-item href="/createIssue/">Issue Create</b-dropdown-item>
           <b-dropdown-item href="#">Logout</b-dropdown-item>
         </b-nav-item-dropdown>
-        <b-nav-item href="#"><img class="img-xs rounded-circle" src="../../assets/images/faces/face4.jpg" alt="profile image"></b-nav-item>
+        <b-nav-item href="#"><img class="img-xs rounded-circle" src="../../assets/images/faces/face14.jpg" alt="profile image"></b-nav-item>
       </b-navbar-nav>
     </b-collapse>
   </b-navbar>
