@@ -56,7 +56,7 @@
           console.log(JSON.stringify(response.data))
           console.log(this.toDoItems.resultCode)
           if (this.toDoItems.resultCode === 0){
-              this.$parent.isLoginPage = false
+            window.open("http://localhost:8080/dashboard", "_self")
           }
         })
         .catch(e => {
