@@ -267,7 +267,6 @@
   }
 
   $(document).ready(function (){
-    console.log("hi")
     $($(".autoTab").find("li")[1]).hide()
     // if($('.autoTab label').value == Attachment)
     //   alert("hh");
