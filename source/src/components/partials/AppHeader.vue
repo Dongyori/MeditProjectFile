@@ -8,7 +8,7 @@
     </div>
     <b-collapse is-nav id="nav_collapse">
       <b-navbar-nav class="header-links">
-        <b-nav-item href="/" :active='$route.name =="dashboard"'><i class="mdi mdi-image-filter"></i>Main DashBoard</b-nav-item>
+        <b-nav-item href="/dashboard" :active='$route.name =="dashboard"'><i class="mdi mdi-image-filter"></i>Main DashBoard</b-nav-item>
         <b-nav-item href="/issueList/" :active='$route.name =="issueList"'><i class="mdi mdi-email-outline"></i>Issue List</b-nav-item>
       </b-navbar-nav>
       <!-- Right aligned nav items -->

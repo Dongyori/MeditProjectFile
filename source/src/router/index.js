@@ -51,8 +51,8 @@ export default new Router({
   mode: 'history',
   routes: [{
     path: '/',
-    name: 'dashboard',
-    component: dashboard
+    name: 'login',
+    component: login
   },
   {
     path: '/widgets',
@@ -80,9 +80,9 @@ export default new Router({
     component: error500
   },
   {
-    path: '/login',
-    name: 'login',
-    component: login
+    path: '/dashboard',
+    name: 'dashboard',
+    component: dashboard
   },
   {
     path: '/register',

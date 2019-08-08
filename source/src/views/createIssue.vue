@@ -268,16 +268,8 @@
       }
     }
   }
-
   $(document).ready(function (){
     $($(".autoTab").find("li")[1]).hide()
-    // if($('.autoTab label').value == Attachment)
-    //   alert("hh");
-    // $('.autoTab li:hidden').show()
-    // $('.autoTab attachment').click(function () {
-    //   $('.autoTab li:hidden').show()
-    // })
-    // $(".resourceTab").css("visibility", "hidden")
   })
 
 </script>
