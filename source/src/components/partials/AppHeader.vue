@@ -8,7 +8,7 @@
     </div>
     <b-collapse is-nav id="nav_collapse">
       <b-navbar-nav class="header-links">
-        <b-nav-item href="/dashboard" :active='$route.name =="dashboard"' @click="stopLoadingLogin()"><i class="mdi mdi-image-filter"></i>Main DashBoard</b-nav-item>
+        <b-nav-item href="/dashboard" :active='$route.name =="dashboard"'><i class="mdi mdi-image-filter"></i>Main DashBoard</b-nav-item>
         <b-nav-item href="/issueList/" :active='$route.name =="issueList"'><i class="mdi mdi-email-outline"></i>Issue List</b-nav-item>
       </b-navbar-nav>
       <!-- Right aligned nav items -->
@@ -84,13 +84,7 @@
 
 <script lang="js">
   export default {
-    name: 'app-header',
-    methods: {
-      stopLoadingLogin () {
-        // window.open("http://localhost:8080/ClickIssueDetail", "_self")        
-        this.$parent.logingPage = false
-      }
-    }
+    name: 'app-header'
   }
 </script>
 

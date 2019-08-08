@@ -325,17 +325,9 @@
         changedMonthLog: []
       }
     },
-    created: function () {
-      // this.$parent.isLoginPage = false
-      console.log('beforeMount ' + this.$parent.logingPage)
-      this.$parent.logingPage = false
-      console.log('beforeMount ' + this.$parent.logingPage)
-    },
     methods: {
       clickList () {
-        this.$parent.logingPage = false
         window.open("http://localhost:8080/ClickIssueDetail", "_self")
-        this.$parent.logingPage = false
       },
       processFile (event) {
       },
@@ -411,10 +403,6 @@
       }
     }
   }
-  $(document).ready(function (){
-    $($(".autoTab").find("li")[1]).hide()
-  })
-
 </script>
 
 <style scoped lang="scss">

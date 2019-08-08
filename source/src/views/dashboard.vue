@@ -397,17 +397,8 @@
 
 <script lang="js">
   export default {
-    name: 'dashboard',
-    created: function () {
-      this.$parent.data.isLoginPage = false
-      alert(this.$parent.data.isLoginPage)
-    }
+    name: 'dashboard'
   }
-  $(document).ready(function (){
-    this.$parent.isLoginPage = false
-    alert(this.$parent.isLoginPage)
-  })
-
 </script>
 
 <style scoped lang="scss">

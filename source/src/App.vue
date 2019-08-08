@@ -45,22 +45,23 @@
       if(this.$route.name !== 'login') {
         this.isNotLoginPage = true
       }
-    },
-    beforeUpdate: function () {
-      console.log(this.$route.name)
-    },
-    computed: {
-      logingPage: {
-        // getter
-        get: function () {
-          return this.isNotLoginPage
-        },
-        // setter
-        set: function (newValue) {
-          this.isNotLoginPage = newValue
-        }
-      }
     }
+    // ,
+    // beforeUpdate: function () {
+    //   console.log(this.$route.name)
+    // },
+    // computed: {
+    //   logingPage: {
+    //     // getter
+    //     get: function () {
+    //       return this.isNotLoginPage
+    //     },
+    //     // setter
+    //     set: function (newValue) {
+    //       this.isNotLoginPage = newValue
+    //     }
+    //   }
+    // }
     // methods () {
     //   getIsLoginPage () {
     //     return isLoginPage
