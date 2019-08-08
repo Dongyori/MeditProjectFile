@@ -40,7 +40,10 @@
     name: 'login',
     methods: {
       checkLogin () {
-        this.$parent.isLoginPage = false
+        // this.$parent.isLoginPage = false
+        // this.$parent.logingPage = false
+        // console.log('login ' + this.$parent.logingPage)        
+        window.open("http://localhost:8080/dashboard", "_self")
       }
     }
   }

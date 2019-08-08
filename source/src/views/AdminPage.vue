@@ -335,6 +335,11 @@
       }
     }
   }
+  $(document).ready(function (){
+    $($(".autoTab").find("li")[1]).hide()
+    this.$parent.isLoginPage = false
+  })
+
 </script>
 
 <style scoped lang="scss">
