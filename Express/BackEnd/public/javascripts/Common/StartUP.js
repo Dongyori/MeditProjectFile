@@ -27,7 +27,7 @@ function SystemLog(url, ip, message)
     table_string += `(date, AccountNo, Action, Message)`
 
     if (message.length > 1000)
-        message = substr(message, 0, 1000);
+        message = message.substring(0, 1000);
 
     var values_string = `(NOW(), '${ip}', '${url}', '${message}')`;
     var query_string = `INSERT INTO ${table_string} VALUES ${values_string}`;
@@ -35,7 +35,7 @@ function SystemLog(url, ip, message)
     {
         if (err)
         {
-            connection.query(`CREATE TABLE ${$table_string} LIKE systemlog_template`);
+            connection.query(`CREATE TABLE ${table_string} LIKE systemlog_template`);
             connection.query(query_string);
         }
     });
