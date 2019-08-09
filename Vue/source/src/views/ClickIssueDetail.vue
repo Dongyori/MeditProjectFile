@@ -20,7 +20,7 @@
                     <button data-v-35f42b37="" type="button" class="btn btn-fw btn-inverse-light btn-secondary">Delete Issue</button>
                     </div>
                     <b-form-group label="Description" label-for="input3">
-                      <b-form-textarea id="input3" v-model="text" placeholder="Description" :rows="10" :max-rows="20" style="height: 290px"></b-form-textarea>
+                      <b-form-textarea id="input3" v-model="text" placeholder="Description" :rows="10" :max-rows="20" style="height: 340px"></b-form-textarea>
                     </b-form-group>
                     <div class="row">
                     <input data-v-186e931c="" id="input1" type="text" placeholder="Comment" class="form-control col-9 mr-4 ml-2">
@@ -43,6 +43,11 @@
                     <b-form-group horizontal label="Version">
                       <b-form-select v-model="selected" :options="Version" placeholder="Select Version" />
                     </b-form-group>
+                    <b-form-group horizontal label="Language">
+                      <b-form-select v-model="selected">
+                          <option v-for="p in getVersion" :key="p.versionid" v-bind:value="p.versionid">{{p.majorver+'.'+p.minorver}}</option>
+                        </b-form-select>
+                    </b-form-group>
                     <b-form-group label="Attachment" label-for="input2">
                       <b-form-file class="Attachment" v-model="file" id="inpu2" :state="Boolean(file)" placeholder="Choose a file....." @change="processFile($event)"></b-form-file>
                     </b-form-group>
@@ -50,7 +55,7 @@
                       <b-form-select v-model="selected" :options="Assignee" placeholder="Select Reference" />
                     </b-form-group>
                     <b-form-group horizontal label="Deadline">
-                      <datepicker placeholder="Select Date"></datepicker>
+                      <datepicker id="datepicker" placeholder="Select Date" class="form-control"></datepicker>
                     </b-form-group>
                     <b-button type="submit" variant="success" class="mr-2" v-on:click="OpenTab()">Update</b-button>
                     <b-button variant="light">Cancel</b-button>
@@ -278,6 +283,9 @@
       }
     }
   }
+  $(document).ready(function (){
+    $('#datepicker').css({'border': '1px solid white'})
+  })
 </script>
 
 <style scoped lang="scss">

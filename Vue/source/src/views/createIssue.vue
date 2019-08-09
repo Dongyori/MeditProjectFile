@@ -14,33 +14,44 @@
                       <b-form-input type="text" id="input1" placeholder="Summary"></b-form-input>
                     </b-form-group>
                     <b-form-group label="Description" label-for="input3">
-                      <b-form-textarea id="input3" v-model="text" placeholder="Description" :rows="10" :max-rows="20" style="height: 380px"></b-form-textarea>
+                      <b-form-textarea id="input3" v-model="text" placeholder="Description" :rows="10" :max-rows="20" style="height: 440px"></b-form-textarea>
                     </b-form-group>
                   </div>
                   <div class="col-md-4 grid-margin">
                     <b-form-group horizontal label="Project">
-                      <b-form-select v-model="selected" :options="IssueType" placeholder="Select IssueType" />
+                      <b-form-select v-model="selected">
+                          <option v-for="p in projectcombo" :key="p.projectid" v-bind:value="p.projectid">{{p.projectname}}</option>
+                        </b-form-select>
                     </b-form-group>
                     <b-form-group horizontal label="Issue Type">
                       <b-form-select v-model="selected" :options="IssueType" placeholder="Select IssueType" />
                     </b-form-group>
                     <b-form-group horizontal label="Assignee">
-                      <b-form-select v-model="selected" :options="Assignee" placeholder="Select Assignee" />
+                      <b-form-select v-model="selected">
+                          <option v-for="p in getAccount" :key="p.accountid" v-bind:value="p.accountid">{{p.email}}</option>
+                      </b-form-select>
                     </b-form-group>
                     <b-form-group horizontal label="Priority">
                       <b-form-select v-model="selected" :options="Priority" placeholder="Select Priority" />
                     </b-form-group>
                     <b-form-group horizontal label="Version">
-                      <b-form-select v-model="selected" :options="Version" placeholder="Select Version" />
+                      <b-form-select v-model="selected">
+                          <option v-for="p in getVersion" :key="p.versionid" v-bind:value="p.versionid">{{p.majorver+'.'+p.minorver}}</option>
+                        </b-form-select>
                     </b-form-group>
                     <b-form-group label="Attachment" label-for="input2">
                       <b-form-file class="Attachment" v-model="file" id="inpu2" :state="Boolean(file)" placeholder="Choose a file....." @change="processFile($event)"></b-form-file>
                     </b-form-group>
                     <b-form-group horizontal label="Reference">
-                      <b-form-select v-model="selected" :options="Assignee" placeholder="Select Reference" />
+                      <b-form-select v-model="selected">
+                          <option v-for="p in getAccount" :key="p.accountid" v-bind:value="p.accountid">{{p.email}}</option>
+                      </b-form-select>
+                    </b-form-group>
+                    <b-form-group horizontal label="Link">
+                      <input data-v-7ea22626="" data-v-a65342b6="" id="input1" type="text" placeholder="URL.." class="form-control">
                     </b-form-group>
                     <b-form-group horizontal label="Deadline">
-                      <datepicker id="deadline" placeholder="Select Date"></datepicker>
+                      <datepicker id="datepicker" placeholder="Select Date" class="form-control"></datepicker>
                     </b-form-group>
                     <b-button type="submit" variant="success" class="mr-2" v-on:click="OpenTab()">Create</b-button>
                     <b-button variant="light">Cancel</b-button>
@@ -120,51 +131,35 @@
 </template>
 
 <script lang="js">
-  import Datepicker from "vuejs-datepicker/dist/vuejs-datepicker.esm.js"
+  import Datepicker from 'vuejs-datepicker'
   import * as lang from "vuejs-datepicker/src/locale"
+  import axios from 'axios'
 
   const state = {
     date1: new Date()
   }
   export default {
+
     name: 'tabs',
     components: {
       Datepicker
     },
     data () {
       return {
-        file: null,
-        isFileSelected: false,
-        options: [
-          { value: null, text: 'Please select an option' },
-          { value: 'a', text: 'This is First option' },
-          { value: 'b', text: 'Selected Option' },
-          { value: {'C': '3PO'}, text: 'This is an option with object value' },
-          { value: 'd', text: 'This one is disabled', disabled: true }
-        ],
-        Assignee: [
-          { value: 'admin', text: 'admin' },
-          { value: 'snety0@gmail.com', text: 'snety0@gmail.com' },
-          { value: 'ssheko93@gmail.com', text: 'ssheko93@gmail.com' },
-          { value: 'mime32@gmail.com', text: 'mime32@gmail.com' },
-          { value: 'sdy9192@naver.com', text: 'sdy9192@naver.com' }
+        Priority: [
+          { value: '0', text: 'Lowest' },
+          { value: '1', text: 'Middle' },
+          { value: '2', text: 'Highest' }
         ],
         IssueType: [
-          { value: 'a', text: 'Bug' },
-          { value: 'b', text: 'Web' },
-          { value: 'c', text: 'App' }
+          { value: '0', text: 'Resource' },
+          { value: '1', text: 'Contents' }
         ],
-        Priority: [
-          { value: '1', text: '1' },
-          { value: '2', text: '2' },
-          { value: '3', text: '3' },
-          { value: '4', text: '4' },
-          { value: '5', text: '5' }
-        ],
-        Version: [
-          { value: '2.0', text: '2.0' },
-          { value: '2.1', text: '2.1' }
-        ],
+        getVersion: {},
+        getAccount: {},
+        projectcombo: {},
+        file: null,
+        isFileSelected: false,
         format: "d MMMM yyyy",
         disabledDates: {},
         disabledFn: {
@@ -190,7 +185,50 @@
         changedMonthLog: []
       }
     },
+    created: function () {
+      this.SelectProject()
+      this.SelectAccount()
+      this.SelectVersion()
+    },
     methods: {
+      SelectVersion () {
+      axios.post('http://192.168.1.26:1337/projectver/select_projectver',
+        {'reqeust': 'SelectVersion'})
+        .then(response => {
+        // this.toDoItems = response.data.map(r => r.data)
+          console.log(JSON.stringify(response.data))
+          this.getVersion = JSON.parse(JSON.stringify(response.data.data))
+        })
+        .catch(e => {
+          console.log('error : ', e)
+        })
+      },
+      SelectAccount () {
+      axios.post('http://192.168.1.26:1337/account/select_account',
+        {'request': 'SelectPName'})
+        .then(response => {
+          // this.pageArray = JSON.stringify(response.data.data)
+          this.getAccount = JSON.parse(JSON.stringify(response.data.data))
+          console.log(this.getAccount)
+          // this.pageArray = JSON.parse(JSON.stringify(response.data.data))
+        })
+        .catch(e => {
+          console.log('error : ', e)
+        })
+      },
+      SelectProject () {
+      axios.post('http://192.168.1.26:1337/project/select_project',
+        {'request': 'SelectPName'})
+        .then(response => {
+        // this.toDoItems = response.data.map(r => r.data)
+          // alert(JSON.stringify(response.data.data))
+          this.projectcombo = JSON.parse(JSON.stringify(response.data.data))
+          console.log(this.projectcombo)
+        })
+        .catch(e => {
+          console.log('error : ', e)
+        })
+    },
       processFile (event) {
         this.isFileSelected = true
         // $($(".autoTab").find("li")[1]).show()
@@ -270,6 +308,7 @@
   }
   $(document).ready(function (){
     $($(".autoTab").find("li")[1]).hide()
+    $('#datepicker').css({'border': '1px solid white'})
   })
 
 </script>

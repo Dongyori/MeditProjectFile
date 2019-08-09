@@ -4,9 +4,9 @@
       <div class="container-fluid page-body-wrapper full-page-wrapper mt-5 row w-100 p-5">
         <div class="col-lg-6 mx-auto p-5">
           <div class="mt-5 auth-form-medit text-left p-5">
-            <h1 style="vertical-align: center;">Medit Ling</h1>
-            <h2>Login</h2>
-            <h4 class="font-weight-light">Hello! let's get started</h4>
+            <h1 style="vertical-align: center; font-size: 80px;">Medit</h1>
+            <h3>Login</h3>
+            <!-- <h4 class="font-weight-light">Hello! let's get started</h4> -->
             <form class="pt-5">
               <form>
                 <div class="form-group">
@@ -22,9 +22,9 @@
                 <div class="mt-5">
                   <a class="btn btn-block btn-warning btn-lg font-weight-medium" @click="LoginCheck()">Login</a>
                 </div>
-                <div class="mt-3 text-center">
+                <!-- <div class="mt-3 text-center">
                   <a href="#" class="auth-link text-white">Forgot password?</a>
-                </div>
+                </div> -->
               </form>
             </form>
           </div>
@@ -47,21 +47,21 @@
     },
     methods: {
       LoginCheck () {
-      var email = document.getElementById('exampleInputEmail1').value
-      var pw = document.getElementById('exampleInputPassword1').value
-      axios.post('http://192.168.1.26:1337/login',
-        {'email': email, 'password': pw})
-        .then(response => {
-          this.toDoItems = response.data
-          console.log(JSON.stringify(response.data))
-          console.log(this.toDoItems.resultCode)
-          if (this.toDoItems.resultCode === 0){
-            window.open("http://localhost:8080/dashboard", "_self")
-          }
-        })
-        .catch(e => {
-          console.log('error : ', e)
-        })
+        var email = document.getElementById('exampleInputEmail1').value
+        var pw = document.getElementById('exampleInputPassword1').value
+        axios.post('http://192.168.1.26:1337/login',
+                   {'email': email, 'password': pw})
+          .then(response => {
+            this.toDoItems = response.data
+            console.log(JSON.stringify(response.data))
+            console.log(this.toDoItems.resultCode)
+            if (this.toDoItems.resultCode === 0){
+              window.open("http://localhost:8080/dashboard", "_self")
+            }
+          })
+          .catch(e => {
+            console.log('error : ', e)
+          })
       }
     }
   }

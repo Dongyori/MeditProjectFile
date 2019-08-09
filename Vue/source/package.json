@@ -22,13 +22,17 @@
     "font-awesome": "^4.7.0",
     "http-server": "^0.11.1",
     "jquery": "^3.4.1",
+    "luxon": "^1.17.2",
+    "mdbvue": "^5.8.0",
     "mdi": "^2.2.43",
     "rollup": "^1.19.4",
     "vue": "^2.6.10",
+    "vue-datetime": "^1.0.0-beta.10",
     "vue-md-date-picker": "^1.0.16",
     "vue-router": "^3.0.6",
     "vuejs-datepicker": "^1.6.2",
-    "webpack-dev-server": "^2.9.1"
+    "webpack-dev-server": "^2.9.1",
+    "weekstart": "^1.0.0"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.2",

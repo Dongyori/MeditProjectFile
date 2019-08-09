@@ -4,12 +4,12 @@
     <div v-if="isLoginPage">
       <app-login/>
       </div> -->
-    <div class="container-scroller">
+    <div class="container-scroller" :class="{ loginPageStyle: !isNotLoginPage }">
       <app-header v-if="isNotLoginPage"/>
       <div class="container-fluid page-body-wrapper">
         <app-sidebar v-if="isNotLoginPage"/>
         <div class="main-panel">
-          <div class="content-wrapper">
+          <div :class="[isNotLoginPage ? content-wrapper : content-wrapper-login]">
             <router-view></router-view>
           </div>
           <!-- content wrapper ends -->
@@ -88,6 +88,11 @@
 @import "../node_modules/mdi/css/materialdesignicons.min.css";
 @import "../node_modules/flag-icon-css/css/flag-icon.min.css";
 @import "../node_modules/font-awesome/css/font-awesome.min.css";
+
+.loginPageStyle{
+  padding-left: 15%;
+  background-color: rgb(42, 119, 209);
+}
 </style>
 
 <style lang="scss">

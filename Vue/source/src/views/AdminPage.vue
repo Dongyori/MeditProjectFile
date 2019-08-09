@@ -113,6 +113,15 @@
                   </div>
                 </div>
               </div>
+              <!-- <div class="btn-cover">
+                <button :disabled="pageNum === 0" @click="prevPage" class="page-btn">
+                  이전
+                </button>
+                <span class="page-count">{{ pageNum + 1 }} / {{ pageCount }} 페이지</span>
+                <button :disabled="pageNum >= pageCount - 1" @click="nextPage" class="page-btn">
+                  다음
+                </button>
+              </div> -->
             </b-tab>
             <b-tab title="Issue">
               <div class="row">
@@ -124,48 +133,50 @@
                 <input data-v-a65342b6="" id="input1" type="text" placeholder="Search" class="col-4 mr-2 form-control">
                 <button data-v-35f42b37="" type="button" class="btn btn-fw btn-inverse-light btn-secondary mr-5">Search</button>
               </div>
-
               <div data-v-19c9d02c="" class="card-body">
                 <div data-v-19c9d02c="" class="table-responsive">
-                  <table data-v-19c9d02c="" class="table center-aligned-table">
-                    <thead data-v-19c9d02c="">
-                      <tr data-v-19c9d02c="">
-                        <th data-v-19c9d02c="" class="border-bottom-0">Issue No</th>
-                        <th data-v-19c9d02c="" class="border-bottom-0">Issue Name</th>
-                        <th data-v-19c9d02c="" class="border-bottom-0">Issue Status</th>
-                      </tr>
-                    </thead>
-                    <tbody data-v-19c9d02c="" v-on:click="clickList()">
-                      <tr data-v-19c9d02c="">
-                        <td data-v-19c9d02c="">1</td>
-                        <td data-v-19c9d02c="">Issue 1</td>
-                        <td><label class="badge badge-teal">Approved</label></td>
-                      </tr>
-                      <tr data-v-19c9d02c="">
-                        <td data-v-19c9d02c="">1</td>
-                        <td data-v-19c9d02c="">Issue 1</td>
-                        <td><label class="badge badge-teal">Approved</label></td>
-                      </tr>
-                      <tr data-v-19c9d02c="" class="clickable-row">
-                        <td data-v-19c9d02c="">1</td>
-                        <td data-v-19c9d02c="">Issue 1</td>
-                        <td><label class="badge badge-teal">Approved</label></td>
-                      </tr>
-                      <tr data-v-19c9d02c="">
-                        <td data-v-19c9d02c="">1</td>
-                        <td data-v-19c9d02c="">Issue 1</td>
-                        <td><label class="badge badge-teal">Approved</label></td>
-                      </tr>
-                      <tr data-v-19c9d02c="">
-                        <td data-v-19c9d02c="">1</td>
-                        <td data-v-19c9d02c="">Issue 1</td>
-                        <td><label class="badge badge-teal">Approved</label></td>
-                      </tr>
-                    </tbody>
-                  </table>
+                  <table class="table center-aligned-table">
+                <thead>
+                  <tr>
+                    <th class="border-bottom-0">SUBJECT</th>
+                    <th class="border-bottom-0">VERSION</th>
+                    <th class="border-bottom-0">PRIORITY</th>
+                    <th class="border-bottom-0">DEADLINE</th>
+                    <th class="border-bottom-0">ASSIGNOR</th>
+                    <th class="border-bottom-0">TYPE</th>
+                    <th class="border-bottom-0">STATUS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr data-v-19c9d02c="" v-for="p in issueArray" :key="p.subject">
+                    <td data-v-19c9d02c="">{{p.subject}}</td>
+                    <td data-v-19c9d02c="">{{p.majorver+'.'+p.minorver}}</td>
+                    <td data-v-19c9d02c="" v-if="p.priority === 0">
+                      <b-badge variant="primary">Lowest</b-badge>
+                    </td>
+                    <td data-v-19c9d02c="" v-else-if="p.priority === 1">
+                      <b-badge variant="warning">Middle</b-badge>
+                    </td>
+                    <td data-v-19c9d02c="" v-else-if="p.priority === 2">
+                      <b-badge variant="danger">Highest</b-badge>
+                    </td>
+                    <td data-v-19c9d02c="">{{p.deadline}}</td>
+                    <td data-v-19c9d02c="">{{p.assignor}}</td>
+                    <td data-v-19c9d02c="">{{p.type}}</td>
+                    <td data-v-19c9d02c="" v-if="p.status === 0">
+                      <b-badge variant="outline-danger">Waiting</b-badge>
+                    </td>
+                    <td data-v-19c9d02c="" v-else-if="p.status === 1">
+                      <b-badge variant="outline-warning">In Progress</b-badge>
+                    </td>
+                    <td data-v-19c9d02c="" v-else-if="p.status === 2">
+                      <b-badge variant="outline-success">Resolved</b-badge>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
                 </div>
               </div>
-
               <div class="col-6 ml-12 grid-margin" style="margin-left:550px; margin-top:50px;">
                 <div class="card">
                   <div class="card-body">
@@ -175,7 +186,6 @@
                 </div>
               </div>
             </b-tab>
-
             <b-tab title="Resource">
               <div class="row">
               <button id="ddown8__BV_toggle_" aria-haspopup="true" aria-expanded="false" type="button" class="btn dropdown-toggle btn-outline-secondary ml-5">Version</button>
@@ -253,6 +263,7 @@
     },
     data () {
       return {
+        issueArray: {},
         pageArray: {},
         file: null,
         isFileSelected: false,
@@ -317,8 +328,23 @@
     },
     created: function () {
       this.SelectAccount()
+      this.SelectIssue()
     },
     methods: {
+      SelectIssue () {
+      // var accountid = document.getElementById('1').valu
+      axios.post('http://192.168.1.26:1337/issue/select_issue',
+        {'accountid': '1'})
+        .then(response => {
+        // this.toDoItems = response.data.map(r => r.data)
+          this.issueArray = JSON.parse(JSON.stringify(response.data.data_creat))
+          // this.issueArray = JSON.stringify(response.data.data)
+          console.log(this.issueArray)
+        })
+        .catch(e => {
+          console.log('error : ', e)
+        })
+    },
       SelectAccount () {
       axios.post('http://192.168.1.26:1337/account/select_account',
         {'request': 'SelectPName'})

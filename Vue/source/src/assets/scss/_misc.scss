@@ -43,6 +43,13 @@ html {
   @include flex-grow(1);
 }
 
+.content-wrapper-login {
+  background: rgb(42, 119, 209);
+  padding: 1.5rem 1.7rem;
+  width: 100%;
+  @include flex-grow(1);
+}
+
 .container-scroller {
   overflow: hidden;
 }
