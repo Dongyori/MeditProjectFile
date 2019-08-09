@@ -355,20 +355,139 @@ router.post('/project/delete_project', async function (req, res)
     res.send(result_array);
     startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
 });
-// 작업중
+
 router.post('/projectver/create_projectver', async function (req, res)
 {
+    startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
 
+    let result_array = Object();
+    result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
+
+    // post로 받은 데이터중 필수로 있어야 하는것 체크
+    const check = await startUP.CheckBody(req.body, ['projectid', 'majorver', 'minorver', 'language']);
+    if (check != true)
+    {
+        // resultCode에 응답코드를 남긴다
+        // ResultCode에 정의한 정수값을 사용할지 string자체를 담을지 결정해야함
+        result_array.resultCode = check;
+        res.send(result_array);
+        return;
+    }
+
+    // 동기 DB
+    const connection = startUP.DB.sync();
+
+    const table_string = `project_version(\`projectid\`, \`majorver\`, \`minorver\`, \`language\`)`;
+    const value_string = `(${req.body.projectid}, ${req.body.majorver}, ${req.body.minorver}, '${req.body.language}')`;
+    const query_string = `INSERT INTO ${table_string} VALUES ${value_string}`;
+
+    try
+    {
+        connection.query(query_string);
+    }
+    catch (err)
+    {
+        result_array.resultCode = err.code;
+        result_array.message = err.message;
+    }
+
+    res.send(result_array);
+    startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
 });
-// 작업중
+
 router.post('/projectver/select_projectver', async function (req, res)
 {
+    startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
 
+    let result_array = Object();
+    result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
+
+    // 동기 DB
+    const connection = startUP.DB.sync();
+
+    const table_string = `project_version`;
+    const query_string = `SELECT * FROM ${table_string}`;
+
+    try
+    {
+        const query_result = connection.query(query_string);
+        result_array.data = query_result;
+    }
+    catch (err)
+    {
+        result_array.resultCode = err.code;
+        result_array.message = err.message;
+    }
+
+    res.send(result_array);
+    startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
 });
-// 작업중
+
 router.post('/projectver/delete_projectver', async function (req, res)
 {
+    startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
 
+    let result_array = Object();
+    result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
+
+    // post로 받은 데이터중 필수로 있어야 하는것 체크
+    const check = await startUP.CheckBody(req.body, ['projectid', 'majorver', 'minorver', 'language']);
+    if (check != true)
+    {
+        // resultCode에 응답코드를 남긴다
+        // ResultCode에 정의한 정수값을 사용할지 string자체를 담을지 결정해야함
+        result_array.resultCode = check;
+        res.send(result_array);
+        return;
+    }
+
+    // 동기 DB
+    const connection = startUP.DB.sync();
+
+    const table_string = `project_version`;
+    const where_string = `projectid = ${req.body.projectid} AND majorver = ${req.body.majorver} AND minorver = ${$req.body.minorver} AND language ;${req.body.language}'`;
+    const query_string = `DELETE FROM ${table_string} WHERE ${where_string}`;
+
+    try
+    {
+        connection.query(query_string);
+    }
+    catch (err)
+    {
+        result_array.resultCode = err.code;
+        result_array.message = err.message;
+    }
+
+    res.send(result_array);
+    startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
+});
+
+router.post('/select_issue', async function (req, res)
+{
+    startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
+    // res로 응답할 내용 초기세팅
+    let result_array = Object();
+    result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
+
+    // 동기 DB
+    const connection = startUP.DB.sync();
+
+    const table_string = 'issue';
+    const query_string = `SELECT * FROM ${table_string}`;
+
+    try
+    {
+        var query_result = connection.query(query_string);
+        result_array.data = query_result;
+    }
+    catch (err)
+    {
+        result_array.resultCode = err.code;
+        result_array.message = err.message;
+    }
+
+    res.send(result_array);
+    startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
 });
 
 router.post('/issue/create_issue', async function (req, res) 
@@ -452,7 +571,7 @@ router.post('/issue/select_issue', async function (req, res)
     var result_array = Object();
     result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
 
-    const check = await startUP.CheckBody(req.body, ['email']);
+    const check = await startUP.CheckBody(req.body, ['accountid']);
     if (check != true)
     {
         result_array.resultCode = check;
@@ -460,11 +579,11 @@ router.post('/issue/select_issue', async function (req, res)
         return;
     }
 
-    var connection = mysql.sync();
+    var connection = startUP.DB.sync();
 
     const table_string = '`issue`';
-    const where_string_creat = `\`creator\` = ${req.body.email}`;
-    const where_string_assign = `\`assignor\` = ${req.body.assginor}`;
+    const where_string_creat = `\`creator\` = ${req.body.accountid}`;
+    const where_string_assign = `\`assignor\` = ${req.body.accountid}`;
     const query_string_creat = `SELECT * FROM ${table_string} WHERE ${where_string_creat}`;
     const query_string_assign = `SELECT * FROM ${table_string} WHERE ${where_string_assign}`;
 
@@ -499,7 +618,7 @@ router.post('/issue/update_issue', async function (req, res)
         return;
     }
 
-    var connection = mysql.sync();
+    var connection = startUP.DB.sync();
     var columns = connection.query("show full columns from `issue`");
     
     // update set where
@@ -540,10 +659,10 @@ router.post('/issue/update_issue', async function (req, res)
     res.send(result_array);
     startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
 });
-
+// 작업중
 router.post('/translate/import_data', async function (req, res)
 {
-    startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
+    //startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
     var result_array = Object();
     result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
 
@@ -572,43 +691,48 @@ router.post('/translate/import_data', async function (req, res)
         return;
     }
 
-    var connection = mysql.sync();
+    var connection = startUP.DB.sync();
     var count = 0;
     switch (req.body.type)
     {
         case 'app':
             {
                 const xml_js = require('xml-js');
-                const data = xml_js.xml2js(req.body.data, { compact: true, space: 4 });
-                
+                const data = await xml_js.xml2js(req.body.data, { compact: true, space: 4 });
+                const project_data = connection.query(`SELECT * FROM project WHERE projectid = ${req.body.projectid}`);
+
+                let value_string = ''
+
                 for (let item of data.Translation.String)
                 {
-                    const project_data = connection.query(`SELECT * FROM project WHERE projectid = ${req.body.projectid}`);
-                    const tag = item._attributes.ID;
-                    const original = item.Original._text;
-                    const translated = item.Translated._text;
+                    let tag = item._attributes.ID;
+                    let original = item.Original._text;
+                    let translated = item.Translated._text;
 
-                    const table_string = `translate_data_${projectname}` + '(`tag`, `original`, `translated`, `language`, `majorver`, `minorver`)'; 
-                    const value_string = `('${tag}', '${original}', '${translated}', '${req.body.language}', ${req.body.majorver}, ${req.body.minorver})`;
-                    const query_string = `INSERT INTO ${table_string} VALUES ${value_string}` + `ON DUPLICATE KEY UPDATE original = '${original}', translated = '${translated}'`;
-                    try
-                    {
-                        await connection.query(query_string)
-                    }
-                    catch(err)
-                    {
-                        if (err.code == 'ER_NO_SUCH_TABLE')
-                        {
-                            connection.query(`CREATE TABLE translate_data_${req.body.majorver}_${req.body.minorver} LIKE translate_data_template`);
-                            connection.query(query_string);
-                        }
-                        else
-                        {
-                            SystemLog(req.url, req.ip, err.message);
-                            count--;
-                        }
-                    }
+                    
+
+                    var table_string = `transdata_${project_data[0].projectname}_${req.body.type}` + '(`transkey`, `original`, `translation`, `language`, `majorver`, `minorver`)'; 
+                    value_string += `("${tag}", "${original}", "${translated}", '${req.body.language}', ${req.body.majorver}, ${req.body.minorver}),\n`;
                     count++;
+                }
+                value_string = value_string.substring(0, value_string.length - 2);
+                const query_string = `INSERT INTO ${table_string} VALUES ${value_string}`/* + ` ON DUPLICATE KEY UPDATE original = '${original}', translation = '${translated}'`*/;
+                try
+                {
+                    connection.query(query_string);
+                }
+                catch (err)
+                {
+                    if (err.code == 'ER_NO_SUCH_TABLE')
+                    {
+                        connection.query(`CREATE TABLE transdata_${project_data[0].projectname}_${req.body.type} LIKE transdata_app_template`);
+                        connection.query(query_string);
+                    }
+                    else
+                    {
+                        result_array.resultCode = err.code;
+                        result_array.message = err.message;
+                    }
                 }
                 break;
             }
@@ -622,41 +746,80 @@ router.post('/translate/import_data', async function (req, res)
     }
     result_array.count = count;
     res.send(result_array);
-    startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
+    //startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
 });
-
+// 작업중
 router.post('/translate/export_data', async function (req, res)
 {
-    startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
+    //startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
     var result_array = Object();
     result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
 
     // 필수 값 체크
-    const check = await startUP.CheckBody(req.body, ['majorver', 'minorver', 'type', 'language']);
+    const check = await startUP.CheckBody(req.body, ['projectid', 'majorver', 'minorver', 'type', 'language']);
     if (check != true)
     {
         result_array.resultCode = check;
         res.send(result_array);
+        startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
         return;
     }
 
-    var table_string = `translate_data_${req.body.majorver}_${req.body.minorver}`;
-    var where_string = `language = '${req.body.language}'`
-    var query_string = `SELECT * FROM ${table_string} WHERE ${where_string}`;
-
     // DB 연결
-    var connection = mysql.sync();
-    connection .query(query_string);
+    var connection = startUP.DB.sync();
 
-    switch (req.body.type)
+    const project_query = connection.query(`SELECT * FROM project WHERE projectid = ${req.body.projectid}`);
+    if (project_query.length == 0)
     {
-        case 'xml':
-
-            break;
-
+        result_array.resultCode = 'NOT EXIST PROJECT';
+        res.send(result_array);
+        startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
+        return; 
     }
+
+    const table_string = `transdata_${project_query[0].projectname}_${req.body.type}`;
+    const where_string = `language = '${req.body.language}' AND majorver = '${req.body.majorver} AND minorver ${req.body.minorver}'`
+    const query_string = `SELECT * FROM ${table_string} WHERE ${where_string}`;
+
+    try
+    {
+        const query_result = connection.query(query_string);
+        const xml_writer = require('xml-writer');
+        switch (req.body.type)
+        {
+            case 'app':
+                const xw = new xml_writer;
+                xw.startDocument();
+                xw.startElement('Translation');
+                xw.writeAttribute('Version', `V${req.body.majorver}.${req.body.minorver}`)
+                for (const item of query_result)
+                {
+                    xw.startElement('String');
+                    xw.writeAttribute('ID', item.transkey);
+                    xw.startElement('Original');
+                    xw.text(`${item.original}`);
+                    xw.endElement();
+                    xw.startElement('Translated');
+                    xw.text(`${item.translation}`);
+                    xw.endElement();
+                    xw.endElement();
+                }
+                xw.endElement();
+                xw.endDocument();
+                result_array.data = xw.toString();
+                break;
+            case 'web':
+                break;
+        }
+    }
+    catch (err)
+    {
+        result_array.resultCode = err.code;
+        result_array.message = err.message;
+    }
+
     res.send(result_array);
-    startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
+    //startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
 });
 
 router.post('/issue/comment/create_comment', async function (req, res)
@@ -810,9 +973,51 @@ router.post('/issue/comment/update_comment', async function (req, res)
     res.send(result_array);
     startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
 });
-// 작업중
+
 router.post('/issue/comment/delete_comment', async function (req, res)
 {
+    startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
+    let result_array = Object();
+    result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
+    const check = await startUP.CheckBody(req.body, ['commentid']);
+    if (check != true)
+    {
+        switch (check)
+        {
+            case 'accountid':
+                res.send(startUP.ErrorResponse(result_array, startUP.ErrorCode.AUTH_ACCOUNTNO_ERROR));
+                break;
+            case 'commentid':
+                res.send(startUP.ErrorResponse(result_array, startUP.ErrorCode.ISSUE_UPDATE_COMMENT_commentid_ERROR));
+                break;
+            default:
+
+        }
+        return;
+    }
+
+    const connection = startUP.DB.sync();
+    const result = connection.query(`SELECT * FROM \`issue_comment\` WHERE commentid = ${req.body.commentid}`);
+
+    if (result == null)
+        res.send(startUP.ErrorResponse(result_array, startUP.ErrorCode.ISSUE_UPDATE_COMMENT_NOT_EXIST_ERROR));
+
+    const table_string = '`issue_comment`';
+    const where_string = `commentid = ${req.body.commentid}`;
+    
+    const query_string = `DELETE FROM ${table_string} WHERE ${where_string}`;
+
+    try
+    {
+        connection.query(query_string);
+    }
+    catch (err)
+    {
+        result_array.resultCode = err.code;
+        result_array.message = err.message;
+    }
+    res.send(result_array);
+    startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
 });
 
 router.get('/logview', async function (req, res)
