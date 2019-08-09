@@ -33,7 +33,12 @@
                     </td>
                     <td data-v-19c9d02c="">{{p.deadline}}</td>
                     <td data-v-19c9d02c="">{{p.assignor}}</td>
-                    <td data-v-19c9d02c="">{{p.type}}</td>
+                    
+                    <td data-v-19c9d02c="" v-if="p.type === 0">Resource
+                    </td>
+                    <td data-v-19c9d02c="" v-else-if="p.type === 1">Contents
+                    </td>
+
                     <td data-v-19c9d02c="" v-if="p.status === 0">
                       <b-badge variant="outline-danger">Waiting</b-badge>
                     </td>
@@ -82,7 +87,8 @@
                     </td>
                     <td data-v-19c9d02c="">{{p.deadline}}</td>
                     <td data-v-19c9d02c="">{{p.assignor}}</td>
-                    <td data-v-19c9d02c="">{{p.type}}</td>
+                    <td data-v-19c9d02c="" v-if="p.type === 0">Resource</td>
+                    <td data-v-19c9d02c="" v-else-if="p.type === 1">Contents</td>
                     <td data-v-19c9d02c="" v-if="p.status === 0">
                       <b-badge variant="outline-danger">Waiting</b-badge>
                     </td>
