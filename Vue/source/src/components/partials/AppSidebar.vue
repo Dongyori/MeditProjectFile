@@ -5,17 +5,17 @@
       <ul class="nav">
         <li class="nav-item nav-profile">
           <div class="nav-link">
-            <div class="profile-image"> <img src="../../assets/images/faces/face14.jpg" alt="image"/> <span class="online-status online"></span> </div>
+            <div style="margin-left:35%"><img src="../../assets/images/medit_logo.png" alt="logo"/> <span class="online-status online"></span></div>
             <div class="profile-name">
-              <p class="name">snety0@gmail.com</p>
-              <p class="designation">Manager</p>
+              <p class="userEmail">{{userEmail}}</p>
+              <p class="designation">CheckIm</p>
               <div class="badge badge-teal mx-auto mt-3">Online</div>
             </div>
           </div>
         </li>
-        <li class="nav-item"><router-link class="nav-link" to="/dashboard"><img class="menu-icon" src="../../assets/images/menu_icons/01.png" alt="menu icon"><span class="menu-title">Dashboard</span></router-link></li>
-        <li class="nav-item"><router-link class="nav-link" to="/widgets/"><img class="menu-icon" src="../../assets/images/menu_icons/02.png" alt="menu icon"><span class="menu-title">Widgets</span></router-link></li>
-        <li class="nav-item">
+        <li class="nav-item" ><router-link class="nav-link" to="/dashboard" :active='$route.name =="dashboard"'><img class="menu-icon" src="../../assets/images/menu_icons/01.png" alt="menu icon"><span class="menu-title">Main Dashboard</span></router-link></li>
+        <li class="nav-item" ><router-link class="nav-link" to="/issueList/" :active='$route.name =="issueList"'><img class="menu-icon" src="../../assets/images/menu_icons/02.png" alt="menu icon"><span class="menu-title">Issue List</span></router-link></li>
+        <!-- <li class="nav-item">
           <span class="nav-link" v-b-toggle="'sample-pages'">
             <img class="menu-icon" src="../../assets/images/menu_icons/08.png" alt="menu icon"><span class="menu-title">Sample Pages</span><i class="menu-arrow"></i>
           </span>
@@ -51,7 +51,7 @@
         </li>
         <li class="nav-item"><router-link class="nav-link" to="/tables/"><img class="menu-icon" src="../../assets/images/menu_icons/06.png" alt="menu icon"><span class="menu-title">Tables</span></router-link></li>
         <li class="nav-item"><router-link class="nav-link" to="/icons/"><img class="menu-icon" src="../../assets/images/menu_icons/07.png" alt="menu icon"><span class="menu-title">Icons</span></router-link></li>
-        <li class="nav-item"><router-link class="nav-link" to="/forms/"><img class="menu-icon" src="../../assets/images/menu_icons/04.png" alt="menu icon"><span class="menu-title">Forms</span></router-link></li>
+        <li class="nav-item"><router-link class="nav-link" to="/forms/"><img class="menu-icon" src="../../assets/images/menu_icons/04.png" alt="menu icon"><span class="menu-title">Forms</span></router-link></li> -->
       </ul>
     </nav>
   </section>
@@ -59,13 +59,39 @@
 </template>
 
 <script lang="js">
+  // import localforage from 'localforage'
+
   export default {
-    name: 'app-sidebar'
+    name: 'app-sidebar',
+    data (){
+      return {
+        userEmail: null
+      }
+    },
+    created: function () {
+      this.GetAccountData()
+    },
+    methods: {
+      GetAccountData () {
+        // localforage.length().then(function () {
+        //   alert(localStorage.getItem('email'))
+        //   localforage.getItem('email').then(function (value) {
+        //     // alert(value)
+        //     console.log(value)
+        //     document.getElementById('userEmail').innerHTML = value
+        //   }).catch(function (err) {
+        //     // This code runs if there were any errors
+        //     console.log(err)
+        //   })
+        // })
+        this.userEmail = localStorage.getItem('email')
+        // alert('userEmail ' + this.userEmail)
+      }
+    }
   }
 </script>
 
 <style scoped lang="scss">
 .app-sidebar {
-
 }
 </style>

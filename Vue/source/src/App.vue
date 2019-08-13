@@ -9,7 +9,7 @@
       <div class="container-fluid page-body-wrapper">
         <app-sidebar v-if="isNotLoginPage"/>
         <div class="main-panel">
-          <div :class="[isNotLoginPage ? content-wrapper : content-wrapper-login]">
+          <div :class="[isNotLoginPage ? 'content-wrapper' : 'content-wrapper-login']">
             <router-view></router-view>
           </div>
           <!-- content wrapper ends -->
@@ -29,7 +29,7 @@
 
   var data = {isNotLoginPage: false}
   export default{
-    name: 'main',
+    name: 'app',
     components: {
       AppHeader,
       AppSidebar,

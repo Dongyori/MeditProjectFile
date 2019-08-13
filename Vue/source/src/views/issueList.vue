@@ -5,19 +5,19 @@
         <div class="card">
           <div class="card-body">
             <b-tabs>
-              <b-tab title="Created Issue" active>
+              <b-tab title="Created Issue" v-if="CheckAdmin === true" active>
                 <div data-v-19c9d02c="" class="card-body">
                   <div class="row mb-5">
-                    <button data-v-35f42b37="" type="button" class="col-1 btn btn-fw btn-inverse-light btn-secondary">All</button>
-                    <button data-v-35f42b37="" type="button" class="col-1 btn btn-fw btn-inverse-light btn-secondary">Waiting</button>
-                    <button data-v-35f42b37="" type="button" class="col-1 btn btn-fw btn-inverse-light btn-secondary">In Progress</button>
-                    <button data-v-35f42b37="" type="button" class="col-1 mr-5 btn btn-fw btn-inverse-light btn-secondary">Resolved</button>
+                    <button data-v-35f42b37="" type="button" class="col-1 btn btn-fw btn-inverse-light btn-secondary" value="0" @click="ChangeIssueType">All</button>
+                    <button data-v-35f42b37="" type="button" class="col-1 btn btn-fw btn-inverse-light btn-secondary" value="1" @click="ChangeIssueType">Waiting</button>
+                    <button data-v-35f42b37="" type="button" class="col-1 btn btn-fw btn-inverse-light btn-secondary" value="2" @click="ChangeIssueType">In Progress</button>
+                    <button data-v-35f42b37="" type="button" class="col-1 mr-5 btn btn-fw btn-inverse-light btn-secondary" value="3" @click="ChangeIssueType">Resolved</button>
                     <i class="mdi mdi-account-search"></i>
-                    <input data-v-a65342b6="" id="input1" type="text" placeholder="Search" class="col-2 mr-2 form-control">
-                    <button data-v-35f42b37="" type="button" class="col-1 mr-5 btn btn-fw btn-inverse-light btn-secondary">Search</button>
+                    <input data-v-a65342b6="" id="SearchIssue" type="text" placeholder="Search" class="col-2 mr-2 form-control" @keyup.enter="SelectIssueSearch()">
+                    <button data-v-35f42b37="" type="button" class="col-1 mr-5 btn btn-fw btn-inverse-light btn-secondary" @click="SelectIssueSearch()">Search</button>
                   </div>
-                  <div class="table-responsive">
-                    <b-table id="createdIssueTable" stripped hover :items="issueLists" :fields="fields" :per-page="perPage_created" :current-page="currentPage_created" @row-clicked="clickList()">
+                  <div class="table-responsive" >
+                    <b-table id="createdIssueTable" stripped hover :items="issueLists" :fields="fields" :per-page="perPage_created" :current-page="currentPage_created" @row-clicked="onRowClicked" style="cursor:pointer">
                       <template slot="priority" slot-scope="row">
                         <div v-if="row.value === 0">
                           <b-badge variant="primary" >Lowest</b-badge>
@@ -40,7 +40,7 @@
     <b-badge variant="outline-success">Resolved</b-badge>
   </div>
 </template>
-                    <template slot="type" slot-scope="row">
+                                            <template slot="type" slot-scope="row">
   <div v-if="row.value === 0">Resource</div>
   <div v-else-if="row.value === 1">Contents</div>
 </template>
@@ -59,16 +59,16 @@
               <b-tab title="Assigned Issue">
                 <div data-v-19c9d02c="" class="card-body">
                   <div class="row mb-5">
-                    <button data-v-35f42b37="" type="button" class="col-1 btn btn-fw btn-inverse-light btn-secondary">All</button>
-                    <button data-v-35f42b37="" type="button" class="col-1 btn btn-fw btn-inverse-light btn-secondary">Waiting</button>
-                    <button data-v-35f42b37="" type="button" class="col-1 btn btn-fw btn-inverse-light btn-secondary">In Progress</button>
-                    <button data-v-35f42b37="" type="button" class="col-1 mr-5 btn btn-fw btn-inverse-light btn-secondary">Resolved</button>
+                    <button data-v-35f42b37="" type="button" class="col-1 btn btn-fw btn-inverse-light btn-secondary" value="0" @click="ChangeIssueType">All</button>
+                    <button data-v-35f42b37="" type="button" class="col-1 btn btn-fw btn-inverse-light btn-secondary" value="1" @click="ChangeIssueType">Waiting</button>
+                    <button data-v-35f42b37="" type="button" class="col-1 btn btn-fw btn-inverse-light btn-secondary" value="2" @click="ChangeIssueType">In Progress</button>
+                    <button data-v-35f42b37="" type="button" class="col-1 mr-5 btn btn-fw btn-inverse-light btn-secondary" value="3" @click="ChangeIssueType">Resolved</button>
                     <i class="mdi mdi-account-search"></i>
-                    <input data-v-a65342b6="" id="input1" type="text" placeholder="Search" class="col-2 mr-2 form-control">
-                    <button data-v-35f42b37="" type="button" class="col-1 mr-5 btn btn-fw btn-inverse-light btn-secondary">Search</button>
+                    <input data-v-a65342b6="" id="SearchAssignedIssue" type="text" placeholder="Search" class="col-2 mr-2 form-control" @keyup.enter="SelectAssignedIssueSearch()">
+                    <button data-v-35f42b37="" type="button" class="col-1 mr-5 btn btn-fw btn-inverse-light btn-secondary" @click="SelectAssignedIssueSearch()">Search</button>
                   </div>
                   <div class="table-responsive">
-                    <b-table id="assignedIssueTable" stripped hover :items="issueLists" :fields="fields" :per-page="perPage_assigned" :current-page="currentPage_assigned">
+                    <b-table id="assignedIssueTable" stripped hover :items="issueLists" :fields="fields" :per-page="perPage_assigned" :current-page="currentPage_assigned" style="cursor:pointer" @row-clicked="onRowClicked">
                       <template slot="priority" slot-scope="row">
   <div v-if="row.value === 0">
     <b-badge variant="primary">Lowest</b-badge>
@@ -80,7 +80,7 @@
     <b-badge variant="danger">Highest</b-badge>
   </div>
 </template>
-                      <template slot="status" slot-scope="row">
+                                            <template slot="status" slot-scope="row">
   <div v-if="row.value === 0">
     <b-badge variant="outline-danger">Waiting</b-badge>
   </div>
@@ -91,7 +91,7 @@
     <b-badge variant="outline-success">Resolved</b-badge>
   </div>
 </template>
-                      <template slot="type" slot-scope="row">
+                                            <template slot="type" slot-scope="row">
   <div v-if="row.value === 0">Resource</div>
   <div v-else-if="row.value === 1">Contents</div>
 </template>
@@ -116,22 +116,14 @@
 </template>
 
 <script lang="js">
-  import Datepicker from "vuejs-datepicker/dist/vuejs-datepicker.esm.js"
-  import * as lang from "vuejs-datepicker/src/locale"
   import axios from 'axios'
-
-  const state = {
-    date1: new Date()
-  }
   export default {
     name: 'tabs',
-    components: {
-      Datepicker
-    },
     data () {
       return {
+        CheckAdmin: false,
         file: null,
-        perPage_created: 2,
+        perPage_created: 100,
         currentPage_created: 1,
         perPage_assigned: 2,
         currentPage_assigned: 1,
@@ -140,105 +132,144 @@
           // 'id', 'first_name', 'last_name'
         ],
         issueLists: [],
-        items: [
-          { id: 1, first_name: 'Fred', last_name: 'Flintstone' },
-          { id: 2, first_name: 'Wilma', last_name: 'Flintstone' },
-          { id: 3, first_name: 'Barney', last_name: 'Rubble' },
-          { id: 4, first_name: 'Betty', last_name: 'Rubble' },
-          { id: 5, first_name: 'Pebbles', last_name: 'Flintstone' },
-          { id: 6, first_name: 'Bamm Bamm', last_name: 'Rubble' },
-          { id: 7, first_name: 'The Great', last_name: 'Gazzoo' },
-          { id: 8, first_name: 'Rockhead', last_name: 'Slate' },
-          { id: 9, first_name: 'Pearl', last_name: 'Slaghoople' }
-        ],
-        options: [
-          { value: null, text: 'Please select an option' },
-          { value: 'a', text: 'This is First option' },
-          { value: 'b', text: 'Selected Option' },
-          { value: {'C': '3PO'}, text: 'This is an option with object value' },
-          { value: 'd', text: 'This one is disabled', disabled: true }
-        ],
-        Assignee: [
-          { value: 'admin', text: 'admin' },
-          { value: 'snety0@gmail.com', text: 'snety0@gmail.com' },
-          { value: 'ssheko93@gmail.com', text: 'ssheko93@gmail.com' },
-          { value: 'mime32@gmail.com', text: 'mime32@gmail.com' },
-          { value: 'sdy9192@naver.com', text: 'sdy9192@naver.com' }
-        ],
-        IssueType: [
-          { value: 'a', text: 'Bug' },
-          { value: 'b', text: 'Web' },
-          { value: 'c', text: 'App' }
-        ],
-        Priority: [
-          { value: '1', text: '1' },
-          { value: '2', text: '2' },
-          { value: '3', text: '3' },
-          { value: '4', text: '4' },
-          { value: '5', text: '5' }
-        ],
-        Version: [
-          { value: '2.0', text: '2.0' },
-          { value: '2.1', text: '2.1' }
-        ],
-        format: "d MMMM yyyy",
-        disabledDates: {},
-        disabledFn: {
-          customPredictor (date) {
-            if (date.getDate() % 3 === 0) {
-              return true
-            }
-          }
-        },
-        highlightedFn: {
-          customPredictor (date) {
-            if (date.getDate() % 4 === 0) {
-              return true
-            }
-          }
-        },
-        highlighted: {},
-        eventMsg: null,
-        state: state,
-        language: "en",
-        languages: lang,
-        vModelExample: null,
-        changedMonthLog: []
+        issueListAll: [],
+        clickedIssue: []
       }
     },
     created: function () {
       this.SelectIssue()
+      this.GetAccountData()
     },
     computed: {
       rows () {
-        return this.items.length
+        return this.issueLists.length
       }
     },
     methods: {
-      SelectIssue () {
+      GetAccountData () {
+        if (localStorage.getItem('email') === "admin"){
+          this.CheckAdmin = true
+        }
+        localStorage.setItem("checkAdmin", this.CheckAdmin)
+      },
+      SelectIssueSearch () {
+        var issueNum = 0
         // var accountid = document.getElementById('1').valu
         axios.post('http://192.168.1.26:1337/issue/select_issue',
-          {'accountid': '1'})
+                   {'accountid': '1'})
           .then(response => {
-          // this.toDoItems = response.data.map(r => r.data)
-            this.issueLists = JSON.parse(JSON.stringify(response.data.data_creat))
+            // this.toDoItems = response.data.map(r => r.data)
+            this.issueListAll = JSON.parse(JSON.stringify(response.data.data_creat))
             // this.issueArray = JSON.stringify(response.data.data)
-            console.log(this.issueLists)
-            
-            var idx = 0
-            for (var issueList in this.issueLists){
-              console.log(issueList)
-              this.issueLists[idx].version = this.issueLists[idx].majorver + '.' + this.issueLists[idx++].minorver
+            var SearchIssue = document.getElementById("SearchIssue").value
+            // var idx = 0
+            this.issueLists.splice(0)
+            for (issueNum in this.issueListAll){
+              if (SearchIssue === this.issueListAll[issueNum].subject){
+                this.issueListAll[issueNum].version = this.issueListAll[issueNum].majorver + '.' + this.issueListAll[issueNum].minorver
+                this.issueLists.push(this.issueListAll[issueNum])
+              }
+            }
+            if (this.issueLists.length === 0){
+              alert("검색 결과가 없습니다.")
+              for (issueNum in this.issueListAll){
+                this.issueListAll[issueNum].version = this.issueListAll[issueNum].majorver + '.' + this.issueListAll[issueNum].minorver
+                this.issueLists.push(this.issueListAll[issueNum])
+              }
+              document.getElementById("SearchIssue").value = ""
             }
           })
           .catch(e => {
             console.log('error : ', e)
           })
       },
-      clickList () {
-        window.open("http://localhost:8080/ClickIssueDetail", "_self")
+      SelectAssignedIssueSearch () {
+        var issueNum = 0
+        // var accountid = document.getElementById('1').valu
+        axios.post('http://192.168.1.26:1337/issue/select_issue',
+                   {'accountid': '1'})
+          .then(response => {
+            // this.toDoItems = response.data.map(r => r.data)
+            this.issueListAll = JSON.parse(JSON.stringify(response.data.data_creat))
+            // this.issueArray = JSON.stringify(response.data.data)
+            var SearchIssue = document.getElementById("SearchAssignedIssue").value
+            // var idx = 0
+            this.issueLists.splice(0)
+            for (issueNum in this.issueListAll){
+              if (SearchIssue === this.issueListAll[issueNum].subject){
+                this.issueListAll[issueNum].version = this.issueListAll[issueNum].majorver + '.' + this.issueListAll[issueNum].minorver
+                this.issueLists.push(this.issueListAll[issueNum])
+              }
+            }
+            if (this.issueLists.length === 0){
+              alert("검색 결과가 없습니다.")
+              for (issueNum in this.issueListAll){
+                this.issueListAll[issueNum].version = this.issueListAll[issueNum].majorver + '.' + this.issueListAll[issueNum].minorver
+                this.issueLists.push(this.issueListAll[issueNum])
+              }
+              document.getElementById("SearchAssignedIssue").value = ""
+            }
+          })
+          .catch(e => {
+            console.log('error : ', e)
+          })
+      },
+      SelectIssue () {
+        console.log('accountid ' + localStorage.getItem('accountid'))
+        axios.post('http://192.168.1.26:1337/issue/select_issue',
+                   {'accountid': '1'})
+          .then(response => {
+            // this.toDoItems = response.data.map(r => r.data)
+            this.issueListAll = JSON.parse(JSON.stringify(response.data.data_creat))
+            // this.issueArray = JSON.stringify(response.data.data)
+            console.log(this.issueListAll)
+            for (var issueNum in this.issueListAll){
+              this.issueListAll[issueNum].version = this.issueListAll[issueNum].majorver + '.' + this.issueListAll[issueNum].minorver
+              this.issueLists.push(this.issueListAll[issueNum])
+            }
+          })
+          .catch(e => {
+            console.log('error : ', e)
+          })
+      },
+      ChangeIssueType (index) {
+        this.issueLists.splice(0)
+        var issueNum = 0
+        if (index.target.value === "0"){
+          for (issueNum in this.issueListAll){
+            this.issueLists.push(this.issueListAll[issueNum])
+          }
+        } else if (index.target.value === "1") {
+          for (issueNum in this.issueListAll){
+            if (this.issueListAll[issueNum].status === 0){
+              this.issueLists.push(this.issueListAll[issueNum])
+            }
+          }
+        } else if (index.target.value === "2") {
+          for (issueNum in this.issueListAll){
+            if ((this.issueListAll[issueNum]).status === 1){
+              this.issueLists.push(this.issueListAll[issueNum])
+            }
+          }
+        } else if (index.target.value === "3") {
+          for (issueNum in this.issueListAll){
+            if (this.issueListAll[issueNum].status === 2){
+              this.issueLists.push(this.issueListAll[issueNum])
+            }
+          }
+        }
+      },
+      onRowClicked (item, index, event) {
+        this.clickedIssue = item
+        localStorage.setItem('clickedListItem', JSON.stringify(this.clickedIssue))
+        let routeData = this.$router.resolve({name: 'ClickIssueDetail'})
+        window.open(routeData.href, "_self")
       },
       processFile (event) {
+        this.scrollToTop()
+      },
+      scrollToTop () {
+        window.scrollTo(0, 0)
       },
       highlightTo (val) {
         if (typeof this.highlighted.to === "undefined") {

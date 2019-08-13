@@ -231,10 +231,10 @@ $modal-inner-padding: 15px;
 $modal-dialog-margin: 10px;
 $modal-dialog-margin-y-sm-up: 30px;
 $modal-title-line-height: $line-height-base;
-$modal-content-bg: $content-bg;
+$modal-content-bg: white;
 $modal-content-box-shadow-xs: 0 3px 9px rgba($black,.5);
 $modal-content-box-shadow-sm-up: 0 5px 15px rgba($black,.5);
-$modal-backdrop-bg: $black;
+$modal-backdrop-bg: rgba(0, 0, 0, 0.7);
 $modal-backdrop-opacity: 1;
 $modal-header-border-color: $border-color;
 $modal-content-border-color: $border-color;
@@ -253,3 +253,8 @@ $modal-md: 500px;
 $modal-sm: 300px;
 $modal-transition: transform 0.4s ease;
 ////////// MODALS VARIABLES //////////
+
+.modal-backdrop.fade.in {
+  opacity: 0.5;
+  filter: alpha(opacity=50);
+  }

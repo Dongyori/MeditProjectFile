@@ -3,13 +3,12 @@
     <b-navbar-toggle target="nav_collapse"></b-navbar-toggle>
     <div class="text-center navbar-brand-wrapper d-flex align-items-top justify-content-center">
       <!-- <img src="../../assets/images/medit.png" alt="logo"/> -->
-      <a class="navbar-brand brand-logo" href="/"><img src="../../assets/images/medit_logo.png" alt="logo"/></a>
       <a class="navbar-brand brand-logo-mini" href="/"><img src="../../assets/images/logo-mini.svg" alt="logo"/></a>
     </div>
     <b-collapse is-nav id="nav_collapse">
       <b-navbar-nav class="header-links">
-        <b-nav-item href="/dashboard" :active='$route.name =="dashboard"'><i class="mdi mdi-image-filter"></i>Main DashBoard</b-nav-item>
-        <b-nav-item href="/issueList/" :active='$route.name =="issueList"'><i class="mdi mdi-email-outline"></i>Issue List</b-nav-item>
+        <!-- <b-nav-item href="/dashboard" :active='$route.name =="dashboard"'><i class="mdi mdi-image-filter"></i>Main DashBoard</b-nav-item>
+        <b-nav-item href="/issueList/" :active='$route.name =="issueList"'><i class="mdi mdi-email-outline"></i>Issue List</b-nav-item> -->
       </b-navbar-nav>
       <!-- Right aligned nav items -->
       <b-navbar-nav class="ml-auto">
@@ -72,19 +71,57 @@
     <i class="icon mdi mdi-plus-circle"></i>
   </div>
 </template>
-          <b-dropdown-item href="/AdminPage/">Admin Page</b-dropdown-item>
+          <b-dropdown-item href="/AdminPage/" v-if="checkAdmin === true">Admin Page</b-dropdown-item>
           <b-dropdown-item href="/createIssue/">Issue Create</b-dropdown-item>
-          <b-dropdown-item href="#">Logout</b-dropdown-item>
+          <b-dropdown-item @click="deleteAccountData()">Logout</b-dropdown-item>
         </b-nav-item-dropdown>
-        <b-nav-item href="#"><img class="img-xs rounded-circle" src="../../assets/images/faces/face14.jpg" alt="profile image"></b-nav-item>
+        <b-nav-item href="#"><img class="img-xs rounded-circle" src="../../assets/images/faces/ananymous.png" alt="profile image"></b-nav-item>
       </b-navbar-nav>
     </b-collapse>
   </b-navbar>
 </template>
 
 <script lang="js">
+  // import localforage from 'localforage'
+
   export default {
-    name: 'app-header'
+    name: 'app-header',
+    data () {
+      return {
+        checkAdmin: false
+      }
+    },
+    created: function () {
+      this.GetAccountData()
+    },
+    methods: {
+      deleteAccountData () {
+        // localforage.removeItem('email').then(function () {
+        //   window.open("http://localhost:8080/", "_self")
+        // }).catch(function (err) {
+        //   // This code runs if there were any errors
+        //   console.log(err)
+        // })
+        // localforage.clear(function () {
+        //   // Run this code once the database has been entirely deleted.
+        //   let routeData = this.$router.resolve({name: 'AdminPage'})
+        //   window.open(routeData.href, "_self")
+        //   console.log('Database is now empty.')
+        // }).catch(function (err) {
+        //   // This code runs if there were any errors
+        //   console.log(err)
+        // })
+        localStorage.removeItem('email')
+        window.open("http://localhost:8080/", "_self")
+      },
+      GetAccountData () {
+        if (localStorage.getItem('email') === "admin"){
+          this.checkAdmin = true
+        }
+        // this.checkAdmin = localStorage.getItem("CheckAdmin")
+        // console.log(this.checkAdmin + ' ' + localStorage.getItem("CheckAdmin"))
+      }
+    }
   }
 </script>
 
