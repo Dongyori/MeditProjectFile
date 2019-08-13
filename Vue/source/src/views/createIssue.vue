@@ -14,36 +14,39 @@
                       <b-form-input type="text" id="input1" placeholder="Summary"></b-form-input>
                     </b-form-group>
                     <b-form-group label="Description" label-for="input3">
-                      <b-form-textarea id="input3" v-model="text" placeholder="Description" :rows="10" :max-rows="20" style="height: 440px"></b-form-textarea>
+                      <b-form-textarea id="input3" v-model="text" placeholder="Description" :rows="10" :max-rows="20" style="height: 490px"></b-form-textarea>
                     </b-form-group>
                   </div>
                   <div class="col-md-4 grid-margin">
                     <b-form-group horizontal label="Project">
-                      <b-form-select v-model="selected">
+                      <b-form-select v-model="selectedProject">
                           <option v-for="p in projectcombo" :key="p.projectid" v-bind:value="p.projectid">{{p.projectname}}</option>
                         </b-form-select>
                     </b-form-group>
                     <b-form-group horizontal label="Issue Type">
-                      <b-form-select v-model="selected" :options="IssueType" placeholder="Select IssueType" />
+                      <b-form-select v-model="selectedType" :options="IssueType" placeholder="Select IssueType" />
                     </b-form-group>
                     <b-form-group horizontal label="Assignee">
-                      <b-form-select v-model="selected">
+                      <b-form-select v-model="selectedAccount">
                           <option v-for="p in getAccount" :key="p.accountid" v-bind:value="p.accountid">{{p.email}}</option>
                       </b-form-select>
                     </b-form-group>
                     <b-form-group horizontal label="Priority">
-                      <b-form-select v-model="selected" :options="Priority" placeholder="Select Priority" />
+                      <b-form-select v-model="selectedPriority" :options="Priority" placeholder="Select Priority" />
                     </b-form-group>
                     <b-form-group horizontal label="Version">
-                      <b-form-select v-model="selected">
+                      <b-form-select v-model="selectedVersion">
                           <option v-for="p in getVersion" :key="p.versionid" v-bind:value="p.versionid">{{p.majorver+'.'+p.minorver}}</option>
                         </b-form-select>
+                    </b-form-group>
+                    <b-form-group horizontal label="Language">
+                      <b-form-select v-model="selectedLanguage" :options="Language" placeholder="Select Language" />
                     </b-form-group>
                     <b-form-group label="Attachment" label-for="input2">
                       <b-form-file class="Attachment" v-model="file" id="inpu2" :state="Boolean(file)" placeholder="Choose a file....." @change="processFile($event)"></b-form-file>
                     </b-form-group>
                     <b-form-group horizontal label="Reference">
-                      <b-form-select v-model="selected">
+                      <b-form-select v-model="selectedReference">
                           <option v-for="p in getAccount" :key="p.accountid" v-bind:value="p.accountid">{{p.email}}</option>
                       </b-form-select>
                     </b-form-group>
@@ -155,6 +158,18 @@
           { value: '0', text: 'Resource' },
           { value: '1', text: 'Contents' }
         ],
+        Language: [
+          { value: '0', text: 'English' },
+          { value: '1', text: 'Korean' }
+        ],
+        selectedProject: null,
+        selectedType: null,
+        selectedAccount: null,
+        selectedPriority: null,
+        selectedVersion: null,
+        selectedLanguage: null,
+        selectedReference: null,
+        text: null,
         getVersion: {},
         getAccount: {},
         projectcombo: {},
@@ -192,43 +207,43 @@
     },
     methods: {
       SelectVersion () {
-      axios.post('http://192.168.1.26:1337/projectver/select_projectver',
-        {'reqeust': 'SelectVersion'})
-        .then(response => {
-        // this.toDoItems = response.data.map(r => r.data)
-          console.log(JSON.stringify(response.data))
-          this.getVersion = JSON.parse(JSON.stringify(response.data.data))
-        })
-        .catch(e => {
-          console.log('error : ', e)
-        })
+        axios.post('http://192.168.1.26:1337/projectver/select_projectver',
+                   {'reqeust': 'SelectVersion'})
+          .then(response => {
+            // this.toDoItems = response.data.map(r => r.data)
+            console.log(JSON.stringify(response.data))
+            this.getVersion = JSON.parse(JSON.stringify(response.data.data))
+          })
+          .catch(e => {
+            console.log('error : ', e)
+          })
       },
       SelectAccount () {
-      axios.post('http://192.168.1.26:1337/account/select_account',
-        {'request': 'SelectPName'})
-        .then(response => {
-          // this.pageArray = JSON.stringify(response.data.data)
-          this.getAccount = JSON.parse(JSON.stringify(response.data.data))
-          console.log(this.getAccount)
-          // this.pageArray = JSON.parse(JSON.stringify(response.data.data))
-        })
-        .catch(e => {
-          console.log('error : ', e)
-        })
+        axios.post('http://192.168.1.26:1337/account/select_account',
+                   {'request': 'SelectPName'})
+          .then(response => {
+            // this.pageArray = JSON.stringify(response.data.data)
+            this.getAccount = JSON.parse(JSON.stringify(response.data.data))
+            console.log(this.getAccount)
+            // this.pageArray = JSON.parse(JSON.stringify(response.data.data))
+          })
+          .catch(e => {
+            console.log('error : ', e)
+          })
       },
       SelectProject () {
-      axios.post('http://192.168.1.26:1337/project/select_project',
-        {'request': 'SelectPName'})
-        .then(response => {
-        // this.toDoItems = response.data.map(r => r.data)
-          // alert(JSON.stringify(response.data.data))
-          this.projectcombo = JSON.parse(JSON.stringify(response.data.data))
-          console.log(this.projectcombo)
-        })
-        .catch(e => {
-          console.log('error : ', e)
-        })
-    },
+        axios.post('http://192.168.1.26:1337/project/select_project',
+                   {'request': 'SelectPName'})
+          .then(response => {
+            // this.toDoItems = response.data.map(r => r.data)
+            // alert(JSON.stringify(response.data.data))
+            this.projectcombo = JSON.parse(JSON.stringify(response.data.data))
+            console.log(this.projectcombo)
+          })
+          .catch(e => {
+            console.log('error : ', e)
+          })
+      },
       processFile (event) {
         this.isFileSelected = true
         // $($(".autoTab").find("li")[1]).show()

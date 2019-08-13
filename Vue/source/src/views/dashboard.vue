@@ -1,7 +1,7 @@
 <template lang="html">
   <section class="dashboard">
     <div class="row">
-      <div class="col-12 grid-margin">
+      <div class="col-12 grid-margin" v-if="CheckAdmin === true">
         <div class="card">
           <div class="card-body">
             <h5 class="card-title mb-4">Created Issue</h5>
@@ -33,12 +33,10 @@
                     </td>
                     <td data-v-19c9d02c="">{{p.deadline}}</td>
                     <td data-v-19c9d02c="">{{p.assignor}}</td>
-                    
                     <td data-v-19c9d02c="" v-if="p.type === 0">Resource
                     </td>
                     <td data-v-19c9d02c="" v-else-if="p.type === 1">Contents
                     </td>
-
                     <td data-v-19c9d02c="" v-if="p.status === 0">
                       <b-badge variant="outline-danger">Waiting</b-badge>
                     </td>
@@ -110,33 +108,41 @@
 </template>
 
 <script lang="js">
-import axios from 'axios'
+  import axios from 'axios'
 
   export default {
     name: 'dashboard',
     data () {
       return {
-        issueArray: {}
+        issueArray: {},
+        CheckAdmin: false
       }
     },
     created: function () {
       this.SelectIssue()
+      this.GetAccountData()
     },
     methods: {
+      GetAccountData () {
+        if (localStorage.getItem('email') === "admin"){
+          this.CheckAdmin = true
+        }
+        localStorage.setItem("checkAdmin", this.CheckAdmin)
+      },
       SelectIssue () {
-      // var accountid = document.getElementById('1').valu
-      axios.post('http://192.168.1.26:1337/issue/select_issue',
-        {'accountid': '1'})
-        .then(response => {
-        // this.toDoItems = response.data.map(r => r.data)
-          this.issueArray = JSON.parse(JSON.stringify(response.data.data_creat))
-          // this.issueArray = JSON.stringify(response.data.data)
-          console.log(this.issueArray)
-        })
-        .catch(e => {
-          console.log('error : ', e)
-        })
-    }
+        console.log('accountid ' + localStorage.getItem('accountid'))
+        axios.post('http://192.168.1.26:1337/issue/select_issue',
+                   {'accountid': '1'})
+          .then(response => {
+            // this.toDoItems = response.data.map(r => r.data)
+            this.issueArray = JSON.parse(JSON.stringify(response.data.data_creat))
+            // this.issueArray = JSON.stringify(response.data.data)
+            console.log(this.issueArray)
+          })
+          .catch(e => {
+            console.log('error : ', e)
+          })
+      }
     }
   }
 </script>

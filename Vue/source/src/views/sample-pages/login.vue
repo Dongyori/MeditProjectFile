@@ -12,12 +12,12 @@
                 <div class="form-group">
                   <label for="exampleInputEmail1">Username</label>
                   <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Username">
-                  <i class="mdi mdi-account"></i>
+                  <!-- <i class="mdi mdi-account"></i> -->
                 </div>
                 <div class="form-group">
                   <label for="exampleInputPassword1">Password</label>
-                  <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
-                  <i class="mdi mdi-eye"></i>
+                  <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password" @keyup.enter="LoginCheck()">
+                  <!-- <i class="mdi mdi-eye"></i> -->
                 </div>
                 <div class="mt-5">
                   <a class="btn btn-block btn-warning btn-lg font-weight-medium" @click="LoginCheck()">Login</a>
@@ -37,12 +37,14 @@
 
 <script lang="js">
   import axios from 'axios'
+  // import localforage from 'localforage'
 
   export default {
     name: 'login',
     data: () => {
       return {
-        toDoItems: []
+        responseFromServer: [],
+        accountData: []
       }
     },
     methods: {
@@ -52,16 +54,31 @@
         axios.post('http://192.168.1.26:1337/login',
                    {'email': email, 'password': pw})
           .then(response => {
-            this.toDoItems = response.data
-            console.log(JSON.stringify(response.data))
-            console.log(this.toDoItems.resultCode)
-            if (this.toDoItems.resultCode === 0){
-              window.open("http://localhost:8080/dashboard", "_self")
+            this.responseFromServer = response.data
+            // alert(JSON.stringify(response.data))
+            console.log(JSON.stringify(this.responseFromServer.data))
+            console.log(this.responseFromServer.data[0].accountid)
+            if (this.responseFromServer.resultCode === 0){
+              this.accountData.email = email
+              this.accountData.pw = pw
+              // this.SaveAccountData()
+              localStorage.setItem('email', email)
+              localStorage.setItem('accountid', this.responseFromServer.data[0].accountid)
+              // alert(this.responseFromServer.data[0].accountid + ' accountid ' + localStorage.getItem('accountid'))
+              this.MoveToDashboard()
+              // localforage.setItem('email', email).then(this.MoveToDashboard()).catch(function (err) {
+              //   // This code runs if there were any errors
+              //   console.log(err)
+              // })
             }
           })
           .catch(e => {
             console.log('error : ', e)
           })
+      },
+      MoveToDashboard () {
+        let routeData = this.$router.resolve({name: 'dashboard'})
+        window.open(routeData.href, "_self")
       }
     }
   }
