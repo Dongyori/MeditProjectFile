@@ -19,7 +19,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr data-v-19c9d02c="" v-for="p in issueArray" :key="p.subject">
+                  <tr data-v-19c9d02c="" v-for="p in createdIssueArray" :key="p.subject" v-if="p.status !== 2">
                     <td data-v-19c9d02c="">{{p.subject}}</td>
                     <td data-v-19c9d02c="">{{p.majorver+'.'+p.minorver}}</td>
                     <td data-v-19c9d02c="" v-if="p.priority === 0">
@@ -32,7 +32,7 @@
                       <b-badge variant="danger">Highest</b-badge>
                     </td>
                     <td data-v-19c9d02c="">{{p.deadline}}</td>
-                    <td data-v-19c9d02c="">{{p.assignor}}</td>
+                    <td data-v-19c9d02c="">{{p.email}}</td>
                     <td data-v-19c9d02c="" v-if="p.type === 0">Resource
                     </td>
                     <td data-v-19c9d02c="" v-else-if="p.type === 1">Contents
@@ -71,7 +71,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr data-v-19c9d02c="" v-for="p in issueArray" :key="p.subject">
+                  <tr data-v-19c9d02c="" v-for="p in assignedIssueArray" :key="p.subject" v-if="p.status !== 2">
                     <td data-v-19c9d02c="">{{p.subject}}</td>
                     <td data-v-19c9d02c="">{{p.majorver+'.'+p.minorver}}</td>
                     <td data-v-19c9d02c="" v-if="p.priority === 0">
@@ -84,7 +84,7 @@
                       <b-badge variant="danger">Highest</b-badge>
                     </td>
                     <td data-v-19c9d02c="">{{p.deadline}}</td>
-                    <td data-v-19c9d02c="">{{p.assignor}}</td>
+                    <td data-v-19c9d02c="">{{p.email}}</td>
                     <td data-v-19c9d02c="" v-if="p.type === 0">Resource</td>
                     <td data-v-19c9d02c="" v-else-if="p.type === 1">Contents</td>
                     <td data-v-19c9d02c="" v-if="p.status === 0">
@@ -92,9 +92,6 @@
                     </td>
                     <td data-v-19c9d02c="" v-else-if="p.status === 1">
                       <b-badge variant="outline-warning">In Progress</b-badge>
-                    </td>
-                    <td data-v-19c9d02c="" v-else-if="p.status === 2">
-                      <b-badge variant="outline-success">Resolved</b-badge>
                     </td>
                   </tr>
                 </tbody>
@@ -114,7 +111,8 @@
     name: 'dashboard',
     data () {
       return {
-        issueArray: {},
+        createdIssueArray: {},
+        assignedIssueArray: {},
         CheckAdmin: false
       }
     },
@@ -130,12 +128,14 @@
         localStorage.setItem("checkAdmin", this.CheckAdmin)
       },
       SelectIssue () {
+        var accountid = localStorage.getItem('accountid')
         console.log('accountid ' + localStorage.getItem('accountid'))
         axios.post('http://192.168.1.26:1337/issue/select_issue',
-                   {'accountid': '1'})
+                   {'accountid': accountid})
           .then(response => {
             // this.toDoItems = response.data.map(r => r.data)
-            this.issueArray = JSON.parse(JSON.stringify(response.data.data_creat))
+            this.createdIssueArray = JSON.parse(JSON.stringify(response.data.data_create))
+            this.assignedIssueArray = JSON.parse(JSON.stringify(response.data.data_assign))
             // this.issueArray = JSON.stringify(response.data.data)
             console.log(this.issueArray)
           })

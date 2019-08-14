@@ -13,11 +13,11 @@
                     <button data-v-35f42b37="" type="button" class="col-1 btn btn-fw btn-inverse-light btn-secondary" value="2" @click="ChangeIssueType">In Progress</button>
                     <button data-v-35f42b37="" type="button" class="col-1 mr-5 btn btn-fw btn-inverse-light btn-secondary" value="3" @click="ChangeIssueType">Resolved</button>
                     <i class="mdi mdi-account-search"></i>
-                    <input data-v-a65342b6="" id="SearchIssue" type="text" placeholder="Search" class="col-2 mr-2 form-control" @keyup.enter="SelectIssueSearch()">
-                    <button data-v-35f42b37="" type="button" class="col-1 mr-5 btn btn-fw btn-inverse-light btn-secondary" @click="SelectIssueSearch()">Search</button>
+                    <input data-v-a65342b6="" id="SearchIssue" type="text" placeholder="Search" class="col-2 mr-2 form-control">
+                    <button data-v-35f42b37="" type="button" class="col-1 mr-5 btn btn-fw btn-inverse-light btn-secondary" value="createdIssue" @click="SelectIssueSearch">Search</button>
                   </div>
                   <div class="table-responsive" >
-                    <b-table id="createdIssueTable" stripped hover :items="issueLists" :fields="fields" :per-page="perPage_created" :current-page="currentPage_created" @row-clicked="onRowClicked" style="cursor:pointer">
+                    <b-table id="createdIssueTable" stripped hover :items="createdIssueArray" :fields="fields" :per-page="perPage_created" :current-page="currentPage_created" @row-clicked="onRowClicked" style="cursor:pointer">
                       <template slot="priority" slot-scope="row">
                         <div v-if="row.value === 0">
                           <b-badge variant="primary" >Lowest</b-badge>
@@ -49,7 +49,7 @@
                   <div class="col-6 grid-margin" style="margin-left:30%;">
                     <div class="card">
                       <div class="card-body">
-                        <b-pagination :total-rows="rows" v-model="currentPage_created" :per-page="perPage_created" @change="processFile($event)" aira-controls="createdIssueTable">
+                        <b-pagination :total-rows="createdIssueRows" v-model="currentPage_created" :per-page="perPage_created" @change="processFile($event)" aira-controls="createdIssueTable">
                         </b-pagination>
                       </div>
                     </div>
@@ -65,10 +65,10 @@
                     <button data-v-35f42b37="" type="button" class="col-1 mr-5 btn btn-fw btn-inverse-light btn-secondary" value="3" @click="ChangeIssueType">Resolved</button>
                     <i class="mdi mdi-account-search"></i>
                     <input data-v-a65342b6="" id="SearchAssignedIssue" type="text" placeholder="Search" class="col-2 mr-2 form-control" @keyup.enter="SelectAssignedIssueSearch()">
-                    <button data-v-35f42b37="" type="button" class="col-1 mr-5 btn btn-fw btn-inverse-light btn-secondary" @click="SelectAssignedIssueSearch()">Search</button>
+                    <button data-v-35f42b37="" type="button" class="col-1 mr-5 btn btn-fw btn-inverse-light btn-secondary" value="assignedIssue" @click="SelectIssueSearch">Search</button>
                   </div>
                   <div class="table-responsive">
-                    <b-table id="assignedIssueTable" stripped hover :items="issueLists" :fields="fields" :per-page="perPage_assigned" :current-page="currentPage_assigned" style="cursor:pointer" @row-clicked="onRowClicked">
+                    <b-table id="assignedIssueTable" stripped hover :items="assignedIssueArray" :fields="fields" :per-page="perPage_assigned" :current-page="currentPage_assigned" style="cursor:pointer" @row-clicked="onRowClicked">
                       <template slot="priority" slot-scope="row">
   <div v-if="row.value === 0">
     <b-badge variant="primary">Lowest</b-badge>
@@ -100,7 +100,7 @@
                   <div class="col-6 grid-margin" style="margin-left:30%;">
                     <div class="card">
                       <div class="card-body">
-                        <b-pagination :total-rows="rows" v-model="currentPage_assigned" :per-page="perPage_assigned" @change="processFile($event)" aira-controls="assignedIssueTable">
+                        <b-pagination :total-rows="assignedIssueRows" v-model="currentPage_assigned" :per-page="perPage_assigned" @change="processFile($event)" aira-controls="assignedIssueTable">
                         </b-pagination>
                       </div>
                     </div>
@@ -131,9 +131,11 @@
           'subject', 'version', 'priority', 'deadline', 'type', 'status'
           // 'id', 'first_name', 'last_name'
         ],
-        issueLists: [],
-        issueListAll: [],
-        clickedIssue: []
+        clickedIssue: [],
+        createdIssueArrayAll: {},
+        createdIssueArray: [],
+        assignedIssueArrayAll: {},
+        assignedIssueArray: []
       }
     },
     created: function () {
@@ -141,8 +143,11 @@
       this.GetAccountData()
     },
     computed: {
-      rows () {
-        return this.issueLists.length
+      createdIssueRows () {
+        return this.createdIssueArray.length
+      },
+      assignedIssueRows () {
+        return this.assignedIssueArray.length
       }
     },
     methods: {
@@ -152,80 +157,58 @@
         }
         localStorage.setItem("checkAdmin", this.CheckAdmin)
       },
-      SelectIssueSearch () {
+      SelectIssueSearch (index) {
         var issueNum = 0
-        // var accountid = document.getElementById('1').valu
-        axios.post('http://192.168.1.26:1337/issue/select_issue',
-                   {'accountid': '1'})
-          .then(response => {
-            // this.toDoItems = response.data.map(r => r.data)
-            this.issueListAll = JSON.parse(JSON.stringify(response.data.data_creat))
-            // this.issueArray = JSON.stringify(response.data.data)
-            var SearchIssue = document.getElementById("SearchIssue").value
-            // var idx = 0
-            this.issueLists.splice(0)
-            for (issueNum in this.issueListAll){
-              if (SearchIssue === this.issueListAll[issueNum].subject){
-                this.issueListAll[issueNum].version = this.issueListAll[issueNum].majorver + '.' + this.issueListAll[issueNum].minorver
-                this.issueLists.push(this.issueListAll[issueNum])
-              }
+        var issueNumAssigne = 0
+        if (index.target.value === "createdIssue") {
+          this.createdIssueArray.splice(0)
+          for (issueNum in this.createdIssueArrayAll){
+            if (document.getElementById('SearchIssue').value === this.createdIssueArrayAll[issueNum].subject) {
+              this.createdIssueArrayAll[issueNum].version = this.createdIssueArrayAll[issueNum].majorver + '.' + this.createdIssueArrayAll[issueNum].minorver
+              this.createdIssueArray.push(this.createdIssueArrayAll[issueNum])
             }
-            if (this.issueLists.length === 0){
-              alert("검색 결과가 없습니다.")
-              for (issueNum in this.issueListAll){
-                this.issueListAll[issueNum].version = this.issueListAll[issueNum].majorver + '.' + this.issueListAll[issueNum].minorver
-                this.issueLists.push(this.issueListAll[issueNum])
-              }
-              document.getElementById("SearchIssue").value = ""
+          }
+          if (this.createdIssueArray.length === 0) {
+            alert("검색 결과가 없습니다")
+            for (issueNum in this.createdIssueArrayAll){
+              this.createdIssueArrayAll[issueNum].version = this.createdIssueArrayAll[issueNum].majorver + '.' + this.createdIssueArrayAll[issueNum].minorver
+              this.createdIssueArray.push(this.createdIssueArrayAll[issueNum])
             }
-          })
-          .catch(e => {
-            console.log('error : ', e)
-          })
-      },
-      SelectAssignedIssueSearch () {
-        var issueNum = 0
-        // var accountid = document.getElementById('1').valu
-        axios.post('http://192.168.1.26:1337/issue/select_issue',
-                   {'accountid': '1'})
-          .then(response => {
-            // this.toDoItems = response.data.map(r => r.data)
-            this.issueListAll = JSON.parse(JSON.stringify(response.data.data_creat))
-            // this.issueArray = JSON.stringify(response.data.data)
-            var SearchIssue = document.getElementById("SearchAssignedIssue").value
-            // var idx = 0
-            this.issueLists.splice(0)
-            for (issueNum in this.issueListAll){
-              if (SearchIssue === this.issueListAll[issueNum].subject){
-                this.issueListAll[issueNum].version = this.issueListAll[issueNum].majorver + '.' + this.issueListAll[issueNum].minorver
-                this.issueLists.push(this.issueListAll[issueNum])
-              }
+          }
+        } else if (index.target.value === "assignedIssue") {
+          this.assignedIssueArray.splice(0)
+          for (issueNumAssigne in this.assignedIssueArrayAll){
+            if (document.getElementById('SearchAssignedIssue').value === this.assignedIssueArrayAll[issueNumAssigne].subject) {
+              this.assignedIssueArrayAll[issueNumAssigne].version = this.assignedIssueArrayAll[issueNumAssigne].majorver + '.' + this.assignedIssueArrayAll[issueNumAssigne].minorver
+              this.assignedIssueArray.push(this.assignedIssueArrayAll[issueNumAssigne])
             }
-            if (this.issueLists.length === 0){
-              alert("검색 결과가 없습니다.")
-              for (issueNum in this.issueListAll){
-                this.issueListAll[issueNum].version = this.issueListAll[issueNum].majorver + '.' + this.issueListAll[issueNum].minorver
-                this.issueLists.push(this.issueListAll[issueNum])
-              }
-              document.getElementById("SearchAssignedIssue").value = ""
+          }
+          if (this.assignedIssueArray.length === 0) {
+            alert("검색 결과가 없습니다")
+            for (issueNumAssigne in this.assignedIssueArrayAll){
+              this.assignedIssueArrayAll[issueNumAssigne].version = this.assignedIssueArrayAll[issueNumAssigne].majorver + '.' + this.assignedIssueArrayAll[issueNumAssigne].minorver
+              this.assignedIssueArray.push(this.assignedIssueArrayAll[issueNumAssigne])
             }
-          })
-          .catch(e => {
-            console.log('error : ', e)
-          })
+          }
+        }
       },
       SelectIssue () {
+        var accountid = localStorage.getItem('accountid')
         console.log('accountid ' + localStorage.getItem('accountid'))
         axios.post('http://192.168.1.26:1337/issue/select_issue',
-                   {'accountid': '1'})
+                   {'accountid': accountid})
           .then(response => {
-            // this.toDoItems = response.data.map(r => r.data)
-            this.issueListAll = JSON.parse(JSON.stringify(response.data.data_creat))
-            // this.issueArray = JSON.stringify(response.data.data)
-            console.log(this.issueListAll)
-            for (var issueNum in this.issueListAll){
-              this.issueListAll[issueNum].version = this.issueListAll[issueNum].majorver + '.' + this.issueListAll[issueNum].minorver
-              this.issueLists.push(this.issueListAll[issueNum])
+            if (accountid === '1'){
+              this.createdIssueArrayAll = JSON.parse(JSON.stringify(response.data.data_create))
+              for (var issueNum in this.createdIssueArrayAll){
+                this.createdIssueArrayAll[issueNum].version = this.createdIssueArrayAll[issueNum].majorver + '.' + this.createdIssueArrayAll[issueNum].minorver
+                this.createdIssueArray.push(this.createdIssueArrayAll[issueNum])
+              }
+            }
+            this.assignedIssueArrayAll = JSON.parse(JSON.stringify(response.data.data_assign))
+            for (var issueNumAssigne in this.assignedIssueArrayAll){
+              this.assignedIssueArrayAll[issueNumAssigne].version = this.assignedIssueArrayAll[issueNumAssigne].majorver + '.' + this.assignedIssueArrayAll[issueNumAssigne].minorver
+              this.assignedIssueArray.push(this.assignedIssueArrayAll[issueNumAssigne])
             }
           })
           .catch(e => {
@@ -233,36 +216,29 @@
           })
       },
       ChangeIssueType (index) {
-        this.issueLists.splice(0)
         var issueNum = 0
-        if (index.target.value === "0"){
-          for (issueNum in this.issueListAll){
-            this.issueLists.push(this.issueListAll[issueNum])
+        this.createdIssueArray.splice(0)
+        this.assignedIssueArray.splice(0)
+        var statusType = parseInt(index.target.value, 10)
+        for (issueNum in this.createdIssueArrayAll){
+          if (statusType === 0) {
+            this.createdIssueArray.push(this.createdIssueArrayAll[issueNum])
+          } else if ((this.createdIssueArrayAll[issueNum]).status === statusType - 1){
+            this.createdIssueArray.push(this.createdIssueArrayAll[issueNum])
           }
-        } else if (index.target.value === "1") {
-          for (issueNum in this.issueListAll){
-            if (this.issueListAll[issueNum].status === 0){
-              this.issueLists.push(this.issueListAll[issueNum])
-            }
-          }
-        } else if (index.target.value === "2") {
-          for (issueNum in this.issueListAll){
-            if ((this.issueListAll[issueNum]).status === 1){
-              this.issueLists.push(this.issueListAll[issueNum])
-            }
-          }
-        } else if (index.target.value === "3") {
-          for (issueNum in this.issueListAll){
-            if (this.issueListAll[issueNum].status === 2){
-              this.issueLists.push(this.issueListAll[issueNum])
-            }
+        }
+        for (issueNum in this.assignedIssueArrayAll){
+          if (statusType === 0) {
+            this.assignedIssueArray.push(this.assignedIssueArrayAll[issueNum])
+          } else if ((this.assignedIssueArrayAll[issueNum]).status === statusType - 1){
+            this.assignedIssueArray.push(this.assignedIssueArrayAll[issueNum])
           }
         }
       },
       onRowClicked (item, index, event) {
         this.clickedIssue = item
         localStorage.setItem('clickedListItem', JSON.stringify(this.clickedIssue))
-        let routeData = this.$router.resolve({name: 'ClickIssueDetail'})
+        let routeData = this.$router.resolve({name: 'clickIssueDetail'})
         window.open(routeData.href, "_self")
       },
       processFile (event) {

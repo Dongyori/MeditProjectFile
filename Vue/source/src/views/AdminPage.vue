@@ -292,12 +292,12 @@
         window.open("http://localhost:8080/ClickIssueDetail", "_self")
       },
       SelectIssue () {
-        // var accountid = document.getElementById('1').valu
+        var accountid = localStorage.getItem('accountid')
         axios.post('http://192.168.1.26:1337/issue/select_issue',
-                   {'accountid': '1'})
+                   {'accountid': accountid})
           .then(response => {
             // this.toDoItems = response.data.map(r => r.data)
-            this.issueListAll = JSON.parse(JSON.stringify(response.data.data_creat))
+            this.issueListAll = JSON.parse(JSON.stringify(response.data.data_create))
             // this.issueArray = JSON.stringify(response.data.data)
             console.log(this.issueListAll)
             // var idx = 0
@@ -317,7 +317,7 @@
                    {'accountid': '1'})
           .then(response => {
             // this.toDoItems = response.data.map(r => r.data)
-            this.issueListAll = JSON.parse(JSON.stringify(response.data.data_creat))
+            this.issueListAll = JSON.parse(JSON.stringify(response.data.data_create))
             // this.issueArray = JSON.stringify(response.data.data)
             var SearchIssue = document.getElementById("SearchIssue").value
             // var idx = 0
@@ -426,7 +426,7 @@
             console.log(JSON.stringify(response.data))
             resultData = JSON.parse(JSON.stringify(response.data))
             if (resultData.resultCode === 0){
-              alert("계정이 생성되었습니다.")
+              alert("계정이 업데이트되었습니다.")
               this.$router.go(this.$router.currentRoute)
             }
           })
