@@ -156,7 +156,7 @@ exports.ExportData = async function (req, res)
 
     const table_string = `transdata_${project_query[0].projectname}_${req.body.type}`;
     const where_string = `language = '${req.body.language}' AND majorver = '${req.body.majorver} AND minorver ${req.body.minorver}'`
-    const query_string = `SELECT * FROM ${table_string} WHERE ${where_string}`;
+    const query_string = `SELECT * FROM ${table_string} WHERE ${where_string} ORDER BY TRANSID`;
 
     try
     {
