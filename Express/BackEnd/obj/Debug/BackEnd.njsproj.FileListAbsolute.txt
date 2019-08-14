@@ -1,5 +1,5 @@
 C:\Users\bit\Desktop\z\ExpressApp1\ExpressApp1\obj\Debug\BackEnd.njsproj.CoreCompileInputs.cache
 C:\Users\bit\Desktop\z\ExpressApp1\ExpressApp1\bin\Microsoft.NodejsTools.WebRole.dll
-C:\Users\bit\Desktop\z\MeditProjectFile\Express\BackEnd\obj\Debug\BackEnd.njsprojAssemblyReference.cache
 C:\Users\bit\Desktop\z\MeditProjectFile\Express\BackEnd\obj\Debug\BackEnd.njsproj.CoreCompileInputs.cache
 C:\Users\bit\Desktop\z\MeditProjectFile\Express\BackEnd\bin\Microsoft.NodejsTools.WebRole.dll
+C:\Users\bit\Desktop\z\MeditProjectFile\Express\BackEnd\obj\Debug\BackEnd.njsprojAssemblyReference.cache

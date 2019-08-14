@@ -1,5 +1,6 @@
 ﻿const DB = require('./DB');
 const ErrorCode = require('./ResultCode');
+const Fun = require('../Function')
 
 //DB.Connect();
 
@@ -48,7 +49,8 @@ Date.prototype.yyyymm = function ()
     return yyyy + (mm[1] ? mm : '0' + mm[0]);
 }
 
-
+module.exports.MakeValueString = Fun.MakeValueString;
+module.exports.MakeJsObject = Fun.MakeJsObject;
 module.exports.Query = DB.query;
 module.exports.DB = DB;
 module.exports.ErrorCode = ErrorCode;

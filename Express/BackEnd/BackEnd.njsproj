@@ -41,9 +41,17 @@
     <Content Include="public\javascripts\Common\StartUP.js">
       <SubType>Code</SubType>
     </Content>
+    <Content Include="public\javascripts\Function.js">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="public\stylesheets\logview.css">
       <SubType>Code</SubType>
     </Content>
+    <Content Include="routes\api\Accout.js" />
+    <Content Include="routes\api\Comment.js" />
+    <Content Include="routes\api\Issue.js" />
+    <Content Include="routes\api\Project.js" />
+    <Content Include="routes\api\Translate.js" />
     <Content Include="routes\index.js" />
     <Content Include="routes\users.js" />
     <Content Include="package.json" />
@@ -63,6 +71,7 @@
     <Folder Include="public\javascripts\Common\" />
     <Folder Include="public\stylesheets\" />
     <Folder Include="routes\" />
+    <Folder Include="routes\api\" />
     <Folder Include="views\" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\Node.js Tools\Microsoft.NodejsToolsV2.targets" />
