@@ -10,7 +10,10 @@ async function MakeValueString(jsonString, treedata, language, majorver, minorve
         }
         else
         {
-            valueString += `\n("${treedata}", "${inner}", "${jsonString[inner]}", "${language}", ${majorver}, ${minorver}),`;
+            if (typeof (jsonString[inner]) == 'undefined')
+                valueString += `\n("${treedata}", "${inner}", "", "${language}", ${majorver}, ${minorver}),`;
+            else
+                valueString += `\n("${treedata}", "${inner}", "${jsonString[inner]}", "${language}", ${majorver}, ${minorver}),`;
         }
     }
     return valueString;

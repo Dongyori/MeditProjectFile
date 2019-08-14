@@ -1,6 +1,6 @@
 ﻿const DB = require('./DB');
 const ErrorCode = require('./ResultCode');
-const Fun = require('../function')
+const Fun = require('../Function')
 
 //DB.Connect();
 

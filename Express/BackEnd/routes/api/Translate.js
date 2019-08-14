@@ -1,5 +1,16 @@
+// translate 관련 API
+
 const startUP = require('../../public/javascripts/Common/StartUP');
 
+/*----------------------------------------------------------*/
+// ImportData
+// 설명 : 리소스 파일을 읽어서 데이터베이스에 추가하는 API함수
+// 입력 : projectid, majorver, minorver, type, language, data
+// 리턴 : result_array
+//       {
+//           resultCode = 0 (성공) or 실패 데이터, count
+//       }
+/*----------------*////////////////////////*----------------*/
 exports.ImportData = async function (req, res)
 {
     //startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
@@ -29,17 +40,20 @@ exports.ImportData = async function (req, res)
                 for (let item of data.Translation.String)
                 {
                     let tag = item._attributes.ID;
-                    let original = item.Original._text;
+                    var original = item.Original._text;
                     let translated = item.Translated._text;
 
-
-
+                    if (original != null)
+                        original = original.replace(/'/gi, "\\'");
+                    
                     var table_string = `transdata_${project_data[0].projectname}_${req.body.type}` + '(`transkey`, `original`, `translation`, `language`, `majorver`, `minorver`)';
-                    value_string += `("${tag}", "${original}", "${translated}", '${req.body.language}', ${req.body.majorver}, ${req.body.minorver}),\n`;
+                    value_string += `('${tag}', '${original}', '${translated}', '${req.body.language}', ${req.body.majorver}, ${req.body.minorver}),\n`;
+
                     count++;
+                
                 }
                 value_string = value_string.substring(0, value_string.length - 2);
-                const query_string = `INSERT INTO ${table_string} VALUES ${value_string}`/* + ` ON DUPLICATE KEY UPDATE original = '${original}', translation = '${translated}'`*/;
+                const query_string = `INSERT INTO ${table_string} VALUES ${value_string}`/*` ON DUPLICATE KEY UPDATE original = '${original}', translation = '${translated}'`*/;
                 try
                 {
                     connection.query(query_string);
@@ -96,6 +110,22 @@ exports.ImportData = async function (req, res)
     connection.dispose();
 };
 
+/*----------------------------------------------------------*/
+// ExportData
+// 설명 : 데이터 베이스의 리소스 데이터를 조회하는 API함수
+// 입력 : projectid, majorver, minorver, type, language
+// 리턴 : result_array
+//       {
+//           resultCode
+//           data :
+//           [
+//               {
+//                  App 일 경우 string(xml)
+//                  Web 일 경우 JsonData
+//               },
+//           ]
+//       }
+/*----------------*////////////////////////*----------------*/
 exports.ExportData = async function (req, res)
 {
     //startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
@@ -173,6 +203,93 @@ exports.ExportData = async function (req, res)
     connection.dispose();
 };
 
+/*----------------------------------------------------------*/
+// SelectData
+// 설명 : 리소스 데이터를 조회 하는 API 함수
+// 입력 : projectid, majorver, minorver, type, language
+// 리턴 : result_array
+//       {
+//            data :
+//           [
+//               {
+//                  App 일 경우
+//                  transid,
+//                  transkey,
+//                  original,
+//                  translation,
+//                  language,
+//                  majorver,
+//                  minorver
+//
+//                  Web 일 경우
+//                  transid,
+//                  tree,
+//                  transkey,
+//                  translation,
+//                  language,
+//                  majorver,
+//                  minorver
+//               },
+//           ]
+//       }
+/*----------------*////////////////////////*----------------*/
+exports.SelectData = async function (req, res)
+{
+    //startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
+    var result_array = Object();
+    result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
+
+    // 필수 값 체크
+    const check = await startUP.CheckBody(req.body, ['projectid', 'majorver', 'minorver', 'type', 'language']);
+    if (check != true)
+    {
+        result_array.resultCode = check;
+        res.send(result_array);
+        startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
+        return;
+    }
+
+    // DB 연결
+    var connection = startUP.DB.sync();
+
+    const project_query = connection.query(`SELECT * FROM project WHERE projectid = ${req.body.projectid}`);
+    if (project_query.length == 0)
+    {
+        result_array.resultCode = 'NOT EXIST PROJECT';
+        res.send(result_array);
+        startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
+        return;
+    }
+
+    const table_string = `transdata_${project_query[0].projectname}_${req.body.type}`;
+    const where_string = `language = '${req.body.language}' AND majorver = '${req.body.majorver} AND minorver ${req.body.minorver}'`
+    const query_string = `SELECT * FROM ${table_string} WHERE ${where_string}`;
+
+    try
+    {
+        var query_result = connection.query(query_string);
+        result_array.data = query_result;
+    }
+    catch (err)
+    {
+        result_array.resultCode = err.code;
+        result_array.errmessage = err.message;
+    }
+        
+
+
+    res.send(result_array);
+    //startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
+
+    connection.dispose();
+};
+
+/*----------------------------------------------------------*/
+// Test
+// 설명 : Echo 테스트 함수
+// 입력 : post 방식의 어떠한 데이터
+// 리턴 : 그대로 send
+/*----------------*////////////////////////*----------------*/
 exports.Test = async function (req, res)
 {
     res.send(JSON.stringify(req.body));

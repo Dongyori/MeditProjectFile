@@ -1,44 +1,16 @@
+// Issue 관련 API
+
 const startUP = require('../../public/javascripts/Common/StartUP');
 
-exports.SelectIssue = async function (req, res)
-{
-    startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
-    var result_array = Object();
-    result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
-
-    const check = await startUP.CheckBody(req.body, ['accountid']);
-    if (check != true)
-    {
-        result_array.resultCode = check;
-        res.send(result_array);
-        return;
-    }
-
-    var connection = startUP.DB.sync();
-
-    const table_string = '`issue` LEFT JOIN `account` ON issue.assignor = account.accountid';
-    const where_string_creat = `\`creator\` = ${req.body.accountid}`;
-    const where_string_assign = `\`assignor\` = ${req.body.accountid}`;
-    const select_string = 'issueid, subject, projectid, creator, assignor, type, priority, description, majorver, minorver, resourcetype, link, status, createtime, starttime, deadline, endtime, reopentime, email';
-    const query_string_creat = `SELECT ${select_string} FROM ${table_string} WHERE ${where_string_creat}`;
-    const query_string_assign = `SELECT ${select_string} FROM ${table_string} WHERE ${where_string_assign}`;
-
-    try
-    {
-        var query_result_creat = connection.query(query_string_creat);
-        var query_result_assign = connection.query(query_string_assign);
-        result_array.data_creat = query_result_creat;
-        result_array.data_assign = query_result_assign;
-    }
-    catch (err)
-    {
-        result_array.resultCode = err.code;
-        result_array.errmessage = err.message;
-    }
-    res.send(result_array);
-    startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
-};
-
+/*----------------------------------------------------------*/
+// CreateIssue
+// 설명 : 이슈를 생성하는 API함수
+// 입력 : subject, projectid, creater, assignor, type, priority, description, majorver, minorver, resourcetype, link 
+// 리턴 : result_array
+//       {
+//           resultCode = 0 (성공) or 실패 데이터
+//       }
+/*----------------*////////////////////////*----------------*/
 exports.CreateIssue = async function (req, res) 
 {
     // 로그
@@ -114,6 +86,86 @@ exports.CreateIssue = async function (req, res)
     startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
 };
 
+/*----------------------------------------------------------*/
+// SelectIssue
+// 설명 : 이슈를 조회하는 API함수
+// 입력 : accountid
+// 리턴 : result_array
+//       {
+//           resultCode
+//           data :
+//           [
+//               {
+//                  subject,
+//                  projectid,
+//                  creater,
+//                  assignor,
+//                  type,
+//                  priority,
+//                  description,
+//                  majorver,
+//                  minorver,
+//                  resourcetype,
+//                  link,
+//                  stasus,
+//                  createTime,
+//                  startTime,
+//                  deadline,
+//                  EndTime,
+//                  reopenTime
+//               },
+//           ]
+//       }
+/*----------------*////////////////////////*----------------*/
+exports.SelectIssue = async function (req, res)
+{
+    startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
+    var result_array = Object();
+    result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
+
+    const check = await startUP.CheckBody(req.body, ['accountid']);
+    if (check != true)
+    {
+        result_array.resultCode = check;
+        res.send(result_array);
+        return;
+    }
+
+    var connection = startUP.DB.sync();
+
+    const table_string = '`issue` LEFT JOIN `account` ON issue.assignor = account.accountid';
+    const where_string_create = `\`creator\` = ${req.body.accountid}`;
+    const where_string_assign = `\`assignor\` = ${req.body.accountid}`;
+    const select_string = 'issueid, subject, projectid, creator, assignor, type, priority, description, majorver, minorver, resourcetype, link, status, createtime, starttime, deadline, endtime, reopentime, email';
+    const query_string_create = `SELECT ${select_string} FROM ${table_string} WHERE ${where_string_create}`;
+    const query_string_assign = `SELECT ${select_string} FROM ${table_string} WHERE ${where_string_assign}`;
+
+    try
+    {
+        var query_result_create = connection.query(query_string_create);
+        var query_result_assign = connection.query(query_string_assign);
+        result_array.data_create = query_result_create;
+        result_array.data_assign = query_result_assign;
+    }
+    catch (err)
+    {
+        result_array.resultCode = err.code;
+        result_array.errmessage = err.message;
+    }
+    res.send(result_array);
+    startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
+};
+
+
+/*----------------------------------------------------------*/
+// UpdateIssue
+// 설명 : 이슈를 수정하는 API함수
+// 입력 : issueid, ...
+// 리턴 : result_array
+//       {
+//           resultCode = 0 (성공) or 실패 데이터
+//       }
+/*----------------*////////////////////////*----------------*/
 exports.UpdateIssue = async function (req, res)
 {
     startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));

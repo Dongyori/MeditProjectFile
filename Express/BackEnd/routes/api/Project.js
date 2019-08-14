@@ -1,5 +1,16 @@
+// project 관련 API
+
 const startUP = require('../../public/javascripts/Common/StartUP');
 
+/*----------------------------------------------------------*/
+// CreateProject
+// 설명 : 프로젝트를 생성하는 API함수
+// 입력 : projectname
+// 리턴 : result_array
+//       {
+//           resultCode = 0 (성공) or 실패 데이터
+//       }
+/*----------------*////////////////////////*----------------*/
 exports.CreateProject = async function (req, res)
 {
     startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
@@ -66,6 +77,22 @@ exports.CreateProject = async function (req, res)
     startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
 };
 
+/*----------------------------------------------------------*/
+// SelectProject
+// 설명 : 프로젝트를 목록을 조회하는 API함수
+// 입력 :
+// 리턴 : result_array
+//       {
+//           resultCode
+//           data :
+//           [
+//               {
+//                  projectid,
+//                  projectname
+//               },
+//           ]
+//       }
+/*----------------*////////////////////////*----------------*/
 exports.SelectProject = async function (req, res)
 {
     startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
@@ -94,6 +121,15 @@ exports.SelectProject = async function (req, res)
     startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
 };
 
+/*----------------------------------------------------------*/
+// DeleteProject
+// 설명 : 프로젝트를 삭제하는 API함수
+// 입력 : projectid
+// 리턴 : result_array
+//      {
+//          resultCode = 0 (성공) or 실패 데이터
+//      }
+/*----------------*////////////////////////*----------------*/
 exports.DeleteProject = async function (req, res)
 {
     startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
@@ -128,6 +164,15 @@ exports.DeleteProject = async function (req, res)
     startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
 };
 
+/*----------------------------------------------------------*/
+// CreateVersion
+// 설명 : 버전을 생성하는 API함수
+// 입력 : projectid, majorver, minorver, language
+// 리턴 : result_array
+//       {
+//           resultCode = 0 (성공) or 실패 데이터
+//       }
+/*----------------*////////////////////////*----------------*/
 exports.CreateVersion = async function (req, res)
 {
     startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
@@ -163,22 +208,51 @@ exports.CreateVersion = async function (req, res)
         result_array.message = err.message;
     }
 
-    res.send(result_array);
+    res.send(result_array);S
     startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
 };
 
-exports.SelecteVersion = async function (req, res)
+/*----------------------------------------------------------*/
+// SelectVersion
+// 설명 : 버전을 조회하는 API함수
+// 입력 : projectid
+// 리턴 : result_array
+//       {
+//           resultCode
+//           data :
+//           [
+//               {
+//                  versionid,
+//                  majorver,
+//                  minorver
+//               },
+//           ]
+//       }
+/*----------------*////////////////////////*----------------*/
+exports.SelectVersion = async function (req, res)
 {
     startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
 
     let result_array = Object();
     result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
 
+    // post로 받은 데이터중 필수로 있어야 하는것 체크
+    const check = await startUP.CheckBody(req.body, ['projectid']);
+    if (check != true)
+    {
+        // resultCode에 응답코드를 남긴다
+        // ResultCode에 정의한 정수값을 사용할지 string자체를 담을지 결정해야함
+        result_array.resultCode = check;
+        res.send(result_array);
+        return;
+    }
+
     // 동기 DB
     const connection = startUP.DB.sync();
 
     const table_string = `project_version`;
-    const query_string = `SELECT * FROM ${table_string}`;
+    const where_string = `projectid = ${req.body.projectid}`;
+    const query_string = `SELECT DISTINCT majorver, minorver FROM ${table_string} WHERE ${where_string}`;
 
     try
     {
@@ -195,6 +269,70 @@ exports.SelecteVersion = async function (req, res)
     startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
 };
 
+/*----------------------------------------------------------*/
+// SelectLanguage
+// 설명 : 버전을 조회하는 API함수
+// 입력 : projectid, majorver, minorver
+// 리턴 : result_array
+//       {
+//           resultCode
+//           data :
+//           [
+//               {
+//                  language
+//               },
+//           ]
+//       }
+/*----------------*////////////////////////*----------------*/
+exports.SelectLanguage = async function (req, res)
+{
+    startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
+
+    let result_array = Object();
+    result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
+
+    // post로 받은 데이터중 필수로 있어야 하는것 체크
+    const check = await startUP.CheckBody(req.body, ['projectid'], ['majorver'], ['minorver']);
+    if (check != true)
+    {
+        // resultCode에 응답코드를 남긴다
+        // ResultCode에 정의한 정수값을 사용할지 string자체를 담을지 결정해야함
+        result_array.resultCode = check;
+        res.send(result_array);
+        return;
+    }
+
+    // 동기 DB
+    const connection = startUP.DB.sync();
+
+    const table_string = `project_version`;
+    const where_string = `projectid = ${req.body.projectid} AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver}`;
+    const query_string = `SELECT language FROM ${table_string} WHERE ${where_string}`;
+
+    try
+    {
+        const query_result = connection.query(query_string);
+        result_array.data = query_result;
+    }
+    catch (err)
+    {
+        result_array.resultCode = err.code;
+        result_array.message = err.message;
+    }
+
+    res.send(result_array);
+    startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
+};
+
+/*----------------------------------------------------------*/
+// DeleteVersion
+// 설명 : 버전을 삭제하는 API함수
+// 입력 : projectid, majorver, minorver, language
+// 리턴 : result_array
+//       {
+//           resultCode = 0 (성공) or 실패 데이터
+//       }
+/*----------------*////////////////////////*----------------*/
 exports.DeleteVersion = async function (req, res)
 {
     startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));

@@ -1,5 +1,16 @@
+// Comment 관련 API
+
 const startUP = require('../../public/javascripts/Common/StartUP');
 
+/*----------------------------------------------------------*/
+// CreateComment
+// 설명 : 댓글을 생성하는 API함수
+// 입력 : accountid, issueid, comment
+// 리턴 : result_array
+//       {
+//           resultCode = 0 (성공) or 실패 데이터
+//       }
+/*----------------*////////////////////////*----------------*/
 exports.CreateComment = async function (req, res)
 {
     startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
@@ -44,6 +55,25 @@ exports.CreateComment = async function (req, res)
     startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
 };
 
+/*----------------------------------------------------------*/
+// SelectComment
+// 설명 : 각 이슈별 댓글을 조회하는 API함수
+// 입력 : issueid
+// 리턴 : result_array
+//       {
+//           resultCode
+//           data :
+//           [
+//               {
+//                  commentid,
+//                  accountid,
+//                  time,
+//                  comment
+//               },
+//               ...
+//           ]
+//       }
+/*----------------*////////////////////////*----------------*/
 exports.SelectComment = async function (req, res)
 {
     startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
@@ -86,6 +116,15 @@ exports.SelectComment = async function (req, res)
     startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
 };
 
+/*----------------------------------------------------------*/
+// UpdateComment
+// 설명 : 댓글을 수정하는 API함수
+// 입력 : commentid, accountid, ...
+// 리턴 : result_array
+//       {
+//           resultCode = 0 (성공) or 실패 데이터
+//       }
+/*----------------*////////////////////////*----------------*/
 exports.UpdateComment = async function (req, res)
 {
     startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
@@ -152,6 +191,15 @@ exports.UpdateComment = async function (req, res)
     startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
 };
 
+/*----------------------------------------------------------*/
+// DeleteComment
+// 설명 : 댓글을 삭제하는 API함수
+// 입력 : commentid, accountid
+// 리턴 : result_array
+//       {
+//           resultCode = 0 (성공) or 실패 데이터
+//       }
+/*----------------*////////////////////////*----------------*/
 exports.DeleteComment = async function (req, res)
 {
     startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
