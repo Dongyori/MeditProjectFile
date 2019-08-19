@@ -5,10 +5,10 @@ import Router from 'vue-router'
 import dashboard from '../views/dashboard'
 
 // Admin Page
-import AdminPage from '../views/AdminPage'
+import adminPage from '../views/adminPage'
 
 // Issue Detail Page (after clicking Issue List)
-import ClickIssueDetail from '../views/ClickIssueDetail'
+import clickIssueDetail from '../views/clickIssueDetail'
 
 // Create Issue Page
 import createIssue from '../views/createIssue'
@@ -155,14 +155,14 @@ export default new Router({
              component: tabs
            },
            {
-             path: '/ClickIssueDetail',
-             name: 'ClickIssueDetail',
-             component: ClickIssueDetail
+             path: '/clickIssueDetail',
+             name: 'clickIssueDetail',
+             component: clickIssueDetail
            },
            {
-             path: '/AdminPage',
-             name: 'AdminPage',
-             component: AdminPage
+             path: '/adminPage',
+             name: 'adminPage',
+             component: adminPage
            },
            {
              path: '/tooltips',

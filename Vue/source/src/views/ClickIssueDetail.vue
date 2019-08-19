@@ -142,14 +142,14 @@
         selectedReference: null,
         text: null,
         currentPage: 1,
-        perPage_resource: 2,
+        perPage_resource: 50,
         currentPage_resource: 1,
         getVersion: {},
         getAccount: {},
         projectcombo: {},
         resourceLists: [],
         resourceFields: [
-          'Original', 'Translation'
+          'original', 'translation'
         ],
         IssueType: [
           { value: 'a', text: 'Bug' },
@@ -198,6 +198,7 @@
       this.SelectProject()
       this.SelectAccount()
       this.SelectVersion()
+      this.SelectResourceData()
       var listItems = JSON.parse(localStorage.getItem('clickedListItem'))
       for (var item in listItems) {
         console.log(item + '\n')
@@ -222,6 +223,19 @@
       ReturnToIssueTable () {
         let routeData = this.$router.resolve({name: 'issueList'})
         window.open(routeData.href, "_self")
+      },
+      SelectResourceData () {
+        axios.post('http://192.168.1.26:1337/translate/select_data',
+                   {'projectid': 1, 'majorver': 2, 'minorver': 1, 'type': 'app', 'language': 'English'})
+          .then(response => {
+            // this.toDoItems = response.data.map(r => r.data)
+            console.log('SelectResourceData')
+            console.log(JSON.stringify(response.data))
+            this.resourceLists = JSON.parse(JSON.stringify(response.data.data))
+          })
+          .catch(e => {
+            console.log('error : ', e)
+          })
       },
       SelectVersion () {
         axios.post('http://192.168.1.26:1337/projectver/select_projectver',
