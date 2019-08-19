@@ -31,21 +31,53 @@ exports.ImportData = async function (req, res)
     {
         case 'app':
             {
-                const xml_js = require('xml-js');
-                const data = await xml_js.xml2js(req.body.data, { compact: true, space: 4 });
+                const parser = require('fast-xml-parser');
+
+                var options = {
+                    attributeNamePrefix: "",
+                    attrNodeName: "attr", //default is 'false'
+                    textNodeName: "#text",
+                    ignoreAttributes: false,
+                    ignoreNameSpace: false,
+                    allowBooleanAttributes: false,
+                    parseNodeValue: true,
+                    parseAttributeValue: false,
+                    trimValues: true,
+                    cdataTagName: "__cdata", //default is 'false'
+                    cdataPositionChar: "\\c",
+                    localeRange: "", //To support non english character in tag/attribute values.
+                    parseTrueNumberOnly: false
+                    //attrValueProcessor: a => he.decode(a, { isAttributeValue: true }),//default is a=>a
+                    //tagValueProcessor: a => he.decode(a) //default is a=>a
+                };
+
+                if (parser.validate(req.body.data) === true)
+                { //optional (it'll return an object in case it's not valid)
+                    var data = parser.parse(req.body.data, options);
+                }
+
+
+                //const xml_js = require('xml-js');
+                //const data = await xml_js.xml2js(req.body.data, { compact: true, space: 4 });
                 const project_data = connection.query(`SELECT * FROM project WHERE projectid = ${req.body.projectid}`);
 
                 let value_string = ''
 
                 for (let item of data.Translation.String)
                 {
-                    let tag = item._attributes.ID;
-                    var original = item.Original._text;
-                    let translated = item.Translated._text;
+                    let tag = item.attr.ID;
+                    var original = item.Original;
+                    let translated = item.Translated;
 
                     if (original != null)
+                    { 
                         original = original.replace(/'/gi, "\\'");
-                    
+                        original = original.replace(/\\n/gi, "\\\\n");
+                    }
+
+                    if (translated != null)
+                        translated = translated.replace(/\\n/gi, "\\\\n");
+
                     var table_string = `transdata_${project_data[0].projectname}_${req.body.type}` + '(`transkey`, `original`, `translation`, `language`, `majorver`, `minorver`)';
                     value_string += `('${tag}', '${original}', '${translated}', '${req.body.language}', ${req.body.majorver}, ${req.body.minorver}),\n`;
 
@@ -155,7 +187,7 @@ exports.ExportData = async function (req, res)
     }
 
     const table_string = `transdata_${project_query[0].projectname}_${req.body.type}`;
-    const where_string = `language = '${req.body.language}' AND majorver = '${req.body.majorver} AND minorver ${req.body.minorver}'`
+    const where_string = `language = '${req.body.language}' AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver}`;
     const query_string = `SELECT * FROM ${table_string} WHERE ${where_string} ORDER BY TRANSID`;
 
     try
@@ -168,16 +200,23 @@ exports.ExportData = async function (req, res)
                 const xw = new xml_writer(true, '\t');
                 xw.startDocument('1.0', 'UTF-8', false);
                 xw.startElement('Translation');
-                xw.writeAttribute('Version', `V${req.body.majorver}.${req.body.minorver}`)
+                //xw.writeAttribute('Version', `V${req.body.majorver}.${req.body.minorver}`);
+                xw.writeAttribute('Version', `V1.0`);
                 for (const item of query_result)
                 {
                     xw.startElement('String');
                     xw.writeAttribute('ID', item.transkey);
                     xw.startElement('Original');
-                    xw.text(`${item.original}`);
+                    if (item.original == 'undefined')
+                        xw.text('');
+                    else
+                        xw.writeRaw(`${item.original}`);
                     xw.endElement();
                     xw.startElement('Translated');
-                    xw.text(`${item.translation}`);
+                    if (item.translation == 'undefined')
+                        xw.text('');
+                    else
+                        xw.writeRaw(`${item.translation}`);
                     xw.endElement();
                     xw.endElement();
                 }
