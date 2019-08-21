@@ -44,6 +44,7 @@ exports.LoginCheck = async function (req, res)
             result_array.data = query_result;
         else
             result_array.resultCode = 'NOT EXIST EMAIL';
+        connection.dispose();
     }
     catch (err)
     {
@@ -157,6 +158,7 @@ exports.SelectAccount = async function (req, res)
         // 동기 쿼리
         var query_result = connection.query(query_string);
         result_array.data = query_result;
+        connection.dispose();
     }
     catch (err)
     {
@@ -185,7 +187,7 @@ exports.UpdateAccount = async function (req, res)
         // 로그 
         startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
         // res로 응답할 내용 초기세팅
-        let result_array = Object();
+        var result_array = Object();
         result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
 
         // post로 받은 데이터중 필수로 있어야 하는것 체크
@@ -225,6 +227,7 @@ exports.UpdateAccount = async function (req, res)
         const query_string = `UPDATE ${table_string} SET ${update_string} WHERE ${where_string}`;
 
         connection.query(query_string);
+        connection.dispose();
     }
     catch (err)
     {
@@ -234,3 +237,19 @@ exports.UpdateAccount = async function (req, res)
     res.send(result_array);
     startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
 };
+
+exports.DeleteAccount = async function (req, res)
+{
+    try
+    {
+        var result_array = Object();
+        result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
+    }
+    catch (err)
+    {
+        result_array.resultCode = err.code;
+        result_array.errmessage = err.message;
+    }
+    res.send(result_array);
+    startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
+}

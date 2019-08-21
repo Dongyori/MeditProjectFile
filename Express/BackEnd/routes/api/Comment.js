@@ -53,6 +53,7 @@ exports.CreateComment = async function (req, res)
     }
     res.send(result_array);
     startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
+    connection.dispose();
 };
 
 /*----------------------------------------------------------*/
@@ -114,6 +115,7 @@ exports.SelectComment = async function (req, res)
     }
     res.send(result_array);
     startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
+    connection.dispose();
 };
 
 /*----------------------------------------------------------*/
@@ -188,6 +190,7 @@ exports.UpdateComment = async function (req, res)
     }
     res.send(result_array);
     startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
+    connection.dispose();
 };
 
 /*----------------------------------------------------------*/
@@ -243,5 +246,6 @@ exports.DeleteComment = async function (req, res)
     }
     res.send(result_array);
     startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
+    connection.dispose();
 };
 

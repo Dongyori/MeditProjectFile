@@ -30,6 +30,8 @@ exports.CreateIssue = async function (req, res)
             return;
         }
 
+        req.body['deadline'] = req.body['deadline'].replace(/\//gi, '-');
+
         // DB 연결
         var connection = startUP.DB.sync();
 
@@ -85,6 +87,7 @@ exports.CreateIssue = async function (req, res)
     }
     res.send(result_array);
     startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
+    connection.dispose();
 };
 
 /*----------------------------------------------------------*/
@@ -156,13 +159,14 @@ exports.SelectIssue = async function (req, res)
     }
     res.send(result_array);
     startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
+    connection.dispose();
 };
 
 
 /*----------------------------------------------------------*/
 // UpdateIssue
 // 설명 : 이슈를 수정하는 API함수
-// 입력 : issueid, ...
+// 입력 : issueid
 // 리턴 : result_array
 //       {
 //           resultCode = 0 (성공) or 실패 데이터
@@ -224,4 +228,133 @@ exports.UpdateIssue = async function (req, res)
     }
     res.send(result_array);
     startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
+    connection.dispose();
+};
+
+
+/*----------------------------------------------------------*/
+// StartIssue
+// 설명 : 이슈를 시작하는 API함수
+// 입력 : issueid
+// 리턴 : result_array
+//       {
+//           resultCode = 0 (성공) or 실패 데이터
+//       }
+/*----------------*////////////////////////*----------------*/
+exports.StartIssue = async function (req, res)
+{
+    try
+    {
+        startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
+        var result_array = Object();
+        result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
+
+        const check = await startUP.CheckBody(req.body, ['issueid']);
+        if (check != true)
+        {
+            result_array.resultCode = check;
+            res.send(result_array);
+            return;
+        }
+        var connection = startUP.DB.sync();
+
+        const table_string = '`issue`';
+        let update_string = '`status` = 1 , `starttime` = CURRENT_TIME()';
+        const where_string = `issueid = ${req.body.issueid}`
+
+        var query_string = `UPDATE ${table_string} SET ${update_string} WHERE ${where_string}`;
+        connection.query(query_string);
+    }
+    catch (err)
+    {
+        result_array.resultCode = err.code;
+        result_array.errmessage = err.message;
+    }
+   
+
+    res.send(result_array);
+};
+
+
+/*----------------------------------------------------------*/
+// resolveIssue
+// 설명 : 이슈를 완료하는 API함수
+// 입력 : issueid
+// 리턴 : result_array
+//       {
+//           resultCode = 0 (성공) or 실패 데이터
+//       }
+/*----------------*////////////////////////*----------------*/
+exports.resolveIssue = async function (req, res)
+{
+    try
+    {
+    startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
+    var result_array = Object();
+    result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
+
+    const check = await startUP.CheckBody(req.body, ['issueid']);
+    if (check != true)
+    {
+        result_array.resultCode = check;
+        res.send(result_array);
+        return;
+    }
+    var connection = startUP.DB.sync();
+
+    const table_string = '`issue`';
+    let update_string = '`status` = 2 , `EndTime` = CURRENT_TIME()';
+    const where_string = `issueid = ${req.body.issueid}`
+
+    var query_string = `UPDATE ${table_string} SET ${update_string} WHERE ${where_string}`;
+    connection.query(query_string);
+    }
+    catch (err)
+    {
+        result_array.resultCode = err.code;
+        result_array.errmessage = err.message;
+    }
+    res.send(result_array);
+};
+
+
+/*----------------------------------------------------------*/
+// reopenIssue
+// 설명 : 이슈를 재시작하는 API함수
+// 입력 : issueid
+// 리턴 : result_array
+//       {
+//           resultCode = 0 (성공) or 실패 데이터
+//       }
+/*----------------*////////////////////////*----------------*/
+exports.reopenIssue = async function (req, res)
+{
+    try
+    {
+    startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
+    var result_array = Object();
+    result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
+
+    const check = await startUP.CheckBody(req.body, ['issueid']);
+    if (check != true)
+    {
+        result_array.resultCode = check;
+        res.send(result_array);
+        return;
+    }
+    var connection = startUP.DB.sync();
+
+    const table_string = '`issue`';
+    let update_string = '`status` = 3 , `reopenTime` = CURRENT_TIME()';
+    const where_string = `issueid = ${req.body.issueid}`
+
+    var query_string = `UPDATE ${table_string} SET ${update_string} WHERE ${where_string}`;
+    connection.query(query_string);
+     }
+    catch (err)
+    {
+        result_array.resultCode = err.code;
+        result_array.errmessage = err.message;
+    }
+    res.send(result_array);
 };

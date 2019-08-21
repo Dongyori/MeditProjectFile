@@ -45,6 +45,9 @@ router.post('/projectlang/select_projectlang', project.SelectLanguage);
 router.post('/issue/create_issue', issue.CreateIssue);
 router.post('/issue/select_issue', issue.SelectIssue);
 router.post('/issue/update_issue', issue.UpdateIssue);
+router.post('/issue/start_issue', issue.StartIssue);
+router.post('/issue/resolve_issue', issue.resolveIssue);
+router.post('/issue/reopen_issue', issue.reopenIssue);
 
 router.post('/issue/comment/create_comment', comment.CreateComment);
 router.post('/issue/comment/select_comment', comment.SelectComment);
@@ -54,6 +57,8 @@ router.post('/issue/comment/delete_comment', comment.DeleteComment);
 router.post('/translate/import_data', translate.ImportData);
 router.post('/translate/export_data', translate.ExportData);
 router.post('/translate/select_data', translate.SelectData);
+router.post('/translate/add_data', translate.AddData);
+router.post('/translate/update_data', translate.UpdateData);
 
 router.get('/logview', async function (req, res)
 {

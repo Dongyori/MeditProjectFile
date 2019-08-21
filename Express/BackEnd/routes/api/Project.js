@@ -68,6 +68,7 @@ exports.CreateProject = async function (req, res)
         // auto increment 값 가져오기 (projectid)
         const result_ai = connection.query("SELECT LAST_INSERT_ID() AS AI");
         result_array.projectid = result_ai[0].AI;
+        connection.dispose();
     }
     catch (err)
     {
@@ -112,6 +113,7 @@ exports.SelectProject = async function (req, res)
 
         var query_result = connection.query(query_string);
         result_array.data = query_result;
+        connection.dispose();
     }
     catch (err)
     {
@@ -156,6 +158,7 @@ exports.DeleteProject = async function (req, res)
 
 
         connection.query(query_string);
+        connection.dispose();
     }
     catch (err)
     {
@@ -185,7 +188,7 @@ exports.CreateVersion = async function (req, res)
         startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
 
         // post로 받은 데이터중 필수로 있어야 하는것 체크
-        const check = await startUP.CheckBody(req.body, ['projectid', 'majorver', 'minorver', 'language']);
+        const check = await startUP.CheckBody(req.body, ['projectid', 'majorver', 'minorver', 'language', 'resourcetype']);
         if (check != true)
         {
             // resultCode에 응답코드를 남긴다
@@ -198,12 +201,13 @@ exports.CreateVersion = async function (req, res)
         // 동기 DB
         const connection = startUP.DB.sync();
 
-        const table_string = `project_version(\`projectid\`, \`majorver\`, \`minorver\`, \`language\`)`;
-        const value_string = `(${req.body.projectid}, ${req.body.majorver}, ${req.body.minorver}, '${req.body.language}')`;
+        const table_string = `project_version(\`projectid\`, \`majorver\`, \`minorver\`, \`language\`, \`resourcetype\`)`;
+        const value_string = `(${req.body.projectid}, ${req.body.majorver}, ${req.body.minorver}, '${req.body.language}', '${req.body.resourcetype}')`;
         const query_string = `INSERT INTO ${table_string} VALUES ${value_string}`;
 
 
         connection.query(query_string);
+        connection.dispose();
     }
     catch (err)
     {
@@ -211,7 +215,7 @@ exports.CreateVersion = async function (req, res)
         result_array.message = err.message;
     }
 
-    res.send(result_array); S
+    res.send(result_array);
     startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
 };
 
@@ -258,13 +262,14 @@ exports.SelectVersion = async function (req, res)
         const table_string = `project_version JOIN project ON project_version.projectid = project.projectid`;
         const where_string = `project_version.projectid = ${req.body.projectid}`;
         const query_string = `SELECT DISTINCT majorver, minorver FROM ${table_string} WHERE ${where_string}`;
-        const query_string2 = `SELECT * FROM ${table_string} WHERE ${where_string}`;
+        const query_string2 = `SELECT * FROM ${table_string}`;
 
 
         const query_result = connection.query(query_string);
         const query_result2 = connection.query(query_string2);
         result_array.data = query_result;
         result_array.data2 = query_result2;
+        connection.dispose();
     }
     catch (err)
     {
@@ -321,6 +326,7 @@ exports.SelectLanguage = async function (req, res)
 
         const query_result = connection.query(query_string);
         result_array.data = query_result;
+        connection.dispose();
     }
     catch (err)
     {
@@ -370,6 +376,7 @@ exports.DeleteVersion = async function (req, res)
 
 
         connection.query(query_string);
+        connection.dispose();
     }
     catch (err)
     {
