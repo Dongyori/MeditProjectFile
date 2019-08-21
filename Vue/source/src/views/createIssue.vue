@@ -50,15 +50,16 @@
                       <b-form-file class="Attachment" v-model="file" id="inpu2" :state="Boolean(file)" placeholder="Choose a file....." @change="processFile($event)"></b-form-file>
                     </b-form-group> -->
                       <b-form-group horizontal label="Reference">
-                        <b-form-select v-model="selectedReference">
+                        <!-- <b-form-select v-model="selectedReference">
                           <option v-for="p in getAccount" :key="p.accountid" v-bind:value="p.accountid">{{p.email}}</option>
-                        </b-form-select>
+                        </b-form-select> -->
+                        <multiselect v-model="selectedReference" :options="getAccount" :multiple="true" placeholder="Type to search" track-by="email" label="email"><span slot="noResult">Oops! No elements found. Consider changing the search query.</span></multiselect>
                       </b-form-group>
                       <b-form-group horizontal label="Link">
                         <input data-v-7ea22626="" data-v-a65342b6="" id="input1" v-model="selectedLink" type="text" placeholder="URL.." class="form-control">
                       </b-form-group>
                       <b-form-group horizontal label="Deadline">
-                        <datepicker id="datepicker" v-model="selectedDeadline" placeholder="Select Date" class="form-control"></datepicker>
+                        <datepicker id="datepicker" v-model="selectedDeadline" placeholder="Select Date" class="form-control" format="yyyy-MM-dd"></datepicker>
                       </b-form-group>
                       <b-button type="button" variant="success" class="mr-2" v-on:click="CreateIssue()" style="margin-left: 31%">Create</b-button>
                       <b-button variant="light" class="mr-2">Cancel</b-button>
@@ -74,17 +75,6 @@
                     <h5 data-v-19c9d02c="" class="card-title mb-4">Resource Edit</h5>
                     <div class="table-responsive">
                       <b-table id="resourceTable" stripped hover :items="resourceLists" :fields="resourceFields" :per-page="perPage_resource" :current-page="currentPage_resource" @row-clicked="clickList()">
-                        <!-- <template slot="status" slot-scope="row">
-                        <div v-if="row.value === 0">
-                          <b-badge variant="outline-danger">Waiting</b-badge>
-                        </div>
-                        <div v-else-if="row.value === 1">
-                          <b-badge variant="outline-warning">In Progress</b-badge>
-                        </div>
-                        <div v-else-if="row.value === 2">
-                          <b-badge variant="outline-success">Resolved</b-badge>
-                        </div>
-                      </template> -->
                       </b-table>
                     </div>
                     <div class="col-6 grid-margin" style="margin-left:550px; margin-top:50px;">
@@ -96,13 +86,13 @@
                       </div>
                     </div>
                   </div>
-                  <div class="row" style="margin-left:350px;">
+                  <!-- <div class="row" style="margin-left:350px;">
                     <i class="mdi mdi-account-search"></i>
                     <input data-v-a65342b6="" id="input1" type="text" placeholder="Search" class="col-4 mr-2 form-control">
                     <button data-v-35f42b37="" type="button" class="col-1 btn btn-fw btn-inverse-light btn-secondary mr-5">Search</button>
                     <button data-v-186e931c="" type="submit" class="btn mr-3 btn-success">Succes</button>
                     <button data-v-186e931c="" type="button" class="btn btn-light">Cancel</button>
-                  </div>
+                  </div> -->
                 </div>
               </b-tab>
             </b-tabs>
@@ -113,19 +103,23 @@
   </section>
 </template>
 
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
+
 <script lang="js">
   import Datepicker from 'vuejs-datepicker'
   import * as lang from "vuejs-datepicker/src/locale"
   import axios from 'axios'
+  import commonVariable from '../javascript/common.js'
+  import Multiselect from 'vue-multiselect'
 
   const state = {
     date1: new Date()
   }
   export default {
-
     name: 'tabs',
     components: {
-      Datepicker
+      Datepicker,
+      Multiselect
     },
     computed: {
       rows () {
@@ -134,6 +128,16 @@
     },
     data () {
       return {
+        value: [],
+        options: [
+          {
+            language: 'Javascript',
+            libs: [
+              { name: 'Vue.js', category: 'Front-end' },
+              { name: 'Adonis', category: 'Backend' }
+            ]
+          }
+        ],
         Priority: [
           { value: '0', text: 'Lowest' },
           { value: '1', text: 'Middle' },
@@ -145,11 +149,11 @@
           // { value: '1', text: 'Contents' }
         ],
         ResourceType: [
-          { value: '0', text: 'app' },
-          { value: '1', text: 'Web' }
+          { value: 'app', text: 'app' },
+          { value: 'web', text: 'Web' }
         ],
         resourceFields: [
-          'original', 'translation'
+          'original'
         ],
         issueSubject: null,
         issueDescription: null,
@@ -160,14 +164,14 @@
         selectedPriority: null,
         selectedVersion: null,
         selectedLanguage: null,
-        selectedReference: null,
+        selectedReference: [],
         selectedLink: null,
         selectedDeadline: null,
         text: null,
         resourceLists: [],
         getVersion: {},
         getLanguage: {},
-        getAccount: {},
+        getAccount: [],
         projectcombo: {},
         file: null,
         isFileSelected: false,
@@ -203,22 +207,32 @@
       this.SelectAccount()
     },
     methods: {
+      // ShowSelectedReference () {
+      //   console.log(this.selectedReference)
+      // },
       SelectResourceData () {
         var selectedVersion = this.selectedVersion.split('.')
-        axios.post('http://192.168.1.26:1337/translate/select_data',
-                   {'projectid': this.selectedProject, 'majorver': selectedVersion[0], 'minorver': selectedVersion[1], 'type': this.selectedResourceType, 'language': this.selectedLanguage})
+        var request = {'projectid': this.selectedProject, 'majorver': selectedVersion[0], 'minorver': selectedVersion[1], 'type': this.selectedResourceType, 'language': this.selectedLanguage}
+        console.log(request)
+        axios.post(commonVariable.ipAddress + 'translate/select_data', request)
           .then(response => {
             // this.toDoItems = response.data.map(r => r.data)
             console.log('SelectResourceData')
             console.log(JSON.stringify(response.data))
             this.resourceLists = JSON.parse(JSON.stringify(response.data.data))
+            if (this.selectedResourceType === 'web'){
+              for (var num in this.resourceLists) {
+                this.resourceLists[num].original = this.resourceLists[num].translation
+                this.resourceLists[num].translation = ""
+              }
+            }
           })
           .catch(e => {
             console.log('error : ', e)
           })
       },
       SelectVersion () {
-        axios.post('http://192.168.1.26:1337/projectver/select_projectver',
+        axios.post(commonVariable.ipAddress + 'projectver/select_projectver',
                    {'projectid': this.selectedProject})
           .then(response => {
             // this.toDoItems = response.data.map(r => r.data)
@@ -231,7 +245,7 @@
       },
       SelectLanguage () {
         var selectedVersion = this.selectedVersion.split('.')
-        axios.post('http://192.168.1.26:1337/projectlang/select_projectlang',
+        axios.post(commonVariable.ipAddress + 'projectlang/select_projectlang',
                    {'projectid': this.selectedProject, 'majorver': selectedVersion[0], 'minorver': selectedVersion[1]})
           .then(response => {
             // this.toDoItems = response.data.map(r => r.data)
@@ -243,11 +257,12 @@
           })
       },
       SelectAccount () {
-        axios.post('http://192.168.1.26:1337/account/select_account',
+        axios.post(commonVariable.ipAddress + 'account/select_account',
                    {'request': 'SelectPName'})
           .then(response => {
             // this.pageArray = JSON.stringify(response.data.data)
             this.getAccount = JSON.parse(JSON.stringify(response.data.data))
+            this.options = JSON.parse(JSON.stringify(response.data.data))
             console.log(this.getAccount)
             // this.pageArray = JSON.parse(JSON.stringify(response.data.data))
           })
@@ -256,7 +271,7 @@
           })
       },
       SelectProject () {
-        axios.post('http://192.168.1.26:1337/project/select_project',
+        axios.post(commonVariable.ipAddress + 'project/select_project',
                    {'request': 'SelectPName'})
           .then(response => {
             // this.toDoItems = response.data.map(r => r.data)
@@ -272,18 +287,21 @@
         var selectedVersion = this.selectedVersion.split('.')
         var accountid = localStorage.getItem('accountid')
         var responseFromServer = null
-        console.log(this.selectedDeadline)
+        // console.log(this.selectedDeadline)
+        this.selectedDeadline = document.getElementById('datepicker').value
         // selectedReference도 추가되어야 함.
         if (accountid === null || this.issueSubject === null || this.selectedAssignor === null || this.selectedPriority === null || this.selectedType === null || selectedVersion[0] === null || selectedVersion[1] === null || this.selectedResourceType === null || this.selectedLink === null || this.selectedDeadline === null) {
           alert("항목을 모두 선택해주세요.")
           return
         }
-        axios.post('http://192.168.1.26:1337/issue/create_issue',
-                   {'email': accountid, 'subject': this.issueSubject, 'assignor': this.selectedAssignor, 'projectid': this.selectedProject, 'type': this.selectedType, 'majorver': selectedVersion[0], 'minorver': selectedVersion[1], 'resourcetype': this.selectedResourceType, 'link': this.selectedLink, 'description': this.issueDescription, 'priority': this.selectedPriority, 'accountid': accountid})
+        var request = {'email': accountid, 'subject': this.issueSubject, 'assignor': this.selectedAssignor, 'projectid': this.selectedProject, 'type': this.selectedType, 'majorver': selectedVersion[0], 'minorver': selectedVersion[1], 'resourcetype': this.selectedResourceType, 'link': this.selectedLink, 'description': this.issueDescription, 'priority': this.selectedPriority, 'accountid': accountid, 'deadline': this.selectedDeadline, 'language': this.selectedLanguage}
+        axios.post(commonVariable.ipAddress + 'issue/create_issue', request)
           .then(response => {
             responseFromServer = response.data
             if (responseFromServer.resultCode === 0) {
               alert("Issue가 등록되었습니다.")
+              let routeData = this.$router.resolve({name: 'issueList'})
+              window.open(routeData.href, "_self")
             }
           })
           .catch(e => {
@@ -304,6 +322,7 @@
           document.getElementById('Version').style.color = "black"
           document.getElementById('ResourceType').style.color = "black"
           document.getElementById('Language').style.color = "black"
+          this.SelectResourceData()
         }
       },
       highlightTo (val) {
@@ -380,7 +399,9 @@
   }
   $(document).ready(function (){
     $($(".autoTab").find("li")[1]).hide()
-    $('#datepicker').css({'border': '1px solid white'})
+    // $('#datepicker').css({'border': '1px solid white;', 'top': '-282px'})
+    $('datepicker').css({'border': '1px solid white'})
+    $('.vdp-datepicker__calendar').css({'top': '-282px'})
   })
 
 </script>

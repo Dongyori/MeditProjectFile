@@ -47,7 +47,7 @@
     methods: {
       deleteAccountData () {
         localStorage.removeItem('email')
-        window.open("http://localhost:8080/", "_self")
+        window.open("/", "_self")
       },
       GetAccountData () {
         this.userEmail = localStorage.getItem('email')

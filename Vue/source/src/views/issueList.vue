@@ -10,11 +10,11 @@
                   <div class="row mb-5">
                     <button data-v-35f42b37="" type="button" class="col-1 btn btn-fw btn-inverse-light btn-secondary" value="0" @click="ChangeIssueType">All</button>
                     <button data-v-35f42b37="" type="button" class="col-1 btn btn-fw btn-inverse-light btn-secondary" value="1" @click="ChangeIssueType">Waiting</button>
-                    <button data-v-35f42b37="" type="button" class="col-1 btn btn-fw btn-inverse-light btn-secondary" value="2" @click="ChangeIssueType">In Progress</button>
+                    <button data-v-35f42b37="" type="button" class="btn btn-fw btn-inverse-light btn-secondary" value="2" @click="ChangeIssueType">In Progress</button>
                     <button data-v-35f42b37="" type="button" class="col-1 mr-5 btn btn-fw btn-inverse-light btn-secondary" value="3" @click="ChangeIssueType">Resolved</button>
                     <i class="mdi mdi-account-search"></i>
-                    <input data-v-a65342b6="" id="SearchIssue" type="text" placeholder="Search" class="col-2 mr-2 form-control">
-                    <button data-v-35f42b37="" type="button" class="col-1 mr-5 btn btn-fw btn-inverse-light btn-secondary" value="createdIssue" @click="SelectIssueSearch">Search</button>
+                    <input data-v-a65342b6="" id="SearchIssue" type="text" placeholder="Search" class="col-2 mr-1 form-control">
+                    <button data-v-35f42b37="" type="button" class="col-1 mr-2 btn btn-fw btn-inverse-light btn-secondary" value="createdIssue" @click="SelectIssueSearch">Search</button>
                   </div>
                   <div class="table-responsive" >
                     <b-table id="createdIssueTable" stripped hover :items="createdIssueArray" :fields="fields" :per-page="perPage_created" :current-page="currentPage_created" @row-clicked="onRowClicked" style="cursor:pointer">
@@ -46,7 +46,7 @@
 </template>
                     </b-table>
                   </div>
-                  <div class="col-6 grid-margin" style="margin-left:30%;">
+                  <div class="col-5 grid-margin" style="margin-left:35%;">
                     <div class="card">
                       <div class="card-body">
                         <b-pagination :total-rows="createdIssueRows" v-model="currentPage_created" :per-page="perPage_created" @change="processFile($event)" aira-controls="createdIssueTable">
@@ -117,6 +117,8 @@
 
 <script lang="js">
   import axios from 'axios'
+  import commonVariable from '../javascript/common.js'
+
   export default {
     name: 'tabs',
     data () {
@@ -195,13 +197,16 @@
       SelectIssue () {
         var accountid = localStorage.getItem('accountid')
         console.log('accountid ' + localStorage.getItem('accountid'))
-        axios.post('http://192.168.1.26:1337/issue/select_issue',
+        axios.post(commonVariable.ipAddress + 'issue/select_issue',
                    {'accountid': accountid})
           .then(response => {
             if (accountid === '1'){
               this.createdIssueArrayAll = JSON.parse(JSON.stringify(response.data.data_create))
               for (var issueNum in this.createdIssueArrayAll){
                 this.createdIssueArrayAll[issueNum].version = this.createdIssueArrayAll[issueNum].majorver + '.' + this.createdIssueArrayAll[issueNum].minorver
+                if (this.createdIssueArrayAll[issueNum].deadline !== null){
+                  this.createdIssueArrayAll[issueNum].deadline = this.createdIssueArrayAll[issueNum].deadline.split('T')[0]
+                }
                 this.createdIssueArray.push(this.createdIssueArrayAll[issueNum])
               }
             }

@@ -106,11 +106,13 @@
 
 <script lang="js">
   import axios from 'axios'
+  import commonVariable from '../javascript/common.js'
 
   export default {
     name: 'dashboard',
     data () {
       return {
+        DeadLine: null,
         createdIssueArray: {},
         assignedIssueArray: {},
         CheckAdmin: false
@@ -130,11 +132,16 @@
       SelectIssue () {
         var accountid = localStorage.getItem('accountid')
         console.log('accountid ' + localStorage.getItem('accountid'))
-        axios.post('http://192.168.1.26:1337/issue/select_issue',
+        axios.post(commonVariable.ipAddress + 'issue/select_issue',
                    {'accountid': accountid})
           .then(response => {
             // this.toDoItems = response.data.map(r => r.data)
             this.createdIssueArray = JSON.parse(JSON.stringify(response.data.data_create))
+            for (var num in this.createdIssueArray){
+              if (this.createdIssueArray[num].deadline !== null){
+                this.createdIssueArray[num].deadline = this.createdIssueArray[num].deadline.split('T')[0]
+              }
+            }
             this.assignedIssueArray = JSON.parse(JSON.stringify(response.data.data_assign))
             // this.issueArray = JSON.stringify(response.data.data)
             console.log(this.issueArray)

@@ -6,18 +6,15 @@
           <div class="mt-5 auth-form-medit text-left p-5">
             <h1 style="vertical-align: center; font-size: 80px;">Medit</h1>
             <h3>Login</h3>
-            <!-- <h4 class="font-weight-light">Hello! let's get started</h4> -->
             <form class="pt-5">
               <form>
                 <div class="form-group">
                   <label for="exampleInputEmail1">Username</label>
                   <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Username">
-                  <!-- <i class="mdi mdi-account"></i> -->
                 </div>
                 <div class="form-group">
                   <label for="exampleInputPassword1">Password</label>
                   <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password" @keyup.enter="LoginCheck()">
-                  <!-- <i class="mdi mdi-eye"></i> -->
                 </div>
                 <div class="mt-5">
                   <a class="btn btn-block btn-warning btn-lg font-weight-medium" @click="LoginCheck()">Login</a>
@@ -37,7 +34,7 @@
 
 <script lang="js">
   import axios from 'axios'
-  // import localforage from 'localforage'
+  import commonVariable from '../../javascript/common.js'
 
   export default {
     name: 'login',
@@ -51,8 +48,8 @@
       LoginCheck () {
         var email = document.getElementById('exampleInputEmail1').value
         var pw = document.getElementById('exampleInputPassword1').value
-        axios.post('http://192.168.1.26:1337/login',
-                   {'email': email, 'password': pw})
+        var request = {'email': email, 'password': pw}
+        axios.post(commonVariable.ipAddress + 'login', request)
           .then(response => {
             this.responseFromServer = response.data
             // alert(JSON.stringify(response.data))
@@ -61,15 +58,9 @@
             if (this.responseFromServer.resultCode === 0){
               this.accountData.email = email
               this.accountData.pw = pw
-              // this.SaveAccountData()
               localStorage.setItem('email', email)
               localStorage.setItem('accountid', this.responseFromServer.data[0].accountid)
-              // alert(this.responseFromServer.data[0].accountid + ' accountid ' + localStorage.getItem('accountid'))
               this.MoveToDashboard()
-              // localforage.setItem('email', email).then(this.MoveToDashboard()).catch(function (err) {
-              //   // This code runs if there were any errors
-              //   console.log(err)
-              // })
             }
           })
           .catch(e => {
