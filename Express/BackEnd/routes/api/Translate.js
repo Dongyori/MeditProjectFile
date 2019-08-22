@@ -60,6 +60,7 @@ exports.ImportData = async function (req, res)
                 //const xml_js = require('xml-js');
                 //const data = await xml_js.xml2js(req.body.data, { compact: true, space: 4 });
                 const project_data = connection.query(`SELECT * FROM project WHERE projectid = ${req.body.projectid}`);
+                var projectname = project_data[0].projectname.replace(/ /gi, '_');
 
                 let value_string = ''
 
@@ -78,7 +79,7 @@ exports.ImportData = async function (req, res)
                     if (translated != null)
                         translated = translated.replace(/\\n/gi, "\\\\n");
 
-                    var table_string = `transdata_${project_data[0].projectname}_${req.body.type}` + '(`transkey`, `original`, `translation`, `language`, `majorver`, `minorver`)';
+                    var table_string = `transdata_${projectname}_${req.body.type}` + '(`transkey`, `original`, `translation`, `language`, `majorver`, `minorver`)';
                     value_string += `('${tag}', '${original}', '${translated}', '${req.body.language}', ${req.body.majorver}, ${req.body.minorver}),\n`;
 
                     count++;
@@ -94,7 +95,7 @@ exports.ImportData = async function (req, res)
                 {
                     if (err.code == 'ER_NO_SUCH_TABLE')
                     {
-                        connection.query(`CREATE TABLE transdata_${project_data[0].projectname}_${req.body.type} LIKE transdata_app_template`);
+                        connection.query(`CREATE TABLE transdata_${projectname}_${req.body.type} LIKE transdata_app_template`);
                         connection.query(query_string);
                     }
                     else
@@ -107,9 +108,10 @@ exports.ImportData = async function (req, res)
             }
         case 'web':
             {
-               const project_data = connection.query(`SELECT * FROM project WHERE projectid = ${req.body.projectid}`);
+                const project_data = connection.query(`SELECT * FROM project WHERE projectid = ${req.body.projectid}`);
+                var projectname = project_data[0].projectname.replace(/ /gi, '_');
 
-                const table_string = `transdata_${project_data[0].projectname}_${req.body.type}(tree, transkey, translation, language, majorver, minorver)`;
+                const table_string = `transdata_${projectname}_${req.body.type}(tree, transkey, translation, language, majorver, minorver)`;
                 if (typeof (req.body.data) != 'object')
                 {
                     const index = req.body.data.IndexOF('=');
@@ -129,7 +131,7 @@ exports.ImportData = async function (req, res)
                 {
                     if (err.code == 'ER_NO_SUCH_TABLE')
                     {
-                        connection.query(`CREATE TABLE transdata_${project_data[0].projectname}_${req.body.type} LIKE transdata_web_template`);
+                        connection.query(`CREATE TABLE transdata_${projectname}_${req.body.type} LIKE transdata_web_template`);
                         connection.query(query_string);
                     }
                     else
@@ -299,16 +301,17 @@ exports.SelectData = async function (req, res)
         // DB 연결
         var connection = startUP.Connection;
 
-        const project_query = connection.query(`SELECT * FROM project WHERE projectid = ${req.body.projectid}`);
-        if (project_query.length == 0)
+        const project_data = connection.query(`SELECT * FROM project WHERE projectid = ${req.body.projectid}`);
+        if (project_data.length == 0)
         {
             result_array.resultCode = 'NOT EXIST PROJECT';
             res.send(result_array);
             startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
             return;
         }
+        var projectname = project_data[0].projectname.replace(/ /gi, '_');
 
-        const table_string = `transdata_${project_query[0].projectname}_${req.body.type}`;
+        const table_string = `transdata_${projectname}_${req.body.type}`;
         const where_string = `language = '${req.body.language}' AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver}`;
         const query_string = `SELECT * FROM ${table_string} WHERE ${where_string}`;
 

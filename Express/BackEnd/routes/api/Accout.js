@@ -36,14 +36,22 @@ exports.LoginCheck = async function (req, res)
         // 동기 DB
         const connection = startUP.Connection;
 
-        const query_string = `SELECT accountid, email, position FROM account WHERE email = '${req.body.email}' AND password = '${req.body.password}'`;
+        const query_string = `SELECT accountid, email, position, password FROM account WHERE email = '${req.body.email}'`;
 
-    // 동기 쿼리
+        // 동기 쿼리
         var query_result = connection.query(query_string);
-        if (query_result.length != 0)
-            result_array.data = query_result;
+        if (query_result.length == 0)
+            result_array.resultCode = 'EMAIL ERROR';
         else
-            result_array.resultCode = 'NOT EXIST EMAIL';
+        {
+            if (query_result[0].password != req.body.password)
+                result_array.resultCode = 'PASSWORD ERROR';
+            else
+            {
+                query_result[0].password = null;
+                result_array.data = query_result;
+            }
+        }
     }
     catch (err)
     {

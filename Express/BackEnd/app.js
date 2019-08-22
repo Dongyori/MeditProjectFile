@@ -1,5 +1,5 @@
 ﻿'use strict';
-var debug = require('debug');
+//var debug = require('debug');
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
@@ -64,5 +64,5 @@ app.use(function (err, req, res, next) {
 app.set('port', process.env.PORT || 1337);
 
 var server = app.listen(app.get('port'), function () {
-    debug('Express server listening on port ' + server.address().port);
+    //debug('Express server listening on port ' + server.address().port);
 });

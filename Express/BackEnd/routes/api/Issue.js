@@ -65,7 +65,10 @@ exports.CreateIssue = async function (req, res)
                 if (column.Type == 'int(11)')
                     value_string += `, ${req.body[column.Field]}`;
                 else
+                {
+                    req.body[column.Field] = req.body[column.Field].replace(/'/gi, "''");
                     value_string += `, '${req.body[column.Field]}'`;
+                }
             }
         }
         // 쿼리 마지막
@@ -142,8 +145,8 @@ exports.SelectIssue = async function (req, res)
         const where_string_create = `\`creator\` = ${req.body.accountid}`;
         const where_string_assign = `\`assignor\` = ${req.body.accountid}`;
         const select_string = 'issueid, subject, projectid, creator, assignor, type, priority, description, majorver, minorver, language, resourcetype, link, status, createtime, starttime, deadline, endtime, reopentime, email';
-        const query_string_create = `SELECT ${select_string} FROM ${table_string} WHERE ${where_string_create}`;
-        const query_string_assign = `SELECT ${select_string} FROM ${table_string} WHERE ${where_string_assign}`;
+        const query_string_create = `SELECT ${select_string} FROM ${table_string} WHERE ${where_string_create} ORDER BY issueid DESC`;
+        const query_string_assign = `SELECT ${select_string} FROM ${table_string} WHERE ${where_string_assign} ORDER BY deadline`;
 
 
         var query_result_create = connection.query(query_string_create);
