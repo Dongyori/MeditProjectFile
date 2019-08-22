@@ -32,7 +32,7 @@ exports.CreateProject = async function (req, res)
         }
 
         // 동기 DB
-        const connection = startUP.DB.sync();
+        const connection = startUP.Connection;
 
         const columns = connection.query("show full columns from `project`");
 
@@ -68,7 +68,6 @@ exports.CreateProject = async function (req, res)
         // auto increment 값 가져오기 (projectid)
         const result_ai = connection.query("SELECT LAST_INSERT_ID() AS AI");
         result_array.projectid = result_ai[0].AI;
-        connection.dispose();
     }
     catch (err)
     {
@@ -105,7 +104,7 @@ exports.SelectProject = async function (req, res)
         startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
 
         // 동기 DB
-        const connection = startUP.DB.sync();
+        const connection = startUP.Connection;
 
         const table_string = 'project';
         const query_string = `SELECT * FROM ${table_string}`;
@@ -113,7 +112,6 @@ exports.SelectProject = async function (req, res)
 
         var query_result = connection.query(query_string);
         result_array.data = query_result;
-        connection.dispose();
     }
     catch (err)
     {
@@ -152,13 +150,12 @@ exports.DeleteProject = async function (req, res)
         }
 
         // 동기 DB
-        const connection = startUP.DB.sync();
+        const connection = startUP.Connection;
 
         const query_string = `DELETE FROM project WHERE projectid = ${req.body.projectid}`;
 
 
         connection.query(query_string);
-        connection.dispose();
     }
     catch (err)
     {
@@ -199,7 +196,7 @@ exports.CreateVersion = async function (req, res)
         }
 
         // 동기 DB
-        const connection = startUP.DB.sync();
+        const connection = startUP.Connection;
 
         const table_string = `project_version(\`projectid\`, \`majorver\`, \`minorver\`, \`language\`, \`resourcetype\`)`;
         const value_string = `(${req.body.projectid}, ${req.body.majorver}, ${req.body.minorver}, '${req.body.language}', '${req.body.resourcetype}')`;
@@ -207,7 +204,6 @@ exports.CreateVersion = async function (req, res)
 
 
         connection.query(query_string);
-        connection.dispose();
     }
     catch (err)
     {
@@ -257,7 +253,7 @@ exports.SelectVersion = async function (req, res)
         }
 
         // 동기 DB
-        const connection = startUP.DB.sync();
+        const connection = startUP.Connection;
 
         const table_string = `project_version JOIN project ON project_version.projectid = project.projectid`;
         const where_string = `project_version.projectid = ${req.body.projectid}`;
@@ -269,7 +265,6 @@ exports.SelectVersion = async function (req, res)
         const query_result2 = connection.query(query_string2);
         result_array.data = query_result;
         result_array.data2 = query_result2;
-        connection.dispose();
     }
     catch (err)
     {
@@ -317,7 +312,7 @@ exports.SelectLanguage = async function (req, res)
         }
 
         // 동기 DB
-        const connection = startUP.DB.sync();
+        const connection = startUP.Connection;
 
         const table_string = `project_version`;
         const where_string = `projectid = ${req.body.projectid} AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver}`;
@@ -326,7 +321,6 @@ exports.SelectLanguage = async function (req, res)
 
         const query_result = connection.query(query_string);
         result_array.data = query_result;
-        connection.dispose();
     }
     catch (err)
     {
@@ -368,7 +362,7 @@ exports.DeleteVersion = async function (req, res)
         }
 
         // 동기 DB
-        const connection = startUP.DB.sync();
+        const connection = startUP.Connection;
 
         const table_string = `project_version`;
         const where_string = `projectid = ${req.body.projectid} AND majorver = ${req.body.majorver} AND minorver = ${$req.body.minorver} AND language ;${req.body.language}'`;
@@ -376,7 +370,6 @@ exports.DeleteVersion = async function (req, res)
 
 
         connection.query(query_string);
-        connection.dispose();
     }
     catch (err)
     {

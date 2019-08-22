@@ -34,7 +34,7 @@ exports.LoginCheck = async function (req, res)
         }
 
         // 동기 DB
-        const connection = startUP.DB.sync();
+        const connection = startUP.Connection;
 
         const query_string = `SELECT accountid, email, position FROM account WHERE email = '${req.body.email}' AND password = '${req.body.password}'`;
 
@@ -44,7 +44,6 @@ exports.LoginCheck = async function (req, res)
             result_array.data = query_result;
         else
             result_array.resultCode = 'NOT EXIST EMAIL';
-        connection.dispose();
     }
     catch (err)
     {
@@ -85,7 +84,7 @@ exports.CreateAccount = async function (req, res)
             return;
         }
         // 동기 DB
-        const connection = startUP.DB.sync();
+        const connection = startUP.Connection;
 
         // 쿼리 생성
         const table_string = '`account`(`email`,`password`, `position`)';
@@ -149,7 +148,7 @@ exports.SelectAccount = async function (req, res)
         result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
 
         // 동기 DB
-        const connection = startUP.DB.sync();
+        const connection = startUP.Connection;
 
         // 쿼리 생성
         const table_string = '`account`';
@@ -158,7 +157,6 @@ exports.SelectAccount = async function (req, res)
         // 동기 쿼리
         var query_result = connection.query(query_string);
         result_array.data = query_result;
-        connection.dispose();
     }
     catch (err)
     {
@@ -199,7 +197,7 @@ exports.UpdateAccount = async function (req, res)
             return;
         }
 
-        const connection = startUP.DB.sync();
+        const connection = startUP.Connection;
 
         var columns = connection.query("show full columns from `account`");
 
@@ -227,7 +225,6 @@ exports.UpdateAccount = async function (req, res)
         const query_string = `UPDATE ${table_string} SET ${update_string} WHERE ${where_string}`;
 
         connection.query(query_string);
-        connection.dispose();
     }
     catch (err)
     {

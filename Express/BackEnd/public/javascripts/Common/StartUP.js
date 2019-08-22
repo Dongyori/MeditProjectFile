@@ -25,13 +25,15 @@ function SystemLog(url, ip, message)
 {
     const connection = DB.connection;
     var table_string = `systemlog_` + (new Date()).yyyymm();
-    table_string += `(date, AccountNo, Action, Message)`
+    var insert_table_string = table_string + `(date, AccountNo, Action, Message)`;
 
     if (message.length > 1000)
         message = message.substring(0, 1000);
 
+    message = message.replace(/'/gi, "''");
+
     var values_string = `(NOW(), '${ip}', '${url}', '${message}')`;
-    var query_string = `INSERT INTO ${table_string} VALUES ${values_string}`;
+    var query_string = `INSERT INTO ${insert_table_string} VALUES ${values_string}`;
     connection.query(query_string,function (err, results, fields)
     {
         if (err)
@@ -49,10 +51,12 @@ Date.prototype.yyyymm = function ()
     return yyyy + (mm[1] ? mm : '0' + mm[0]);
 }
 
+var connection = DB.sync();
 module.exports.MakeValueString = Fun.MakeValueString;
 module.exports.MakeJsObject = Fun.MakeJsObject;
 module.exports.Query = DB.query;
 module.exports.DB = DB;
+module.exports.Connection = connection;
 module.exports.ErrorCode = ErrorCode;
 module.exports.ErrorResponse = ErrorResponse;
 module.exports.CheckBody = CheckBody;

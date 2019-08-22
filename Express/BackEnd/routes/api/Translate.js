@@ -25,7 +25,7 @@ exports.ImportData = async function (req, res)
         return;
     }
 
-    var connection = startUP.DB.sync();
+    var connection = startUP.Connection;
     var count = 0;
     switch (req.body.type)
     {
@@ -146,7 +146,6 @@ exports.ImportData = async function (req, res)
     result_array.count = count;
     res.send(result_array);
     //startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
-    connection.dispose();
 };
 
 /*----------------------------------------------------------*/
@@ -184,7 +183,7 @@ exports.ExportData = async function (req, res)
         }
 
         // DB 연결
-        var connection = startUP.DB.sync();
+        var connection = startUP.Connection;
 
         const project_query = connection.query(`SELECT * FROM project WHERE projectid = ${req.body.projectid}`);
         if (project_query.length == 0)
@@ -247,7 +246,6 @@ exports.ExportData = async function (req, res)
 
     res.send(result_array);
     //startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
-    connection.dispose();
 };
 
 /*----------------------------------------------------------*/
@@ -299,7 +297,7 @@ exports.SelectData = async function (req, res)
         }
 
         // DB 연결
-        var connection = startUP.DB.sync();
+        var connection = startUP.Connection;
 
         const project_query = connection.query(`SELECT * FROM project WHERE projectid = ${req.body.projectid}`);
         if (project_query.length == 0)
@@ -327,8 +325,6 @@ exports.SelectData = async function (req, res)
 
     res.send(result_array);
     //startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
-
-    connection.dispose();
 };
 
 /*----------------------------------------------------------*/
@@ -358,7 +354,7 @@ exports.AddData = async function (req, res)
         }
 
         // DB 연결
-        var connection = startUP.DB.sync();
+        var connection = startUP.Connection;
 
         const project_query = connection.query(`SELECT * FROM project WHERE projectid = ${req.body.projectid}`);
         if (project_query.length == 0)
@@ -379,7 +375,6 @@ exports.AddData = async function (req, res)
         {
             result_array.resultCode = 'Not Exist Data';
             res.send(result_array);
-            connection.dispose();
             return;
         }
         let insert_value_string = '';
@@ -389,6 +384,7 @@ exports.AddData = async function (req, res)
                 var insert_table_string = `${table_string}(transkey, original, language, majorver, minorver)`;
                 for (var row of query_result)
                 {
+                    row.original = row.original.replace(/\\n/gi, "\\\\n");
                     insert_value_string += `("${row.transkey}", "${row.original}", "${req.body.language}", ${req.body.majorver}, ${req.body.minorver}),`;
                 }
                 break;
@@ -418,7 +414,6 @@ exports.AddData = async function (req, res)
     }
 
     res.send(result_array);
-    connection.dispose();
 };
 
 /*----------------------------------------------------------*/
@@ -445,7 +440,7 @@ exports.UpdateData = async function (req, res)
         }
 
         // DB 연결
-        var connection = startUP.DB.sync();
+        var connection = startUP.Connection;
 
         const project_query = connection.query(`SELECT * FROM project WHERE projectid = ${req.body.projectid}`);
         if (project_query.length == 0)
@@ -467,7 +462,10 @@ exports.UpdateData = async function (req, res)
                     for (let item of data)
                     {
                         //item.translation.replace(/'/gi, "''");
-                        query_string += `UPDATE ${table_string} SET \`translation\` = '${item.translation} ' WHERE \`transid\` = ${item.transid};\n`;
+                        if (item.translation == null)
+                            query_string += `UPDATE ${table_string} SET \`translation\` = NULL WHERE \`transid\` = ${item.transid};\n`;
+                        else
+                            query_string += `UPDATE ${table_string} SET \`translation\` = '${item.translation}' WHERE \`transid\` = ${item.transid};\n`;
                     }
                     break;
                 }
@@ -495,7 +493,6 @@ exports.UpdateData = async function (req, res)
         result_array.errmessage = err.message;
     }
     res.send(result_array);
-    connection.dispose();
 }
 
 /*----------------------------------------------------------*/
@@ -507,5 +504,46 @@ exports.UpdateData = async function (req, res)
 exports.Test = async function (req, res)
 {
     console.log(req);
+};
+
+exports.SelectDomain = async function (req, res)
+{
+    try
+    {
+        startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
+
+        var result_array = Object();
+        result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
+
+        // post로 받은 데이터중 필수로 있어야 하는것 체크
+        const check = await startUP.CheckBody(req.body, ['language']);
+        if (check != true)
+        {
+            // resultCode에 응답코드를 남긴다
+            // ResultCode에 정의한 정수값을 사용할지 string자체를 담을지 결정해야함
+            result_array.resultCode = check;
+            res.send(result_array);
+            return;
+        }
+
+        // 동기 DB
+        const connection = startUP.Connection;
+
+        const table_string = `language_domain`;
+        const where_string = `language = '${req.body.language}'`;
+        const query_string = `SELECT domain FROM ${table_string} WHERE ${where_string}`;
+
+
+        const query_result = connection.query(query_string);
+        result_array.data = query_result;
+    }
+    catch (err)
+    {
+        result_array.resultCode = err.code;
+        result_array.message = err.message;
+    }
+
+    res.send(result_array);
+    startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
 };
 

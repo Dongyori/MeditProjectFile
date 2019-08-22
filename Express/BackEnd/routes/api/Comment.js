@@ -36,7 +36,7 @@ exports.CreateComment = async function (req, res)
             return;
         }
 
-        const connection = startUP.DB.sync();
+        const connection = startUP.Connection;
 
         const insert_string = `issue_comment(\`issueid\`, \`time\`, \`accountid\`, \`comment\`)`;
         const values_string = `(${req.body.issueid}, NOW(), ${req.body.accountid}, '${req.body.comment}')`;
@@ -53,7 +53,6 @@ exports.CreateComment = async function (req, res)
     }
     res.send(result_array);
     startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
-    connection.dispose();
 };
 
 /*----------------------------------------------------------*/
@@ -100,7 +99,7 @@ exports.SelectComment = async function (req, res)
             return;
         }
 
-        const connection = startUP.DB.sync();
+        const connection = startUP.Connection;
 
         const table_string = '`issue_comment`';
         const where_string = `issueid = ${req.body.issueid}`;
@@ -115,7 +114,6 @@ exports.SelectComment = async function (req, res)
     }
     res.send(result_array);
     startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
-    connection.dispose();
 };
 
 /*----------------------------------------------------------*/
@@ -151,7 +149,7 @@ exports.UpdateComment = async function (req, res)
             return;
         }
 
-        const connection = startUP.DB.sync();
+        const connection = startUP.Connection;
         const result = connection.query(`SELECT * FROM \`issue_comment\` WHERE commentid = ${req.body.commentid}`);
 
         if (result == null)
@@ -190,7 +188,6 @@ exports.UpdateComment = async function (req, res)
     }
     res.send(result_array);
     startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
-    connection.dispose();
 };
 
 /*----------------------------------------------------------*/
@@ -226,7 +223,7 @@ exports.DeleteComment = async function (req, res)
             return;
         }
 
-        const connection = startUP.DB.sync();
+        const connection = startUP.Connection;
         const result = connection.query(`SELECT * FROM \`issue_comment\` WHERE commentid = ${req.body.commentid}`);
 
         if (result == null)
@@ -246,6 +243,5 @@ exports.DeleteComment = async function (req, res)
     }
     res.send(result_array);
     startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
-    connection.dispose();
 };
 

@@ -33,7 +33,7 @@ exports.CreateIssue = async function (req, res)
         req.body['deadline'] = req.body['deadline'].replace(/\//gi, '-');
 
         // DB 연결
-        var connection = startUP.DB.sync();
+        var connection = startUP.Connection;
 
         // DB issue 테이블의 컬럼 목록을 가져와 insert문을 생성한다
         // 이렇게 하면 컬럼이 추가되도 이부분을 수정하지 않아도 됨
@@ -70,7 +70,7 @@ exports.CreateIssue = async function (req, res)
         }
         // 쿼리 마지막
         table_string += ", `status`)";
-        value_string += `, 1)`;
+        value_string += `, 0)`;
 
         const query_string = `INSERT INTO ${table_string} VALUES ${value_string}`;
 
@@ -87,7 +87,6 @@ exports.CreateIssue = async function (req, res)
     }
     res.send(result_array);
     startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
-    connection.dispose();
 };
 
 /*----------------------------------------------------------*/
@@ -137,7 +136,7 @@ exports.SelectIssue = async function (req, res)
             return;
         }
 
-        var connection = startUP.DB.sync();
+        var connection = startUP.Connection;
 
         const table_string = '`issue` LEFT JOIN `account` ON issue.assignor = account.accountid';
         const where_string_create = `\`creator\` = ${req.body.accountid}`;
@@ -159,7 +158,6 @@ exports.SelectIssue = async function (req, res)
     }
     res.send(result_array);
     startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
-    connection.dispose();
 };
 
 
@@ -189,7 +187,7 @@ exports.UpdateIssue = async function (req, res)
             return;
         }
 
-        var connection = startUP.DB.sync();
+        var connection = startUP.Connection;
         var columns = connection.query("show full columns from `issue`");
 
         // update set where
@@ -228,7 +226,6 @@ exports.UpdateIssue = async function (req, res)
     }
     res.send(result_array);
     startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
-    connection.dispose();
 };
 
 
@@ -256,7 +253,7 @@ exports.StartIssue = async function (req, res)
             res.send(result_array);
             return;
         }
-        var connection = startUP.DB.sync();
+        var connection = startUP.Connection;
 
         const table_string = '`issue`';
         let update_string = '`status` = 1 , `starttime` = CURRENT_TIME()';
@@ -300,7 +297,7 @@ exports.resolveIssue = async function (req, res)
         res.send(result_array);
         return;
     }
-    var connection = startUP.DB.sync();
+    var connection = startUP.Connection;
 
     const table_string = '`issue`';
     let update_string = '`status` = 2 , `EndTime` = CURRENT_TIME()';
@@ -342,7 +339,7 @@ exports.reopenIssue = async function (req, res)
         res.send(result_array);
         return;
     }
-    var connection = startUP.DB.sync();
+    var connection = startUP.Connection;
 
     const table_string = '`issue`';
     let update_string = '`status` = 3 , `reopenTime` = CURRENT_TIME()';

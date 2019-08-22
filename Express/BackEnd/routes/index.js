@@ -59,10 +59,11 @@ router.post('/translate/export_data', translate.ExportData);
 router.post('/translate/select_data', translate.SelectData);
 router.post('/translate/add_data', translate.AddData);
 router.post('/translate/update_data', translate.UpdateData);
+router.post('/translate/select_domain', translate.SelectDomain);
 
 router.get('/logview', async function (req, res)
 {
-    const connection = startUP.DB.sync();
+    const connection = startUP.Connection;
     try
     {
         const date = new Date().yyyymm();
