@@ -160,7 +160,7 @@ exports.SelectAccount = async function (req, res)
 
         // 쿼리 생성
         const table_string = '`account`';
-        const query_string = `SELECT accountid, email, position FROM ${table_string}`;
+        const query_string = `SELECT accountID, email, position FROM ${table_string}`;
 
         // 동기 쿼리
         var query_result = connection.query(query_string);

@@ -144,7 +144,7 @@ exports.SelectIssue = async function (req, res)
         const table_string = '`issue` LEFT JOIN `account` ON issue.assignor = account.accountid';
         const where_string_create = `\`creator\` = ${req.body.accountid}`;
         const where_string_assign = `\`assignor\` = ${req.body.accountid}`;
-        const select_string = 'issueid, subject, projectid, creator, assignor, type, priority, description, majorver, minorver, language, resourcetype, link, status, createtime, starttime, deadline, endtime, reopentime, email';
+        const select_string = 'issueid, subject, projectid, creator, assignor, type, priority, description, majorver, minorver, language, resourcetype AS `resource_type`, link, status, createtime, starttime, deadline, endtime, reopentime, email';
         const query_string_create = `SELECT ${select_string} FROM ${table_string} WHERE ${where_string_create} ORDER BY issueid DESC`;
         const query_string_assign = `SELECT ${select_string} FROM ${table_string} WHERE ${where_string_assign} ORDER BY deadline`;
 
@@ -209,7 +209,10 @@ exports.UpdateIssue = async function (req, res)
                 if (column.Type == 'int(11)')
                     update_string += `${req.body[column.Field]}, `;
                 else
+                {
+                    req.body[column.Field] = req.body[column.Field].replace(/'/gi, "''");
                     update_string += `'${req.body[column.Field]}', `;
+                }
             }
         }
 

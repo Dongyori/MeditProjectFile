@@ -107,7 +107,7 @@ exports.SelectProject = async function (req, res)
         const connection = startUP.Connection;
 
         const table_string = 'project';
-        const query_string = `SELECT * FROM ${table_string}`;
+        const query_string = `SELECT projectname AS \`project_name\`, projectid FROM ${table_string}`;
 
 
         var query_result = connection.query(query_string);

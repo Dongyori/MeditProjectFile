@@ -23,6 +23,7 @@ async function CheckBody(req_body, checklist)
 // SystemLog(req.url, req.body);
 function SystemLog(url, ip, message)
 {
+    return;
     const connection = DB.connection;
     var table_string = `systemlog_` + (new Date()).yyyymm();
     var insert_table_string = table_string + `(date, AccountNo, Action, Message)`;
@@ -34,14 +35,18 @@ function SystemLog(url, ip, message)
 
     var values_string = `(NOW(), '${ip}', '${url}', '${message}')`;
     var query_string = `INSERT INTO ${insert_table_string} VALUES ${values_string}`;
-    connection.query(query_string,function (err, results, fields)
+    try
     {
-        if (err)
+        connection.query(query_string)
+    }
+    catch (err)
+    {
+        if (err.code == 'ER_NO_SUCH_TABLE')
         {
             connection.query(`CREATE TABLE ${table_string} LIKE systemlog_template`);
             connection.query(query_string);
         }
-    });
+    };
 }
 
 Date.prototype.yyyymm = function ()
