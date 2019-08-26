@@ -38,6 +38,7 @@ router.post('/project/delete_project', project.DeleteProject);
 
 router.post('/projectver/create_projectver', project.CreateVersion);
 router.post('/projectver/select_projectver', project.SelectVersion);
+router.post('/projectver/select_all_projectver', project.SelectAllVersion);
 router.post('/projectver/delete_projectver', project.DeleteVersion);
 
 router.post('/projectlang/select_projectlang', project.SelectLanguage);

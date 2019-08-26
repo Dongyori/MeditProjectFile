@@ -17,7 +17,7 @@ exports.ImportData = async function (req, res)
     var result_array = Object();
     result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
 
-    var check = await startUP.CheckBody(req.body, ['projectid', 'majorver', 'minorver', 'type', 'language']);
+    var check = await startUP.CheckBody(req.body, ['projectid', 'majorver', 'minorver', 'hotfixver', 'buildver', 'type', 'language']);
     if (check != true)
     {
         result_array.resultCode = check;
@@ -79,8 +79,8 @@ exports.ImportData = async function (req, res)
                     if (translated != null)
                         translated = translated.replace(/\\n/gi, "\\\\n");
 
-                    var table_string = `transdata_${projectname}_${req.body.type}` + '(`transkey`, `original`, `translation`, `language`, `majorver`, `minorver`)';
-                    value_string += `('${tag}', '${original}', '${translated}', '${req.body.language}', ${req.body.majorver}, ${req.body.minorver}),\n`;
+                    var table_string = `transdata_${req.body.projectid}_${req.body.type}` + '(`transkey`, `original`, `translation`, `language`, `majorver`, `minorver`, `hotfixver`, `buildver`)';
+                    value_string += `('${tag}', '${original}', '${translated}', '${req.body.language}', ${req.body.majorver}, ${req.body.minorver}, ${req.body.hotfixver}, ${req.body.buildver}),\n`;
 
                     count++;
 
@@ -95,7 +95,7 @@ exports.ImportData = async function (req, res)
                 {
                     if (err.code == 'ER_NO_SUCH_TABLE')
                     {
-                        connection.query(`CREATE TABLE transdata_${projectname}_${req.body.type} LIKE transdata_app_template`);
+                        connection.query(`CREATE TABLE transdata_${req.body.projectid}_${req.body.type} LIKE transdata_app_template`);
                         connection.query(query_string);
                     }
                     else
@@ -111,7 +111,7 @@ exports.ImportData = async function (req, res)
                 const project_data = connection.query(`SELECT * FROM project WHERE projectid = ${req.body.projectid}`);
                 var projectname = project_data[0].projectname.replace(/ /gi, '_');
 
-                const table_string = `transdata_${projectname}_${req.body.type}(tree, transkey, translation, language, majorver, minorver)`;
+                const table_string = `transdata_${req.body.projectid}_${req.body.type}(tree, transkey, translation, language, majorver, minorver, hotfixver, buildver)`;
                 if (typeof (req.body.data) != 'object')
                 {
                     const index = req.body.data.IndexOF('=');
@@ -119,7 +119,7 @@ exports.ImportData = async function (req, res)
                     req.body.data = JSON.parse(req.body.data);
                 }
 
-                let value_string = await startUP.MakeValueString(req.body.data, '', req.body.language, req.body.majorver, req.body.minorver);
+                let value_string = await startUP.MakeValueString(req.body.data, '', req.body.language, req.body.majorver, req.body.minorver, req.body.hotfixver, req.body.buildver);
                 value_string = value_string.substring(0, value_string.length - 1);
                 const query_string = `INSERT INTO ${table_string} VALUES ${value_string}` + 'ON DUPLICATE KEY UPDATE translation = VALUES(`translation`)';
 
@@ -131,7 +131,7 @@ exports.ImportData = async function (req, res)
                 {
                     if (err.code == 'ER_NO_SUCH_TABLE')
                     {
-                        connection.query(`CREATE TABLE transdata_${projectname}_${req.body.type} LIKE transdata_web_template`);
+                        connection.query(`CREATE TABLE transdata_${req.body.projectid}_${req.body.type} LIKE transdata_web_template`);
                         connection.query(query_string);
                     }
                     else
@@ -196,7 +196,7 @@ exports.ExportData = async function (req, res)
             return;
         }
 
-        const table_string = `transdata_${project_query[0].projectname}_${req.body.type}`;
+        const table_string = `transdata_${req.body.projectid}_${req.body.type}`;
         const where_string = `language = '${req.body.language}' AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver}`;
         const query_string = `SELECT * FROM ${table_string} WHERE ${where_string} ORDER BY TRANSID`;
 
@@ -232,11 +232,11 @@ exports.ExportData = async function (req, res)
                 xw.endElement();
                 xw.endDocument();
                 result_array.data = xw.toString();
-                result_array.filename = `${project_query[0].projectname}_${req.body.language}${req.body.majorver}_${req.body.minorver}.lan`;
+                result_array.filename = `${req.body.projectid}_${req.body.language}${req.body.majorver}_${req.body.minorver}.lan`;
                 break;
             case 'web':
                 result_array.data = await startUP.MakeJsObject(query_result);
-                result_array.filename = `${project_query[0].projectname}_${req.body.language}${req.body.majorver}_${req.body.minorver}.js`;
+                result_array.filename = `${req.body.projectid}_${req.body.language}${req.body.majorver}_${req.body.minorver}.js`;
                 break;
         }
     }
@@ -311,7 +311,7 @@ exports.SelectData = async function (req, res)
         }
         var projectname = project_data[0].projectname.replace(/ /gi, '_');
 
-        const table_string = `transdata_${projectname}_${req.body.type}`;
+        const table_string = `transdata_${req.body.projectid}_${req.body.type}`;
         const where_string = `language = '${req.body.language}' AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver}`;
         const query_string = `SELECT * FROM ${table_string} WHERE ${where_string}`;
 
@@ -368,7 +368,7 @@ exports.AddData = async function (req, res)
             return;
         }
 
-        const table_string = `transdata_${project_query[0].projectname}_${req.body.type}`;
+        const table_string = `transdata_${req.body.projectid}_${req.body.type}`;
         const where_string = `language = 'english' AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver}`;
         const query_string = `SELECT * FROM ${table_string} WHERE ${where_string}`;
 
@@ -455,7 +455,7 @@ exports.UpdateData = async function (req, res)
         }
 
         // for update
-        const table_string = `transdata_${project_query[0].projectname}_${req.body.type}`;
+        const table_string = `transdata_${req.body.projectid}_${req.body.type}`;
         let query_string = '';
         switch (req.body.type)
         {

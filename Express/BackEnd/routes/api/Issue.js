@@ -22,7 +22,7 @@ exports.CreateIssue = async function (req, res)
         result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
 
         // post로 받은 데이터중 필수로 있어야 하는것 체크
-        const check = await startUP.CheckBody(req.body, ['email', 'subject', 'type', 'priority']);
+        const check = await startUP.CheckBody(req.body, ['email', 'subject', 'type', 'priority', 'majorver', 'minorver', 'hotfixver', 'language', 'resourcetype']);
         if (check != true)
         {
             result_array.resultCode = check;

@@ -1,19 +1,19 @@
 ﻿
-async function MakeValueString(jsonString, treedata, language, majorver, minorver)
+async function MakeValueString(jsonString, treedata, language, majorver, minorver, hotfixver, buildver)
 {
     let valueString = '';
     for (inner in jsonString)
     {
         if (typeof (jsonString[inner]) == 'object')
         {
-            valueString += await MakeValueString(jsonString[inner], treedata + '/' + inner, language, majorver, minorver);
+            valueString += await MakeValueString(jsonString[inner], treedata + '/' + inner, language, majorver, minorver, hotfixver, buildver);
         }
         else
         {
             if (typeof (jsonString[inner]) == 'undefined')
-                valueString += `\n('${treedata}', '${inner}', '', '${language}', ${majorver}, ${minorver}),`;
+                valueString += `\n('${treedata}', '${inner}', '', '${language}', ${majorver}, ${minorver}, ${hotfixver}, ${buildver}),`;
             else
-                valueString += `\n('${treedata}', '${inner}', '${jsonString[inner]}', "${language}", ${majorver}, ${minorver}),`;
+                valueString += `\n('${treedata}', '${inner}', '${jsonString[inner]}', "${language}", ${majorver}, ${minorver},${hotfixver},${buildver}),`;
         }
     }
     return valueString;

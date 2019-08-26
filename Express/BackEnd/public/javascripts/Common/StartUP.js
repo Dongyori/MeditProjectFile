@@ -23,7 +23,6 @@ async function CheckBody(req_body, checklist)
 // SystemLog(req.url, req.body);
 function SystemLog(url, ip, message)
 {
-    return;
     const connection = DB.connection;
     var table_string = `systemlog_` + (new Date()).yyyymm();
     var insert_table_string = table_string + `(date, AccountNo, Action, Message)`;

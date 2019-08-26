@@ -185,7 +185,7 @@ exports.CreateVersion = async function (req, res)
         startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
 
         // post로 받은 데이터중 필수로 있어야 하는것 체크
-        const check = await startUP.CheckBody(req.body, ['projectid', 'majorver', 'minorver', 'language', 'resourcetype']);
+        const check = await startUP.CheckBody(req.body, ['projectid','language', 'resourcetype', 'majorver', 'minorver', 'hotfixver']);
         if (check != true)
         {
             // resultCode에 응답코드를 남긴다
@@ -197,13 +197,16 @@ exports.CreateVersion = async function (req, res)
 
         // 동기 DB
         const connection = startUP.Connection;
+        const select_buildver_query = `(SELECT buildver FROM (SELECT IFNULL(MAX(buildver) + 1, 0) AS buildver FROM project_version WHERE projectid = ${req.body.projectid} AND language = '${req.body.language}' AND resourcetype = '${req.body.resourcetype}' AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver} AND hotfixver = ${req.body.hotfixver}) temp)`;
 
-        const table_string = `project_version(\`projectid\`, \`majorver\`, \`minorver\`, \`language\`, \`resourcetype\`)`;
-        const value_string = `(${req.body.projectid}, ${req.body.majorver}, ${req.body.minorver}, '${req.body.language}', '${req.body.resourcetype}')`;
+        const buildver = connection.query(select_buildver_query);
+         
+        const table_string = `project_version(\`projectid\`, \`majorver\`, \`minorver\`, \`language\`, \`resourcetype\`, \`hotfixver\`, \`buildver\`)`;
+        const value_string = `(${req.body.projectid}, ${req.body.majorver}, ${req.body.minorver}, '${req.body.language}', '${req.body.resourcetype}', ${req.body.hotfixver}, ${buildver[0].buildver})`;
         const query_string = `INSERT INTO ${table_string} VALUES ${value_string}`;
 
-
         connection.query(query_string);
+        result_array.buildver = buildver[0].buildver;
     }
     catch (err)
     {
@@ -242,7 +245,7 @@ exports.SelectVersion = async function (req, res)
 
 
         // post로 받은 데이터중 필수로 있어야 하는것 체크
-        const check = await startUP.CheckBody(req.body, ['projectid']);
+        const check = await startUP.CheckBody(req.body, ['projectid', 'resourcetype']);
         if (check != true)
         {
             // resultCode에 응답코드를 남긴다
@@ -255,16 +258,59 @@ exports.SelectVersion = async function (req, res)
         // 동기 DB
         const connection = startUP.Connection;
 
+        // 8/26 최신버전만 나오도록 수정
         const table_string = `project_version JOIN project ON project_version.projectid = project.projectid`;
-        const where_string = `project_version.projectid = ${req.body.projectid}`;
-        const query_string = `SELECT DISTINCT majorver, minorver FROM ${table_string} WHERE ${where_string}`;
-        const query_string2 = `SELECT * FROM ${table_string}`;
+        const where_string = `project_version.projectid = ${req.body.projectid} AND resourcetype = '${req.body.resourcetype}'`;
+        const query_string = `SELECT majorver, minorver, hotfixver FROM ${table_string} WHERE ${where_string} ORDER BY majorver DESC, minorver DESC, hotfixver DESC`;
 
 
         const query_result = connection.query(query_string);
-        const query_result2 = connection.query(query_string2);
         result_array.data = query_result;
-        result_array.data2 = query_result2;
+    }
+    catch (err)
+    {
+        result_array.resultCode = err.code;
+        result_array.message = err.message;
+    }
+
+    res.send(result_array);
+    startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
+};
+
+/*----------------------------------------------------------*/
+// SelectAllVersion
+// 설명 : 모든 버전을 조회하는 API함수
+// 입력 : 
+// 리턴 : result_array
+//       {
+//           resultCode
+//           data :
+//           [
+//               {
+//                  
+//                  
+//                  
+//               },
+//           ]
+//       }
+/*----------------*////////////////////////*----------------*/
+exports.SelectAllVersion = async function (req, res)
+{
+    var result_array = Object();
+    result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
+    try
+    {
+        startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
+
+        // 동기 DB
+        const connection = startUP.Connection;
+
+        const table_string = `project_version JOIN project ON project_version.projectid = project.projectid`;
+        const query_string = `SELECT * FROM ${table_string}`;
+
+
+        const query_result = connection.query(query_string);
+        result_array.data = query_result;
     }
     catch (err)
     {
@@ -301,7 +347,7 @@ exports.SelectLanguage = async function (req, res)
         result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
 
         // post로 받은 데이터중 필수로 있어야 하는것 체크
-        const check = await startUP.CheckBody(req.body, ['projectid'], ['majorver'], ['minorver']);
+        const check = await startUP.CheckBody(req.body, ['projectid', 'majorver', 'minorver', 'hotfixver']);
         if (check != true)
         {
             // resultCode에 응답코드를 남긴다
@@ -315,8 +361,8 @@ exports.SelectLanguage = async function (req, res)
         const connection = startUP.Connection;
 
         const table_string = `project_version`;
-        const where_string = `projectid = ${req.body.projectid} AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver}`;
-        const query_string = `SELECT language FROM ${table_string} WHERE ${where_string}`;
+        const where_string = `projectid = ${req.body.projectid} AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver} AND hotfixver = ${req.body.hotfixver}`;
+        const query_string = `SELECT DISTINCT language FROM ${table_string} WHERE ${where_string}`;
 
 
         const query_result = connection.query(query_string);
