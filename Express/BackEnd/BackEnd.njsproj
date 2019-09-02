@@ -49,7 +49,13 @@
     </Content>
     <Content Include="routes\api\Accout.js" />
     <Content Include="routes\api\Comment.js" />
+    <Content Include="routes\api\Description.js">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="routes\api\Issue.js" />
+    <Content Include="routes\api\Language.js">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="routes\api\Project.js" />
     <Content Include="routes\api\Translate.js" />
     <Content Include="routes\index.js" />

@@ -13,6 +13,8 @@ const project = require('./api/Project');
 const issue = require('./api/Issue');
 const translate = require('./api/Translate');
 const comment = require('./api/Comment');
+const description = require('./api/Description');
+const language = require('./api/Language');
 
 //const mysql = require('../public/javascripts/Common/DB');
 
@@ -61,6 +63,16 @@ router.post('/translate/select_data', translate.SelectData);
 router.post('/translate/add_data', translate.AddData);
 router.post('/translate/update_data', translate.UpdateData);
 router.post('/translate/select_domain', translate.SelectDomain);
+router.post('/translate/testURL', translate.TestURL);
+router.post('/translate/TID', translate.TestDescriptionData);
+
+router.post('/description/create_description', description.CreateDescription);
+router.post('/description/select_description', description.SelectDescription);
+router.post('/description/delete_description', description.DeleteDescription);
+
+router.post('/language/add_language', language.AddLanguage);
+router.post('/language/select_language', language.SelectLanguage);
+
 
 router.get('/logview', async function (req, res)
 {

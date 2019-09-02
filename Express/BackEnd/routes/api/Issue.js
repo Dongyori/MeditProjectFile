@@ -22,7 +22,7 @@ exports.CreateIssue = async function (req, res)
         result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
 
         // post로 받은 데이터중 필수로 있어야 하는것 체크
-        const check = await startUP.CheckBody(req.body, ['email', 'subject', 'type', 'priority', 'majorver', 'minorver', 'hotfixver', 'language', 'resourcetype']);
+        const check = await startUP.CheckBody(req.body, ['email', 'projectid', 'subject', 'type', 'priority', 'majorver', 'minorver', 'hotfixver', 'language', 'resourcetype']);
         if (check != true)
         {
             result_array.resultCode = check;
@@ -71,9 +71,12 @@ exports.CreateIssue = async function (req, res)
                 }
             }
         }
+
+        const buildver_subquery_string = `(SELECT IFNULL(MAX(buildver), 0) FROM project_version WHERE projectid = ${req.body.projectid} AND resourcetype = '${req.body.resourcetype}' AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver} AND hotfixver = ${req.body.hotfixver})`;
+
         // 쿼리 마지막
-        table_string += ", `status`)";
-        value_string += `, 0)`;
+        table_string += `, \`status\`, \`buildver\`)`;
+        value_string += `, 0, ${buildver_subquery_string})`;
 
         const query_string = `INSERT INTO ${table_string} VALUES ${value_string}`;
 
@@ -119,6 +122,8 @@ exports.CreateIssue = async function (req, res)
 //                  deadline,
 //                  EndTime,
 //                  reopenTime
+//                  transid_min
+//                  transid_max
 //               },
 //           ]
 //       }
@@ -141,10 +146,11 @@ exports.SelectIssue = async function (req, res)
 
         var connection = startUP.Connection;
 
-        const table_string = '`issue` LEFT JOIN `account` ON issue.assignor = account.accountid';
+        const table_string = '`issue` LEFT JOIN (SELECT accountid, email, position FROM `account`) temp ON issue.assignor = temp.accountid';
         const where_string_create = `\`creator\` = ${req.body.accountid}`;
         const where_string_assign = `\`assignor\` = ${req.body.accountid}`;
-        const select_string = 'issueid, subject, projectid, creator, assignor, type, priority, description, majorver, minorver, language, resourcetype AS `resource_type`, link, status, createtime, starttime, deadline, endtime, reopentime, email';
+        //const select_string = 'issueid, subject, projectid, creator, assignor, type, priority, description, majorver, minorver, hotfixver, language, resourcetype AS `resource_type`, link, status, createtime, starttime, deadline, endtime, reopentime, email, transid_min, transid_max';
+        const select_string = '*, resourcetype AS `resource_type`';
         const query_string_create = `SELECT ${select_string} FROM ${table_string} WHERE ${where_string_create} ORDER BY issueid DESC`;
         const query_string_assign = `SELECT ${select_string} FROM ${table_string} WHERE ${where_string_assign} ORDER BY deadline`;
 
@@ -292,25 +298,25 @@ exports.resolveIssue = async function (req, res)
 {
     try
     {
-    startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
-    var result_array = Object();
-    result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
+        startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
+        var result_array = Object();
+        result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
 
-    const check = await startUP.CheckBody(req.body, ['issueid']);
-    if (check != true)
-    {
-        result_array.resultCode = check;
-        res.send(result_array);
-        return;
-    }
-    var connection = startUP.Connection;
+        const check = await startUP.CheckBody(req.body, ['issueid']);
+        if (check != true)
+        {
+            result_array.resultCode = check;
+            res.send(result_array);
+            return;
+        }
+        var connection = startUP.Connection;
 
-    const table_string = '`issue`';
-    let update_string = '`status` = 2 , `EndTime` = CURRENT_TIME()';
-    const where_string = `issueid = ${req.body.issueid}`
+        const table_string = '`issue`';
+        let update_string = '`status` = 2 , `EndTime` = CURRENT_TIME()';
+        const where_string = `issueid = ${req.body.issueid}`
 
-    var query_string = `UPDATE ${table_string} SET ${update_string} WHERE ${where_string}`;
-    connection.query(query_string);
+        var query_string = `UPDATE ${table_string} SET ${update_string} WHERE ${where_string}`;
+        connection.query(query_string);
     }
     catch (err)
     {
@@ -334,26 +340,26 @@ exports.reopenIssue = async function (req, res)
 {
     try
     {
-    startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
-    var result_array = Object();
-    result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
+        startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
+        var result_array = Object();
+        result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
 
-    const check = await startUP.CheckBody(req.body, ['issueid']);
-    if (check != true)
-    {
-        result_array.resultCode = check;
-        res.send(result_array);
-        return;
+        const check = await startUP.CheckBody(req.body, ['issueid']);
+        if (check != true)
+        {
+            result_array.resultCode = check;
+            res.send(result_array);
+            return;
+        }
+        var connection = startUP.Connection;
+
+        const table_string = '`issue`';
+        let update_string = '`status` = 3 , `reopenTime` = CURRENT_TIME()';
+        const where_string = `issueid = ${req.body.issueid}`
+
+        var query_string = `UPDATE ${table_string} SET ${update_string} WHERE ${where_string}`;
+        connection.query(query_string);
     }
-    var connection = startUP.Connection;
-
-    const table_string = '`issue`';
-    let update_string = '`status` = 3 , `reopenTime` = CURRENT_TIME()';
-    const where_string = `issueid = ${req.body.issueid}`
-
-    var query_string = `UPDATE ${table_string} SET ${update_string} WHERE ${where_string}`;
-    connection.query(query_string);
-     }
     catch (err)
     {
         result_array.resultCode = err.code;

@@ -170,7 +170,7 @@ exports.DeleteProject = async function (req, res)
 /*----------------------------------------------------------*/
 // CreateVersion
 // 설명 : 버전을 생성하는 API함수
-// 입력 : projectid, majorver, minorver, language
+// 입력 : projectid, majorver, minorver, hotfixver, language
 // 리턴 : result_array
 //       {
 //           resultCode = 0 (성공) or 실패 데이터
@@ -207,6 +207,25 @@ exports.CreateVersion = async function (req, res)
 
         connection.query(query_string);
         result_array.buildver = buildver[0].buildver;
+
+        const add_list_query = `SELECT DISTINCT \`language\` FROM \`project_version\` WHERE projectid = ${req.body.projectid} AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver} AND hotfixver = ${req.body.hotfixver} AND resourcetype = '${req.body.resourcetype}' AND language != '${req.body.language}'`;
+
+
+        const add_list_result = connection.query(add_list_query);
+        let language_value_string = '';
+        if (req.body.language == 'english')
+        {
+            if (add_list_result.length != 0)
+            {
+                for (const item of add_list_result)
+                {
+                    language_value_string += `(${req.body.projectid}, ${req.body.majorver}, ${req.body.minorver}, '${item.language}',   '${req.body.resourcetype}', ${req.body.hotfixver}, ${buildver[0].buildver}),`;
+                }
+                language_value_string = language_value_string.substring(0, language_value_string.length - 1);
+                const add_query = `INSERT INTO ${table_string} VALUES ${language_value_string}`;
+                connection.query(add_query);
+            }
+        }
     }
     catch (err)
     {
@@ -258,14 +277,17 @@ exports.SelectVersion = async function (req, res)
         // 동기 DB
         const connection = startUP.Connection;
 
-        // 8/26 최신버전만 나오도록 수정
         const table_string = `project_version JOIN project ON project_version.projectid = project.projectid`;
         const where_string = `project_version.projectid = ${req.body.projectid} AND resourcetype = '${req.body.resourcetype}'`;
-        const query_string = `SELECT majorver, minorver, hotfixver FROM ${table_string} WHERE ${where_string} ORDER BY majorver DESC, minorver DESC, hotfixver DESC`;
+        const query_string = `SELECT DISTINCT majorver, minorver, hotfixver, buildver FROM ${table_string} WHERE ${where_string} ORDER BY majorver DESC, minorver DESC, hotfixver DESC`;
 
+        const query_string1 = `SELECT DISTINCT majorver, minorver, hotfixver, MAX(buildver) as buildver FROM ${table_string} WHERE ${where_string} GROUP BY majorver, minorver, hotfixver ORDER BY majorver DESC, minorver DESC, hotfixver DESC`;
 
         const query_result = connection.query(query_string);
+        const query_result1 = connection.query(query_string1);
+
         result_array.data = query_result;
+        result_array.data2 = query_result1;
     }
     catch (err)
     {
@@ -324,8 +346,8 @@ exports.SelectAllVersion = async function (req, res)
 
 /*----------------------------------------------------------*/
 // SelectLanguage
-// 설명 : 버전을 조회하는 API함수
-// 입력 : projectid, majorver, minorver
+// 설명 : 버전의 언어를 조회하는 API함수
+// 입력 : projectid, majorver, minorver, hotfixver
 // 리턴 : result_array
 //       {
 //           resultCode
@@ -379,9 +401,9 @@ exports.SelectLanguage = async function (req, res)
 };
 
 /*----------------------------------------------------------*/
-// DeleteVersion
+// DeleteVersion (폐기, 버전 세분화로 인한 사용불가)
 // 설명 : 버전을 삭제하는 API함수
-// 입력 : projectid, majorver, minorver, language
+// 입력 : projectid, majorver, minorver, hotfixver, language
 // 리턴 : result_array
 //       {
 //           resultCode = 0 (성공) or 실패 데이터
@@ -389,6 +411,7 @@ exports.SelectLanguage = async function (req, res)
 /*----------------*////////////////////////*----------------*/
 exports.DeleteVersion = async function (req, res)
 {
+    return;
     try
     {
         startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));

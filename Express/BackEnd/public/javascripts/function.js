@@ -11,7 +11,7 @@ async function MakeValueString(jsonString, treedata, language, majorver, minorve
         else
         {
             if (typeof (jsonString[inner]) == 'undefined')
-                valueString += `\n('${treedata}', '${inner}', '', '${language}', ${majorver}, ${minorver}, ${hotfixver}, ${buildver}),`;
+                valueString += `\n('${treedata}', '${inner}', NULL, '${language}', ${majorver}, ${minorver}, ${hotfixver}, ${buildver}),`;
             else
                 valueString += `\n('${treedata}', '${inner}', '${jsonString[inner]}', "${language}", ${majorver}, ${minorver},${hotfixver},${buildver}),`;
         }
@@ -39,6 +39,28 @@ async function MakeJsObject(DBdata)
     return return_data;
 }
 
+async function MakeDescriptionValueString(jsonString, treedata, valuepart)
+{
+    let valueString = '';
+    for (const inner in jsonString)
+    {
+        if (typeof (jsonString[inner]) == 'object')
+        {
+            valueString += await MakeDescriptionValueString(jsonString[inner], treedata + '/' + inner, valuepart);
+        }
+        else
+        {
+            jsonString.transkey = jsonString.transkey.replace(/'/gi, "''");
+            jsonString.content = jsonString.content.replace(/'/gi, "''");
+            jsonString.caption = jsonString.caption.replace(/'/gi, "''");
+            valueString += `(${valuepart}, '${jsonString.transkey}', '${jsonString.content}', '${jsonString.caption}', '${treedata}'),\n`
+            return valueString;
+        }
+    }
+    return valueString;
+}
+
 
 module.exports.MakeValueString = MakeValueString;
 module.exports.MakeJsObject = MakeJsObject;
+module.exports.MakeDescriptionValueString = MakeDescriptionValueString;

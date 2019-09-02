@@ -21,7 +21,7 @@ async function CheckBody(req_body, checklist)
 }
 
 // SystemLog(req.url, req.body);
-function SystemLog(url, ip, message)
+async function SystemLog(url, ip, message)
 {
     const connection = DB.connection;
     var table_string = `systemlog_` + (new Date()).yyyymm();
@@ -34,18 +34,22 @@ function SystemLog(url, ip, message)
 
     var values_string = `(NOW(), '${ip}', '${url}', '${message}')`;
     var query_string = `INSERT INTO ${insert_table_string} VALUES ${values_string}`;
-    try
-    {
-        connection.query(query_string)
-    }
-    catch (err)
+    connection.query(query_string, log_result)
+}
+
+function log_result(err, results)
+{
+    if (err)
     {
         if (err.code == 'ER_NO_SUCH_TABLE')
         {
-            connection.query(`CREATE TABLE ${table_string} LIKE systemlog_template`);
-            connection.query(query_string);
+            const connection = DB.connection;
+            const table_string = `systemlog_` + (new Date()).yyyymm();
+            //const insert_table_string = table_string + `(date, AccountNo, Action, Message)`;
+            connection.query(`CREATE TABLE ${table_string} LIKE systemlog_template`, log_result);
+            //connection.query(query_string, log_result);
         }
-    };
+    }
 }
 
 Date.prototype.yyyymm = function ()
@@ -58,6 +62,7 @@ Date.prototype.yyyymm = function ()
 var connection = DB.sync();
 module.exports.MakeValueString = Fun.MakeValueString;
 module.exports.MakeJsObject = Fun.MakeJsObject;
+module.exports.MakeDescriptionValueString = Fun.MakeDescriptionValueString;
 module.exports.Query = DB.query;
 module.exports.DB = DB;
 module.exports.Connection = connection;

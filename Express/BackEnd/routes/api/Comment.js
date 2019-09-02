@@ -22,21 +22,14 @@ exports.CreateComment = async function (req, res)
         const check = await startUP.CheckBody(req.body, ['accountid', 'issueid']);
         if (check != true)
         {
-            switch (check)
-            {
-                case 'email':
-                    res.send(startUP.ErrorResponse(result_array, startUP.ErrorCode.AUTH_EMAIL_ERROR));
-                    break;
-                case 'issueid':
-                    res.send(startUP.ErrorResponse(result_array, startUP.ErrorCode.ISSUE_CREATE_COMMENT_issueid_ERROR));
-                    break;
-                default:
-
-            }
+            result_array.resultCode = check;
+            res.send(result_array);
             return;
         }
 
         const connection = startUP.Connection;
+
+        req.body.comment = req.body.comment.replace(/'/gi, "''");
 
         const insert_string = `issue_comment(\`issueid\`, \`time\`, \`accountid\`, \`comment\`)`;
         const values_string = `(${req.body.issueid}, NOW(), ${req.body.accountid}, '${req.body.comment}')`;
@@ -85,17 +78,8 @@ exports.SelectComment = async function (req, res)
         const check = await startUP.CheckBody(req.body, ['issueid']);
         if (check != true)
         {
-            switch (check)
-            {
-                case 'email':
-                    res.send(startUP.ErrorResponse(result_array, startUP.ErrorCode.AUTH_EMAIL_ERROR));
-                    break;
-                case 'issueid':
-                    res.send(startUP.ErrorResponse(result_array, startUP.ErrorCode.ISSUE_SELECT_COMMENT_issueid_ERROR));
-                    break;
-                default:
-
-            }
+            result_array.resultCode = check;
+            res.send(result_array);
             return;
         }
 
@@ -135,17 +119,8 @@ exports.UpdateComment = async function (req, res)
         const check = await startUP.CheckBody(req.body, ['commentid']);
         if (check != true)
         {
-            switch (check)
-            {
-                case 'accountid':
-                    res.send(startUP.ErrorResponse(result_array, startUP.ErrorCode.AUTH_ACCOUNTNO_ERROR));
-                    break;
-                case 'commentid':
-                    res.send(startUP.ErrorResponse(result_array, startUP.ErrorCode.ISSUE_UPDATE_COMMENT_commentid_ERROR));
-                    break;
-                default:
-
-            }
+            result_array.resultCode = check;
+            res.send(result_array);
             return;
         }
 
@@ -169,6 +144,8 @@ exports.UpdateComment = async function (req, res)
                     continue;
                 if (column.Field == 'commentid')
                     continue;
+                if (column.Field == 'comment')
+                    req.body[column.Field] = req.body[column.Field].replace(/'/gi, "''");
                 update_string += `${column.Field} = `;
                 if (column.Type == 'int(11)')
                     update_string += `${req.body[column.Field]}, `;
@@ -209,17 +186,8 @@ exports.DeleteComment = async function (req, res)
         const check = await startUP.CheckBody(req.body, ['commentid']);
         if (check != true)
         {
-            switch (check)
-            {
-                case 'accountid':
-                    res.send(startUP.ErrorResponse(result_array, startUP.ErrorCode.AUTH_ACCOUNTNO_ERROR));
-                    break;
-                case 'commentid':
-                    res.send(startUP.ErrorResponse(result_array, startUP.ErrorCode.ISSUE_UPDATE_COMMENT_commentid_ERROR));
-                    break;
-                default:
-
-            }
+            result_array.resultCode = check;
+            res.send(result_array);
             return;
         }
 
