@@ -1,6 +1,7 @@
 ﻿const DB = require('./DB');
 const ErrorCode = require('./ResultCode');
-const Fun = require('../Function')
+const Fun = require('../Function');
+const Mailer = require('../Mailer');
 
 //DB.Connect();
 
@@ -70,3 +71,4 @@ module.exports.ErrorCode = ErrorCode;
 module.exports.ErrorResponse = ErrorResponse;
 module.exports.CheckBody = CheckBody;
 module.exports.SystemLog = SystemLog;
+module.exports.SendMail = Mailer.SendMail;

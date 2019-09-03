@@ -1,5 +1,5 @@
 ﻿
-async function MakeValueString(jsonString, treedata, language, majorver, minorver, hotfixver, buildver)
+async function MakeValueString(jsonString, treedata, language, majorver, minorver, hotfixver, buildver, noteng = false)
 {
     let valueString = '';
     for (inner in jsonString)
@@ -10,7 +10,7 @@ async function MakeValueString(jsonString, treedata, language, majorver, minorve
         }
         else
         {
-            if (typeof (jsonString[inner]) == 'undefined')
+            if (typeof (jsonString[inner]) == 'undefined' || noteng)
                 valueString += `\n('${treedata}', '${inner}', NULL, '${language}', ${majorver}, ${minorver}, ${hotfixver}, ${buildver}),`;
             else
                 valueString += `\n('${treedata}', '${inner}', '${jsonString[inner]}', "${language}", ${majorver}, ${minorver},${hotfixver},${buildver}),`;

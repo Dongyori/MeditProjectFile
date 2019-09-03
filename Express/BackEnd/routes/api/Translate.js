@@ -131,7 +131,7 @@ exports.ImportData = async function (req, res)
                     {
                         for (const item of add_list_result)
                         {
-                            other_language_value_string += await startUP.MakeValueString(req.body.data, '', item.language, req.body.majorver,   req.body.minorver, req.body.hotfixver, req.body.buildver);
+                            other_language_value_string += await startUP.MakeValueString(req.body.data, '', item.language, req.body.majorver,   req.body.minorver, req.body.hotfixver, req.body.buildver, true);
                         }
                         other_language_value_string = other_language_value_string.substring(0, other_language_value_string.length - 1);
                         const other_language_query_string = `INSERT INTO ${table_string} VALUES ${other_language_value_string}`;
@@ -407,18 +407,18 @@ exports.AddData = async function (req, res)
         switch (req.body.resourcetype)
         {
             case 'app':
-                var insert_table_string = `${table_string}(transkey, original, language, majorver, minorver, hotfixver, buildver)`;
+                var insert_table_string = `${table_string}(transkey, original, language, majorver, minorver, hotfixver, buildver, descriptioncount)`;
                 for (var row of query_result)
                 {
                     row.original = row.original.replace(/\\n/gi, "\\\\n");
-                    insert_value_string += `("${row.transkey}", "${row.original}", "${req.body.language}", ${req.body.majorver}, ${req.body.minorver}, ${req.body.hotfixver}, ${req.body.buildver}),`;
+                    insert_value_string += `("${row.transkey}", "${row.original}", "${req.body.language}", ${req.body.majorver}, ${req.body.minorver}, ${req.body.hotfixver}, ${req.body.buildver}, ${row.descriptioncount}),`;
                 }
                 break;
             case 'web':
-                var insert_table_string = `${table_string}(tree, transkey, language, majorver, minorver, hotfixver, buildver)`;
+                var insert_table_string = `${table_string}(tree, transkey, language, majorver, minorver, hotfixver, buildver, descriptioncount)`;
                 for (var row of query_result)
                 {
-                    insert_value_string += `("${row.tree}", "${row.transkey}", "${req.body.language}", ${req.body.majorver}, ${req.body.minorver}, ${req.body.hotfixver}, ${req.body.buildver}),`;
+                    insert_value_string += `("${row.tree}", "${row.transkey}", "${req.body.language}", ${req.body.majorver}, ${req.body.minorver}, ${req.body.hotfixver}, ${req.body.buildver}, ${row.descriptioncount}),`;
                 }
                 break
             default:

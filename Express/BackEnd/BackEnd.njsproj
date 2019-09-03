@@ -44,6 +44,9 @@
     <Content Include="public\javascripts\Function.js">
       <SubType>Code</SubType>
     </Content>
+    <Content Include="public\javascripts\Mailer.js">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="public\stylesheets\logview.css">
       <SubType>Code</SubType>
     </Content>
