@@ -200,3 +200,24 @@ exports.DeleteDescription = async function (req, res)
     res.send(result_array);
     startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
 }
+
+exports.UpdateDescription = async function (req, res)
+{
+    startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
+    var result_array = Object();
+    result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
+
+    try
+    {
+
+    }
+    catch (err)
+    {
+        result_array.resultCode = err.code;
+        result_array.message = err.message;
+    }
+
+
+    res.send(result_array);
+    startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
+}

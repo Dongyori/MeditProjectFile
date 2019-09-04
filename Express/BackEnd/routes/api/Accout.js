@@ -249,6 +249,23 @@ exports.DeleteAccount = async function (req, res)
     {
         var result_array = Object();
         result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
+
+        // post로 받은 데이터중 필수로 있어야 하는것 체크
+        const check = await startUP.CheckBody(req.body, ['accountid']);
+        if (check != true)
+        {
+            result_array.resultCode = check;
+            res.send(result_array);
+            return;
+        }
+        
+        const connection = startUP.Connection;
+
+        const table_string = 'account';
+        const where_string = `accountid = ${req.body.accountid}`;
+        const query_string = `DELETE FROM ${table_string} WHERE ${where_string}`;
+
+        connection.query(query_string);
     }
     catch (err)
     {

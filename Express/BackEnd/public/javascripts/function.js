@@ -1,19 +1,20 @@
 ﻿
-async function MakeValueString(jsonString, treedata, language, majorver, minorver, hotfixver, buildver, noteng = false)
+async function MakeValueString(table, jsonString, treedata, language, majorver, minorver, hotfixver, buildver, noteng = false)
 {
     let valueString = '';
     for (inner in jsonString)
     {
         if (typeof (jsonString[inner]) == 'object')
         {
-            valueString += await MakeValueString(jsonString[inner], treedata + '/' + inner, language, majorver, minorver, hotfixver, buildver);
+            valueString += await MakeValueString(table, jsonString[inner], treedata + '/' + inner, language, majorver, minorver, hotfixver, buildver, noteng);
         }
         else
         {
+            const subquery = `(SELECT IFNULL(MAX(descriptioncount),0) FROM ${table} temp WHERE tree = '${treedata}' AND transkey = '${inner}' ORDER BY majorver DESC, minorver DESC, hotfixver DESC, buildver DESC LIMIT 1)`;
             if (typeof (jsonString[inner]) == 'undefined' || noteng)
-                valueString += `\n('${treedata}', '${inner}', NULL, '${language}', ${majorver}, ${minorver}, ${hotfixver}, ${buildver}),`;
+                valueString += `\n('${treedata}', '${inner}', NULL, '${language}', ${majorver}, ${minorver}, ${hotfixver}, ${buildver}, ${subquery}),\n`;
             else
-                valueString += `\n('${treedata}', '${inner}', '${jsonString[inner]}', "${language}", ${majorver}, ${minorver},${hotfixver},${buildver}),`;
+                valueString += `\n('${treedata}', '${inner}', '${jsonString[inner]}', "${language}", ${majorver}, ${minorver},${hotfixver},${buildver}, ${subquery}),\n`;
         }
     }
     return valueString;

@@ -38,6 +38,22 @@ exports.CreateComment = async function (req, res)
         connection.query(query_string);
         var result_ai = connection.query('SELECT LAST_INSERT_ID() AS AI');
         result_array.commentid = result_ai[0].AI;
+
+        // mail for ...
+        /*const email = connection.query(`SELECT email FROM account WHERE accountid = ${req.body.accountid}`)[0].email;
+        const subject = connection.query(`SELECT subject FROM issue WHERE issueid = ${req.body.issueid}`)[0].subject;
+        var option =
+        {
+            to: `${email}`,
+            subject: `이슈 ${req.body.subject}에 댓글이 작성되었습니다..`,
+            text: `Comment : ${req.body.comment}`
+        }
+        // mail for reference
+        if (typeof (req.body.reference) != 'undefined')
+        {
+            option.to += `, ${req.body.reference}`;
+        }
+        startUP.SendMail(option);*/
     }
     catch (err)
     {

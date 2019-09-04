@@ -33,6 +33,7 @@ router.post('/login', account.LoginCheck);
 router.post('/account/create_account', account.CreateAccount);
 router.post('/account/select_account', account.SelectAccount);
 router.post('/account/update_account', account.UpdateAccount);
+router.post('/account/delete_account', account.DeleteAccount);
 
 router.post('/project/create_project', project.CreateProject);
 router.post('/project/select_project', project.SelectProject);

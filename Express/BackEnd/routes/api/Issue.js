@@ -95,7 +95,7 @@ exports.CreateIssue = async function (req, res)
     startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
 
     // mail for assignor
-    const email = connection.query(`SELECT email FROM account WHERE accountid = ${req.body.accountid}`)[0].email;
+    const email = connection.query(`SELECT email FROM account WHERE accountid = ${req.body.assignor}`)[0].email;
     var option =
     {
         to: `${email}`,
@@ -255,7 +255,7 @@ exports.UpdateIssue = async function (req, res)
     startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
 
     // mail for assignor
-    const email = connection.query(`SELECT email FROM account WHERE accountid = ${req.body.accountid}`)[0].email;
+    const email = connection.query(`SELECT email FROM account WHERE accountid = ${req.body.assignor}`)[0].email;
     var option =
     {
         to: `${email}`,
@@ -313,18 +313,22 @@ exports.StartIssue = async function (req, res)
 
     res.send(result_array);
 
-    // mail for assignor
-    const email = connection.query(`SELECT email FROM account WHERE accountid = ${req.body.accountid}`)[0].email;
-    var option =
+    // mail for assignor.
+    const issue_info = connection.query(`SELECT * FROM issue WHERE issueid = ${req.body.issueid}`);
+    if (issue_info.length != 0)
     {
-        to: `${email}`,
-        subject: `이슈 ${req.body.subject}가 Start상태가 되었습니다.`,
-        text: `majorver : ${req.body.majorver}\nminorver : ${req.body.minorver}\nhotfixver : ${req.body.hotfixver}\n\ndeadline : ${req.body.deadline}`
-    }
-    // mail for reference
-    if (typeof (req.body.reference) != 'undefined')
-    {
-        option.to += `, ${req.body.reference}`;
+        const email = connection.query(`SELECT email FROM account WHERE accountid = ${issue_info.assignor}`)[0].email;
+        var option =
+        {
+            to: `${email}`,
+            subject: `이슈 ${issue_info.subject}가 Start상태가 되었습니다.`,
+            text: `majorver : ${issue_info.majorver}\nminorver : ${issue_info.minorver}\nhotfixver : ${issue_info.hotfixver}\n\ndeadline :  ${issue_info.deadline}`
+        }
+        // mail for reference
+        if (typeof (issue_info.reference) != 'undefined')
+        {
+            option.to += `, ${issue_info.reference}`;
+        }
     }
     startUP.SendMail(option);
 };
@@ -370,18 +374,22 @@ exports.resolveIssue = async function (req, res)
     }
     res.send(result_array);
 
-    // mail for assignor
-    const email = connection.query(`SELECT email FROM account WHERE accountid = ${req.body.accountid}`)[0].email;
-    var option =
+    // mail for assignor.
+    const issue_info = connection.query(`SELECT * FROM issue WHERE issueid = ${req.body.issueid}`);
+    if (issue_info.length != 0)
     {
-        to: `${email}`,
-        subject: `이슈 ${req.body.subject}가 Resolve상태가 되었습니다.`,
-        text: `majorver : ${req.body.majorver}\nminorver : ${req.body.minorver}\nhotfixver : ${req.body.hotfixver}\n\ndeadline : ${req.body.deadline}`
-    }
-    // mail for reference
-    if (typeof (req.body.reference) != 'undefined')
-    {
-        option.to += `, ${req.body.reference}`;
+        const email = connection.query(`SELECT email FROM account WHERE accountid = ${issue_info.assignor}`)[0].email;
+        var option =
+        {
+            to: `${email}`,
+            subject: `이슈 ${issue_info.subject}가 Resolve상태가 되었습니다.`,
+            text: `majorver : ${issue_info.majorver}\nminorver : ${issue_info.minorver}\nhotfixver : ${issue_info.hotfixver}\n\ndeadline :  ${issue_info.deadline}`
+        }
+        // mail for reference
+        if (typeof (issue_info.reference) != 'undefined')
+        {
+            option.to += `, ${issue_info.reference}`;
+        }
     }
     startUP.SendMail(option);
 };
@@ -427,18 +435,22 @@ exports.reopenIssue = async function (req, res)
     }
     res.send(result_array);
 
-    // mail for assignor
-    const email = connection.query(`SELECT email FROM account WHERE accountid = ${req.body.accountid}`)[0].email;
-    var option =
+    // mail for assignor.
+    const issue_info = connection.query(`SELECT * FROM issue WHERE issueid = ${req.body.issueid}`);
+    if (issue_info.length != 0)
     {
-        to: `${email}`,
-        subject: `이슈 ${req.body.subject}가 Reopen상태가 되었습니다.`,
-        text: `majorver : ${req.body.majorver}\nminorver : ${req.body.minorver}\nhotfixver : ${req.body.hotfixver}\n\ndeadline : ${req.body.deadline}`
-    }
-    // mail for reference
-    if (typeof (req.body.reference) != 'undefined')
-    {
-        option.to += `, ${req.body.reference}`;
+        const email = connection.query(`SELECT email FROM account WHERE accountid = ${issue_info.assignor}`)[0].email;
+        var option =
+        {
+            to: `${email}`,
+            subject: `이슈 ${issue_info.subject}가 Reopen상태가 되었습니다.`,
+            text: `majorver : ${issue_info.majorver}\nminorver : ${issue_info.minorver}\nhotfixver : ${issue_info.hotfixver}\n\ndeadline :  ${issue_info.deadline}`
+        }
+        // mail for reference
+        if (typeof (issue_info.reference) != 'undefined')
+        {
+            option.to += `, ${issue_info.reference}`;
+        }
     }
     startUP.SendMail(option);
 };

@@ -87,14 +87,17 @@ exports.ImportData = async function (req, res)
                         if (translated != null)
                             translated = translated.replace(/\\n/gi, "\\\\n");
 
-                        var table_string = `transdata_${req.body.projectid}_${req.body.resourcetype}` + '(`transkey`, `original`, `translation`, `language`, `majorver`, `minorver`, `hotfixver`, `buildver`)';
-                        value_string += `('${tag}', '${original}', '${translated}', '${req.body.language}', ${req.body.majorver}, ${req.body.minorver}, ${req.body.hotfixver}, ${req.body.buildver}),\n`;
+                        var table_string = `transdata_${req.body.projectid}_${req.body.resourcetype}` + '(`transkey`, `original`, `translation`, `language`, `majorver`, `minorver`, `hotfixver`, `buildver`, `descriptioncount`)';
+
+                        const subquery = `SELECT IFNULL(MAX(descriptioncount), 0) FROM transdata_${req.body.projectid}_${req.body.resourcetype} temp WHERE language = '${req.body.language}' AND transkey = '${tag}' ORDER BY majorver DESC, minorver DESC, hotfixver DESC, buildver DESC LIMIT 1`;
+
+                        value_string += `('${tag}', '${original}', '${translated}', '${req.body.language}', ${req.body.majorver}, ${req.body.minorver}, ${req.body.hotfixver}, ${req.body.buildver}, (${subquery})),\n`;
 
                         count++;
 
                         for (const item of add_list_result)
                         {
-                            other_language_value_string += `('${tag}', '${original}', '${translated}', '${item.language}', ${req.body.majorver}, ${req.body.minorver}, ${req.body.hotfixver}, ${req.body.buildver}),\n`
+                            other_language_value_string += `('${tag}', '${original}', '${translated}', '${item.language}', ${req.body.majorver}, ${req.body.minorver}, ${req.body.hotfixver}, ${req.body.buildver}, (${subquery})),\n`;
                         }
                     }
                     value_string = value_string.substring(0, value_string.length - 2);
@@ -114,16 +117,17 @@ exports.ImportData = async function (req, res)
                     const project_data = connection.query(`SELECT * FROM project WHERE projectid = ${req.body.projectid}`);
                     var projectname = project_data[0].projectname.replace(/ /gi, '_');
 
-                    const table_string = `transdata_${req.body.projectid}_${req.body.resourcetype}(tree, transkey, translation, language, majorver, minorver, hotfixver, buildver)`;
+                    const table_string = `transdata_${req.body.projectid}_${req.body.resourcetype}(tree, transkey, translation, language, majorver, minorver, hotfixver, buildver, descriptioncount)`;
                     if (typeof (req.body.data) != 'object')
                     {
                         const index = req.body.data.IndexOF('=');
                         req.body.data = req.body.data.substring(0, index);
                         req.body.data = JSON.parse(req.body.data);
                     }
+                    
 
-                    let value_string = await startUP.MakeValueString(req.body.data, '', req.body.language, req.body.majorver, req.body.minorver, req.body.hotfixver, req.body.buildver);
-                    value_string = value_string.substring(0, value_string.length - 1);
+                    let value_string = await startUP.MakeValueString(`transdata_${req.body.projectid}_${req.body.resourcetype}`, req.body.data, '', req.body.language, req.body.majorver, req.body.minorver, req.body.hotfixver, req.body.buildver);
+                    value_string = value_string.substring(0, value_string.length - 2);
                     var query_string = `INSERT INTO ${table_string} VALUES ${value_string}` + 'ON DUPLICATE KEY UPDATE translation = VALUES(`translation`)';
                     connection.query(query_string);
 
@@ -131,7 +135,7 @@ exports.ImportData = async function (req, res)
                     {
                         for (const item of add_list_result)
                         {
-                            other_language_value_string += await startUP.MakeValueString(req.body.data, '', item.language, req.body.majorver,   req.body.minorver, req.body.hotfixver, req.body.buildver, true);
+                            other_language_value_string += await startUP.MakeValueString(`transdata_${req.body.projectid}_${req.body.resourcetype}`, req.body.data, '', item.language, req.body.majorver, req.body.minorver, req.body.hotfixver, req.body.buildver, true);
                         }
                         other_language_value_string = other_language_value_string.substring(0, other_language_value_string.length - 1);
                         const other_language_query_string = `INSERT INTO ${table_string} VALUES ${other_language_value_string}`;
@@ -324,7 +328,7 @@ exports.SelectData = async function (req, res)
         }
         var projectname = project_data[0].projectname.replace(/ /gi, '_');
 
-        const buildver_subquery_string = '(SELECT MAX(buildver) FROM project_version WHERE ' + `language = '${req.body.language}' AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver} AND hotfixver = ${req.body.hotfixver} AND resourcetype = '${req.body.resourcetype}')`;
+        const buildver_subquery_string = '(SELECT MAX(buildver) FROM project_version WHERE ' + `language = '${req.body.language}' AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver} AND hotfixver = ${req.body.hotfixver} AND resourcetype = '${req.body.resourcetype}' AND projectid = ${req.body.projectid})`;
 
         const table_string = `transdata_${req.body.projectid}_${req.body.resourcetype}`;
         const where_string = `language = '${req.body.language}' AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver} AND hotfixver = ${req.body.hotfixver} AND buildver = ${buildver_subquery_string}`;
@@ -407,24 +411,85 @@ exports.AddData = async function (req, res)
         switch (req.body.resourcetype)
         {
             case 'app':
-                var insert_table_string = `${table_string}(transkey, original, language, majorver, minorver, hotfixver, buildver, descriptioncount)`;
-                for (var row of query_result)
+                const parser = require('fast-xml-parser');
+
+                var insert_table_string = `${table_string}(transkey, original, language, majorver, minorver, hotfixver, buildver, descriptioncount, translation)`;
+
+                if (typeof (req.body.data) != 'undefined')
                 {
-                    row.original = row.original.replace(/\\n/gi, "\\\\n");
-                    insert_value_string += `("${row.transkey}", "${row.original}", "${req.body.language}", ${req.body.majorver}, ${req.body.minorver}, ${req.body.hotfixver}, ${req.body.buildver}, ${row.descriptioncount}),`;
+                    var options = {
+                        attributeNamePrefix: "",
+                        attrNodeName: "attr", //default is 'false'
+                        textNodeName: "#text",
+                        ignoreAttributes: false,
+                        ignoreNameSpace: false,
+                        allowBooleanAttributes: false,
+                        parseNodeValue: true,
+                        parseAttributeValue: false,
+                        trimValues: false,
+                        cdataTagName: "__cdata", //default is 'false'
+                        cdataPositionChar: "\\c",
+                        localeRange: "", //To support non english character in tag/attribute values.
+                        parseTrueNumberOnly: false
+                    };
+
+                    if (parser.validate(req.body.data) === true)
+                        var data = parser.parse(req.body.data, options);
+
+                    for (var row of query_result)
+                    {
+                        row.original = row.original.replace(/\\n/gi, "\\\\n");
+                        var translation = 'NULL';
+
+                        for (const transitem of data.Translation.String)
+                        {
+                            translation = 'NULL';
+                            if (transitem.attr.ID == row.transkey)
+                            {
+                                if (transitem.Translated != null)
+                                {
+                                    translation = transitem.Translated.replace(/\\n/gi, "\\\\n");
+                                    translation = translation.replace(/'/gi, "''");
+                                }
+                                break;
+                            }
+                        }
+                        insert_value_string += `("${row.transkey}", "${row.original}", "${req.body.language}", ${req.body.majorver}, ${req.body.minorver}, ${req.body.hotfixver}, ${req.body.buildver}, ${row.descriptioncount}, '${translation}'),\n`;
+                    }
                 }
                 break;
             case 'web':
-                var insert_table_string = `${table_string}(tree, transkey, language, majorver, minorver, hotfixver, buildver, descriptioncount)`;
+                var insert_table_string = `${table_string}(tree, transkey, language, majorver, minorver, hotfixver, buildver, descriptioncount, translation)`;
                 for (var row of query_result)
                 {
-                    insert_value_string += `("${row.tree}", "${row.transkey}", "${req.body.language}", ${req.body.majorver}, ${req.body.minorver}, ${req.body.hotfixver}, ${req.body.buildver}, ${row.descriptioncount}),`;
+                    var translation = 'NULL';
+                    if (typeof (req.body.data) != 'undefined')
+                    {
+                        var target = req.body.data;
+                        translation = 'NULL';
+                        const treearray = row.tree.split('/');
+                        for (const treeitem of treearray)
+                        {
+                            if (treeitem == '')
+                                continue;
+                            if (typeof (target[treeitem]) == 'undefined')
+                                break;
+                            target = target[treeitem];
+                        }
+                        if (target != req.body.data)
+                        {
+                            translation = target[row.transkey];
+                            translation = translation.replace(/\\n/gi, "\\\\n");
+                            translation = translation.replace(/'/gi, "''");
+                        }
+                    }
+                    insert_value_string += `("${row.tree}", "${row.transkey}", "${req.body.language}", ${req.body.majorver}, ${req.body.minorver}, ${req.body.hotfixver}, ${req.body.buildver}, ${row.descriptioncount}, '${translation}'),\n`;
                 }
                 break
             default:
                 break;
         }
-        insert_value_string = insert_value_string.substring(0, insert_value_string.length - 1);
+        insert_value_string = insert_value_string.substring(0, insert_value_string.length - 2);
         // other_language_value_string = other_language_value_string.substring(0, other_language_value_string.length - 1);
 
         const insert_query_string = `INSERT INTO ${insert_table_string} VALUES ${insert_value_string}`;
