@@ -197,20 +197,25 @@ exports.CreateVersion = async function (req, res)
 
         // 동기 DB
         const connection = startUP.Connection;
+
+        // 새로운 빌드 버전 계산
         const select_buildver_query = `(SELECT buildver FROM (SELECT IFNULL(MAX(buildver) + 1, 0) AS buildver FROM project_version WHERE projectid = ${req.body.projectid} AND language = '${req.body.language}' AND resourcetype = '${req.body.resourcetype}' AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver} AND hotfixver = ${req.body.hotfixver}) temp)`;
 
         const buildver = connection.query(select_buildver_query);
-         
+
+        // project_version 테이블에 새로운 빌드버전을 포함해서 Insert
         const table_string = `project_version(\`projectid\`, \`majorver\`, \`minorver\`, \`language\`, \`resourcetype\`, \`hotfixver\`, \`buildver\`)`;
         const value_string = `(${req.body.projectid}, ${req.body.majorver}, ${req.body.minorver}, '${req.body.language}', '${req.body.resourcetype}', ${req.body.hotfixver}, ${buildver[0].buildver})`;
         const query_string = `INSERT INTO ${table_string} VALUES ${value_string}`;
 
         connection.query(query_string);
+
         result_array.buildver = buildver[0].buildver;
 
+        // 영어가 아닌 언어중 프로젝트에서 사용되는 언어 구하기 
         const add_list_query = `SELECT DISTINCT \`language\` FROM \`project_version\` WHERE projectid = ${req.body.projectid} AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver} AND hotfixver = ${req.body.hotfixver} AND resourcetype = '${req.body.resourcetype}' AND language != '${req.body.language}'`;
 
-
+        // 프로젝트에서 사용되는 언어를 새로운 버전이 생길때 같이 버전업
         const add_list_result = connection.query(add_list_query);
         let language_value_string = '';
         if (req.body.language == 'english')

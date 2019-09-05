@@ -30,10 +30,21 @@ exports.ImportData = async function (req, res)
         var connection = startUP.Connection;
         var count = 0;
 
+
         // 빌드버전업시 영어만 추가하지말고 현재 그 프로젝트에 존재하는 언어를 추가해줘야함
         const add_list_query = `SELECT DISTINCT \`language\` FROM \`project_version\` WHERE majorver = ${req.body.majorver} AND minorver = ${req.body.minorver} AND hotfixver = ${req.body.hotfixver} AND resourcetype = '${req.body.resourcetype}' AND language != '${req.body.language}'`;
         const add_list_result = connection.query(add_list_query);
         let other_language_value_string = '';
+
+        // 전 버전을 구하기위해 정렬된 전체버전 SELECT
+        const pre_ver_query = `SELECT * FROM project_version WHERE language = '${req.body.language}' AND resourcetype = '${req.body.resourcetype}' AND projectid = ${req.body.projectid} ORDER BY majorver DESC, minorver DESC, hotfixver DESC`;
+        const ver_list = connection.query(pre_ver_query);
+
+        // 전 버전 구하기
+        const pre_ver = startUP.FindPreVer(ver_list, req.body.majorver, req.body.minorver, req.body.hotfixver, req.body.buildver);
+
+        // 변환한 값을 담을 객체
+        var pre_ver_object = Object();
 
         switch (req.body.resourcetype)
         {
@@ -55,8 +66,6 @@ exports.ImportData = async function (req, res)
                         cdataPositionChar: "\\c",
                         localeRange: "", //To support non english character in tag/attribute values.
                         parseTrueNumberOnly: false
-                        //attrValueProcessor: a => he.decode(a, { isAttributeValue: true }),//default is a=>a
-                        //tagValueProcessor: a => he.decode(a) //default is a=>a
                     };
 
                     if (parser.validate(req.body.data) === true)
@@ -64,14 +73,31 @@ exports.ImportData = async function (req, res)
                         var data = parser.parse(req.body.data, options);
                     }
 
-
-                    //const xml_js = require('xml-js');
-                    //const data = await xml_js.xml2js(req.body.data, { compact: true, space: 4 });
                     const project_data = connection.query(`SELECT * FROM project WHERE projectid = ${req.body.projectid}`);
                     var projectname = project_data[0].projectname.replace(/ /gi, '_');
 
-                    let value_string = ''
+                    if (pre_ver != null)
+                    {
+                        for (const language of add_list_result)
+                        {
+                            // 전 버전의 번역 데이터를 새로운 버전의 데이터에 덮어씌우기 위해 SELECT
+                            const pre_ver_where_string = `language = '${language.language}' AND majorver = ${pre_ver.majorver} AND minorver = ${pre_ver.minorver} AND hotfixver = ${pre_ver.hotfixver} AND buildver = ${pre_ver.buildver}`;
+                            const pre_ver_language_query = `SELECT * FROM transdata_${req.body.projectid}_${req.body.resourcetype} WHERE ${pre_ver_where_string}`;
+                            const pre_ver_language = connection.query(pre_ver_language_query);
 
+                            var laguage_object = Object();
+                            // Key로 접근하기 위해 Array -> Key : Value의 객체로 변환
+                            for (const item of pre_ver_language)
+                            {
+                                laguage_object[item.transkey] = item.translation;
+                            }
+                            pre_ver_object[language.language] = laguage_object;
+                        }
+                    }
+
+                    // 받은 데이터를 원본으로 하며 전 버전의 번역데이터를 참고하여 INSERT
+
+                    let value_string = '';
                     for (let item of data.Translation.String)
                     {
                         let tag = item.attr.ID;
@@ -87,6 +113,8 @@ exports.ImportData = async function (req, res)
                         if (translated != null)
                             translated = translated.replace(/\\n/gi, "\\\\n");
 
+
+
                         var table_string = `transdata_${req.body.projectid}_${req.body.resourcetype}` + '(`transkey`, `original`, `translation`, `language`, `majorver`, `minorver`, `hotfixver`, `buildver`, `descriptioncount`)';
 
                         const subquery = `SELECT IFNULL(MAX(descriptioncount), 0) FROM transdata_${req.body.projectid}_${req.body.resourcetype} temp WHERE language = '${req.body.language}' AND transkey = '${tag}' ORDER BY majorver DESC, minorver DESC, hotfixver DESC, buildver DESC LIMIT 1`;
@@ -97,6 +125,18 @@ exports.ImportData = async function (req, res)
 
                         for (const item of add_list_result)
                         {
+                            // 이전버전의 같은 키의 번역이 있다면 덮어 씌운다
+                            if (typeof (pre_ver_object[item.language]) != 'undefined')
+                            {
+                                const language_pre_data = pre_ver_object[item.language];
+                                if (typeof (language_pre_data[tag]) != 'undefined')
+                                {
+                                    translated = language_pre_data[tag];
+                                    translated = translated.replace(/'/gi, "''");
+                                    translated = translated.replace(/\\n/gi, "\\\\n");
+                                }
+                            }
+
                             other_language_value_string += `('${tag}', '${original}', '${translated}', '${item.language}', ${req.body.majorver}, ${req.body.minorver}, ${req.body.hotfixver}, ${req.body.buildver}, (${subquery})),\n`;
                         }
                     }
@@ -124,7 +164,26 @@ exports.ImportData = async function (req, res)
                         req.body.data = req.body.data.substring(0, index);
                         req.body.data = JSON.parse(req.body.data);
                     }
-                    
+
+                    if (pre_ver != null)
+                    {
+                        for (const language of add_list_result)
+                        {
+                            // 전 버전의 번역 데이터를 새로운 버전의 데이터에 덮어씌우기 위해 SELECT
+                            const pre_ver_where_string = `language = '${language.language}' AND majorver = ${pre_ver.majorver} AND minorver = ${pre_ver.minorver} AND hotfixver = ${pre_ver.hotfixver} AND buildver = ${pre_ver.buildver}`;
+                            const pre_ver_language_query = `SELECT * FROM transdata_${req.body.projectid}_${req.body.resourcetype} WHERE ${pre_ver_where_string}`;
+                            const pre_ver_language = connection.query(pre_ver_language_query);
+
+                            var laguage_object = Object();
+                            // Key로 접근하기 위해 Array -> Key : Value의 객체로 변환
+                            for (const item of pre_ver_language)
+                            {
+                                laguage_object[item.transkey] = item.translation;
+                            }
+                            pre_ver_object[language.language] = laguage_object;
+                        }
+                    }
+
 
                     let value_string = await startUP.MakeValueString(`transdata_${req.body.projectid}_${req.body.resourcetype}`, req.body.data, '', req.body.language, req.body.majorver, req.body.minorver, req.body.hotfixver, req.body.buildver);
                     value_string = value_string.substring(0, value_string.length - 2);
@@ -135,9 +194,9 @@ exports.ImportData = async function (req, res)
                     {
                         for (const item of add_list_result)
                         {
-                            other_language_value_string += await startUP.MakeValueString(`transdata_${req.body.projectid}_${req.body.resourcetype}`, req.body.data, '', item.language, req.body.majorver, req.body.minorver, req.body.hotfixver, req.body.buildver, true);
+                            other_language_value_string += await startUP.MakeValueString(`transdata_${req.body.projectid}_${req.body.resourcetype}`, req.body.data, '', item.language, req.body.majorver, req.body.minorver, req.body.hotfixver, req.body.buildver, true, pre_ver_object);
                         }
-                        other_language_value_string = other_language_value_string.substring(0, other_language_value_string.length - 1);
+                        other_language_value_string = other_language_value_string.substring(0, other_language_value_string.length - 2);
                         const other_language_query_string = `INSERT INTO ${table_string} VALUES ${other_language_value_string}`;
                         connection.query(other_language_query_string);
                     }
@@ -270,6 +329,7 @@ exports.ExportData = async function (req, res)
 /*----------------------------------------------------------*/
 // SelectData
 // 설명 : 리소스 데이터를 조회 하는 API 함수
+// 가장 최신 buildver을 보내준다
 // 입력 : projectid, majorver, minorver, resourcetype, language
 // 리턴 : result_array
 //       {
@@ -283,7 +343,9 @@ exports.ExportData = async function (req, res)
 //                  translation,
 //                  language,
 //                  majorver,
-//                  minorver
+//                  minorver,
+//                  hotfixver,
+//                  buildver
 //
 //                  Web 일 경우
 //                  transid,
@@ -293,6 +355,8 @@ exports.ExportData = async function (req, res)
 //                  language,
 //                  majorver,
 //                  minorver
+//                  hotfixver,
+//                  buildver
 //               },
 //           ]
 //       }
@@ -331,18 +395,51 @@ exports.SelectData = async function (req, res)
         const buildver_subquery_string = '(SELECT MAX(buildver) FROM project_version WHERE ' + `language = '${req.body.language}' AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver} AND hotfixver = ${req.body.hotfixver} AND resourcetype = '${req.body.resourcetype}' AND projectid = ${req.body.projectid})`;
 
         const table_string = `transdata_${req.body.projectid}_${req.body.resourcetype}`;
-        const where_string = `language = '${req.body.language}' AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver} AND hotfixver = ${req.body.hotfixver} AND buildver = ${buildver_subquery_string}`;
+        //const where_string = `language = '${req.body.language}' AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver} AND hotfixver = ${req.body.hotfixver} AND buildver = ${buildver_subquery_string}`;
+        //const query_string = `SELECT * FROM ${table_string} WHERE ${where_string}`;
+
+
+        const where_string = `language = '${req.body.language}' AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver} AND hotfixver = ${req.body.hotfixver} AND buildver = ${req.body.buildver}`;
         const query_string = `SELECT * FROM ${table_string} WHERE ${where_string}`;
 
-
-        const where_string_old = `language = '${req.body.language}' AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver} AND hotfixver = ${req.body.hotfixver} AND buildver = ${req.body.buildver}`;
-        const query_string_old = `SELECT * FROM ${table_string} WHERE ${where_string_old}`;
-
         const query_result = connection.query(query_string);
-        const query_result_old = connection.query(query_string_old);
 
-        result_array.data = query_result;
-        result_array.olddata = query_result_old;
+        result_array.data = query_result; // 관리자가 등록한 최신버전 ->  이슈 테이블에 등록된 버전
+        //result_array.olddata = query_result_old; // 이슈 테이블에 등록된 버전 -> 위의 전 버전, 근데 0일경우?
+
+        const premax_ver_query = `SELECT * FROM project_version WHERE language = '${req.body.language}' AND resourcetype = '${req.body.resourcetype}' AND projectid = ${req.body.projectid} ORDER BY majorver DESC, minorver DESC, hotfixver DESC`;
+        const ver_list = connection.query(premax_ver_query);
+
+        var premax_ver = null;
+        var checked = false;
+        for (const ver in ver_list)
+        {
+            if (checked == true)
+            {
+                premax_ver = ver_list[ver];
+                break;
+            }
+            if (ver_list[ver].majorver == req.body.majorver)
+            {
+                if (ver_list[ver].minorver == req.body.minorver)
+                {
+                    if (ver_list[ver].hotfixver == req.body.hotfixver)
+                    {
+                        if (ver_list[ver].buildver == req.body.buildver)
+                            checked = true;
+                    }
+                }
+            }
+        }
+
+        if (premax_ver != null)
+        {
+            const where_string_old = `language = '${req.body.language}' AND majorver = ${premax_ver.majorver} AND minorver = ${premax_ver.minorver} AND    hotfixver = ${premax_ver.hotfixver} AND buildver = ${premax_ver.buildver}`;
+            const query_string_old = `SELECT * FROM ${table_string} WHERE ${where_string_old }`;
+            const query_result_old = connection.query(query_string_old );
+            result_array.olddata = query_result_old ;
+        }
+
     }
     catch (err)
     {
@@ -385,6 +482,7 @@ exports.AddData = async function (req, res)
         // DB 연결
         var connection = startUP.Connection;
 
+        // 실제로 존재하는 프로젝트인지 확인
         const project_query = connection.query(`SELECT * FROM project WHERE projectid = ${req.body.projectid}`);
         if (project_query.length == 0)
         {
@@ -394,30 +492,32 @@ exports.AddData = async function (req, res)
             return;
         }
 
+        // 추가되는 언어의 영어버전 데이터 SELECT
         const table_string = `transdata_${req.body.projectid}_${req.body.resourcetype}`;
         const where_string = `language = 'english' AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver} AND hotfixver = ${req.body.hotfixver} AND buildver = ${req.body.buildver}`;
         const query_string = `SELECT * FROM ${table_string} WHERE ${where_string}`;
 
         const query_result = connection.query(query_string);
 
-
+        // 영어버전 데이터가 없는경우
         if (query_result.length == 0)
         {
             result_array.resultCode = 'Not Exist Data';
             res.send(result_array);
             return;
         }
+
+
+
         let insert_value_string = '';
         switch (req.body.resourcetype)
         {
             case 'app':
-                const parser = require('fast-xml-parser');
-
-                var insert_table_string = `${table_string}(transkey, original, language, majorver, minorver, hotfixver, buildver, descriptioncount, translation)`;
-
                 if (typeof (req.body.data) != 'undefined')
                 {
-                    var options = {
+                    var parser = require('fast-xml-parser');
+                    var options =
+                    {
                         attributeNamePrefix: "",
                         attrNodeName: "attr", //default is 'false'
                         textNodeName: "#text",
@@ -431,16 +531,23 @@ exports.AddData = async function (req, res)
                         cdataPositionChar: "\\c",
                         localeRange: "", //To support non english character in tag/attribute values.
                         parseTrueNumberOnly: false
-                    };
+                    }
 
                     if (parser.validate(req.body.data) === true)
                         var data = parser.parse(req.body.data, options);
+                };
 
-                    for (var row of query_result)
+                var insert_table_string = `${table_string}(transkey, original, language, majorver, minorver, hotfixver, buildver, descriptioncount, translation)`;
+
+                // 영어 버전 데이터를 루프
+                for (var row of query_result)
+                {
+                    row.original = row.original.replace(/\\n/gi, "\\\\n");
+                    var translation = 'NULL';
+
+                    // 파일을 첨부한 경우
+                    if (typeof (req.body.data) != 'undefined')
                     {
-                        row.original = row.original.replace(/\\n/gi, "\\\\n");
-                        var translation = 'NULL';
-
                         for (const transitem of data.Translation.String)
                         {
                             translation = 'NULL';
@@ -454,8 +561,8 @@ exports.AddData = async function (req, res)
                                 break;
                             }
                         }
-                        insert_value_string += `("${row.transkey}", "${row.original}", "${req.body.language}", ${req.body.majorver}, ${req.body.minorver}, ${req.body.hotfixver}, ${req.body.buildver}, ${row.descriptioncount}, '${translation}'),\n`;
                     }
+                    insert_value_string += `("${row.transkey}", "${row.original}", "${req.body.language}", ${req.body.majorver}, ${req.body.minorver}, ${req.body.hotfixver}, ${req.body.buildver}, ${row.descriptioncount}, '${translation}'),\n`;
                 }
                 break;
             case 'web':

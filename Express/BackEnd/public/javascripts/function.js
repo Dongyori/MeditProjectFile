@@ -1,20 +1,38 @@
 ﻿
-async function MakeValueString(table, jsonString, treedata, language, majorver, minorver, hotfixver, buildver, noteng = false)
+async function MakeValueString(table, jsonString, treedata, language, majorver, minorver, hotfixver, buildver, noteng = false, pre_ver_data = null)
 {
     let valueString = '';
     for (inner in jsonString)
     {
         if (typeof (jsonString[inner]) == 'object')
         {
-            valueString += await MakeValueString(table, jsonString[inner], treedata + '/' + inner, language, majorver, minorver, hotfixver, buildver, noteng);
+            valueString += await MakeValueString(table, jsonString[inner], treedata + '/' + inner, language, majorver, minorver, hotfixver, buildver, noteng, pre_ver_data);
         }
         else
         {
             const subquery = `(SELECT IFNULL(MAX(descriptioncount),0) FROM ${table} temp WHERE tree = '${treedata}' AND transkey = '${inner}' ORDER BY majorver DESC, minorver DESC, hotfixver DESC, buildver DESC LIMIT 1)`;
+
+            var translation = 'NULL';
             if (typeof (jsonString[inner]) == 'undefined' || noteng)
-                valueString += `\n('${treedata}', '${inner}', NULL, '${language}', ${majorver}, ${minorver}, ${hotfixver}, ${buildver}, ${subquery}),\n`;
+            {
+                if (typeof (pre_ver_data[language]) != 'undefined')
+                {
+                    const language_data = pre_ver_data[language];
+                    if (typeof (language_data[inner]) != 'undefined')
+                    {
+                        translation = language_data[inner];
+                        translation = translation.replace(/'/gi, "''");
+                        translation = translation.replace(/\\n/gi, "\\\\n");
+                        translation = `'${translation}'`;
+                    }
+                }
+            }
             else
-                valueString += `\n('${treedata}', '${inner}', '${jsonString[inner]}', "${language}", ${majorver}, ${minorver},${hotfixver},${buildver}, ${subquery}),\n`;
+            {
+                translation = `'${jsonString[inner]}'`;
+            }
+            
+            valueString += `\n('${treedata}', '${inner}', ${translation}, "${language}", ${majorver}, ${minorver},${hotfixver},${buildver}, ${subquery}),\n`;
         }
     }
     return valueString;
@@ -61,7 +79,34 @@ async function MakeDescriptionValueString(jsonString, treedata, valuepart)
     return valueString;
 }
 
+function FindPreVer(ver_list, majorver, minorver, hotfixver, buildver)
+{
+    var premax_ver = null;
+    var checked = false;
+    for (const ver of ver_list)
+    {
+        if (checked == true)
+        {
+            premax_ver = ver;
+            break;
+        }
+        if (ver.majorver == majorver)
+        {
+            if (ver.minorver == minorver)
+            {
+                if (ver.hotfixver ==hotfixver)
+                {
+                    if (ver.buildver == buildver)
+                        checked = true;
+                }
+            }
+        }
+    }
+    return premax_ver;
+}
+
 
 module.exports.MakeValueString = MakeValueString;
-module.exports.MakeJsObject = MakeJsObject;
 module.exports.MakeDescriptionValueString = MakeDescriptionValueString;
+module.exports.MakeJsObject = MakeJsObject;
+module.exports.FindPreVer = FindPreVer;

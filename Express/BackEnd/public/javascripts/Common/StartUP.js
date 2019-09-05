@@ -64,6 +64,7 @@ var connection = DB.sync();
 module.exports.MakeValueString = Fun.MakeValueString;
 module.exports.MakeJsObject = Fun.MakeJsObject;
 module.exports.MakeDescriptionValueString = Fun.MakeDescriptionValueString;
+module.exports.FindPreVer = Fun.FindPreVer;
 module.exports.Query = DB.query;
 module.exports.DB = DB;
 module.exports.Connection = connection;

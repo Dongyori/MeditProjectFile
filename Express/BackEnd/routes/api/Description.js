@@ -209,7 +209,48 @@ exports.UpdateDescription = async function (req, res)
 
     try
     {
+        // 필수 값 체크
+        const check = await startUP.CheckBody(req.body, ['descriptionid']);
+        if (check != true)
+        {
+            result_array.resultCode = check;
+            res.send(result_array);
+            return;
+        }
 
+        var connection = startUP.Connection;
+        var columns = connection.query("show full columns from `transdata_description`");
+
+        // update set where
+        const table_string = '`transdata_description`';
+        let update_string = '';
+        const where_string = `descriptionid = ${req.body.descriptionid}`
+        // 컬럼 목록을 순회
+        for (let column of columns)
+        {
+            // req에 있는경우
+            if (req.body[column.Field] != null)
+            {
+                if (column.Field == 'descriptionid')
+                    continue;
+                update_string += `${column.Field} = `
+                if (column.Type.match('int') == 'int')
+                    update_string += `${req.body[column.Field]}, `;
+                else
+                {
+                    req.body[column.Field] = req.body[column.Field].replace(/'/gi, "''");
+                    update_string += `'${req.body[column.Field]}', `;
+                }
+            }
+        }
+
+        // 끝 (, ) 제거
+        update_string = update_string.substr(0, update_string.length - 2);
+
+        var query_string = `UPDATE ${table_string} SET ${update_string} WHERE ${where_string}`;
+
+
+        connection.query(query_string);
     }
     catch (err)
     {

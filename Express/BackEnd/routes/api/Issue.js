@@ -314,7 +314,7 @@ exports.StartIssue = async function (req, res)
     res.send(result_array);
 
     // mail for assignor.
-    const issue_info = connection.query(`SELECT * FROM issue WHERE issueid = ${req.body.issueid}`);
+    const issue_info = connection.query(`SELECT * FROM issue WHERE issueid = ${req.body.issueid}`)[0];
     if (issue_info.length != 0)
     {
         const email = connection.query(`SELECT email FROM account WHERE accountid = ${issue_info.assignor}`)[0].email;
@@ -375,7 +375,7 @@ exports.resolveIssue = async function (req, res)
     res.send(result_array);
 
     // mail for assignor.
-    const issue_info = connection.query(`SELECT * FROM issue WHERE issueid = ${req.body.issueid}`);
+    const issue_info = connection.query(`SELECT * FROM issue WHERE issueid = ${req.body.issueid}`)[0];
     if (issue_info.length != 0)
     {
         const email = connection.query(`SELECT email FROM account WHERE accountid = ${issue_info.assignor}`)[0].email;
@@ -436,7 +436,7 @@ exports.reopenIssue = async function (req, res)
     res.send(result_array);
 
     // mail for assignor.
-    const issue_info = connection.query(`SELECT * FROM issue WHERE issueid = ${req.body.issueid}`);
+    const issue_info = connection.query(`SELECT * FROM issue WHERE issueid = ${req.body.issueid}`)[0];
     if (issue_info.length != 0)
     {
         const email = connection.query(`SELECT email FROM account WHERE accountid = ${issue_info.assignor}`)[0].email;
