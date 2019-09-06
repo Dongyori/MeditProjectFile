@@ -543,14 +543,14 @@ exports.AddData = async function (req, res)
                 for (var row of query_result)
                 {
                     row.original = row.original.replace(/\\n/gi, "\\\\n");
-                    var translation = 'NULL';
+                    var translation = '';
 
                     // 파일을 첨부한 경우
                     if (typeof (req.body.data) != 'undefined')
                     {
                         for (const transitem of data.Translation.String)
                         {
-                            translation = 'NULL';
+                            translation = '';
                             if (transitem.attr.ID == row.transkey)
                             {
                                 if (transitem.Translated != null)
