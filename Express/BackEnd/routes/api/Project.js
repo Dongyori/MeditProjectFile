@@ -199,7 +199,16 @@ exports.CreateVersion = async function (req, res)
         const connection = startUP.Connection;
 
         // 새로운 빌드 버전 계산
-        const select_buildver_query = `(SELECT buildver FROM (SELECT IFNULL(MAX(buildver) + 1, 0) AS buildver FROM project_version WHERE projectid = ${req.body.projectid} AND language = '${req.body.language}' AND resourcetype = '${req.body.resourcetype}' AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver} AND hotfixver = ${req.body.hotfixver}) temp)`;
+        let select_buildver_query = null;
+        if (req.body.language == 'english')
+        {
+            select_buildver_query = `(SELECT buildver FROM (SELECT IFNULL(MAX(buildver) + 1, 0) AS buildver FROM project_version WHERE projectid = ${req.body.projectid} AND language = '${req.body.language}' AND resourcetype = '${req.body.resourcetype}' AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver} AND hotfixver = ${req.body.hotfixver}) temp)`;
+        }
+        else
+        {
+            select_buildver_query = `(SELECT buildver FROM (SELECT IFNULL(MAX(buildver), 0) AS buildver FROM project_version WHERE projectid = ${req.body.projectid} AND language = 'english' AND resourcetype = '${req.body.resourcetype}' AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver} AND hotfixver = ${req.body.hotfixver}) temp)`;
+        }
+
 
         const buildver = connection.query(select_buildver_query);
 
