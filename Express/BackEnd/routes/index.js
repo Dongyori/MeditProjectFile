@@ -60,6 +60,7 @@ router.post('/issue/comment/delete_comment', comment.DeleteComment);
 
 router.post('/translate/import_data', translate.ImportData);
 router.post('/translate/export_data', translate.ExportData);
+router.post('/translate/export_late_data', translate.ExportDataLated);
 router.post('/translate/select_data', translate.SelectData);
 router.post('/translate/add_data', translate.AddData);
 router.post('/translate/update_data', translate.UpdateData);

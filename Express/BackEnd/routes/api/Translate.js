@@ -326,6 +326,97 @@ exports.ExportData = async function (req, res)
     //startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
 };
 
+
+exports.ExportDataLated = async function (req, res)
+{
+    //startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
+    var result_array = Object();
+    result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
+
+    try
+    {
+        // 필수 값 체크
+        const check = await startUP.CheckBody(req.body, ['projectid', 'resourcetype', 'language']);
+        if (check != true)
+        {
+            result_array.resultCode = check;
+            res.send(result_array);
+            startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
+            return;
+        }
+
+        // DB 연결
+        var connection = startUP.Connection;
+
+        const project_query = connection.query(`SELECT * FROM project WHERE projectid = ${req.body.projectid}`);
+        if (project_query.length == 0)
+        {
+            result_array.resultCode = 'NOT EXIST PROJECT';
+            res.send(result_array);
+            startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
+            return;
+        }
+        
+        // 필요한 최신 버전
+        const lated_ver = `SELECT * FROM project_version WHERE projectid = ${req.body.projectid} AND language = '${req.body.language}' AND resourcetype = '${req.body.resourcetype}' ORDER BY majorver DESC, minorver DESC, hotfixver DESC, buildver DESC LIMIT 1`;
+        const lated_ver_result = connection.query(lated_ver)[0];
+
+        const buildver_subquery_string = '(SELECT MAX(buildver) FROM project_version WHERE ' + `language = '${req.body.language}' AND majorver = ${lated_ver_result.majorver} AND minorver = ${lated_ver_result.minorver} AND hotfixver = ${lated_ver_result.hotfixver} AND projectid = ${req.body.projectid} AND resourcetype = '${req.body.resourcetype}')`;
+
+        const table_string = `transdata_${req.body.projectid}_${req.body.resourcetype}`;
+        const where_string = `language = '${req.body.language}' AND majorver = ${lated_ver_result.majorver} AND minorver = ${lated_ver_result.minorver} AND hotfixver = ${lated_ver_result.hotfixver} AND buildver = ${lated_ver_result.buildver}`;
+        const query_string = `SELECT * FROM ${table_string} WHERE ${where_string} ORDER BY transid`;
+
+
+        const query_result = connection.query(query_string);
+        const xml_writer = require('xml-writer');
+        switch (req.body.resourcetype)
+        {
+            case 'app':
+                const xw = new xml_writer(true, '\t');
+                xw.startDocument('1.0', 'UTF-8', false);
+                xw.startElement('Translation');
+                //xw.writeAttribute('Version', `V${req.body.majorver}.${req.body.minorver}`);
+                xw.writeAttribute('Version', `V1.0`);
+                for (const item of query_result)
+                {
+                    xw.startElement('String');
+                    xw.writeAttribute('ID', item.transkey);
+                    xw.startElement('Original');
+                    if (item.original == 'undefined')
+                        xw.text('');
+                    else
+                        xw.writeRaw(`${item.original}`);
+                    xw.endElement();
+                    xw.startElement('Translated');
+                    if (item.translation == 'undefined')
+                        xw.text('');
+                    else
+                        xw.writeRaw(`${item.translation}`);
+                    xw.endElement();
+                    xw.endElement();
+                }
+                xw.endElement();
+                xw.endDocument();
+                result_array.data = xw.toString();
+                result_array.filename = `${req.body.projectid}_${req.body.language}${lated_ver_result.majorver}_${lated_ver_result.minorver}.lan`;
+                break;
+            case 'web':
+                result_array.data = await startUP.MakeJsObject(query_result);
+                result_array.filename = `${req.body.projectid}_${req.body.language}${lated_ver_result.majorver}_${lated_ver_result.minorver}.js`;
+                break;
+        }
+    }
+    catch (err)
+    {
+        result_array.resultCode = err.code;
+        result_array.message = err.message;
+    }
+
+    res.send(result_array);
+    //startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
+};
+
 /*----------------------------------------------------------*/
 // SelectData
 // 설명 : 리소스 데이터를 조회 하는 API 함수

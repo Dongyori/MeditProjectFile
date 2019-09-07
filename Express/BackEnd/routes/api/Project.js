@@ -383,7 +383,7 @@ exports.SelectLanguage = async function (req, res)
         result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
 
         // post로 받은 데이터중 필수로 있어야 하는것 체크
-        const check = await startUP.CheckBody(req.body, ['projectid', 'majorver', 'minorver', 'hotfixver']);
+        const check = await startUP.CheckBody(req.body, ['projectid', 'resourcetype', 'majorver', 'minorver', 'hotfixver']);
         if (check != true)
         {
             // resultCode에 응답코드를 남긴다
@@ -397,7 +397,7 @@ exports.SelectLanguage = async function (req, res)
         const connection = startUP.Connection;
 
         const table_string = `project_version`;
-        const where_string = `projectid = ${req.body.projectid} AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver} AND hotfixver = ${req.body.hotfixver}`;
+        const where_string = `projectid = ${req.body.projectid} AND resourcetype = '${req.body.resourcetype}' AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver} AND hotfixver = ${req.body.hotfixver}`;
         const query_string = `SELECT DISTINCT language FROM ${table_string} WHERE ${where_string}`;
 
 
