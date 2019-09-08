@@ -222,7 +222,7 @@ exports.CreateVersion = async function (req, res)
         result_array.buildver = buildver[0].buildver;
 
         // 영어가 아닌 언어중 프로젝트에서 사용되는 언어 구하기 
-        const add_list_query = `SELECT DISTINCT \`language\` FROM \`project_version\` WHERE projectid = ${req.body.projectid} AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver} AND hotfixver = ${req.body.hotfixver} AND resourcetype = '${req.body.resourcetype}' AND language != '${req.body.language}'`;
+        const add_list_query = `SELECT DISTINCT \`language\` FROM \`project_version\` WHERE projectid = ${req.body.projectid} AND resourcetype = '${req.body.resourcetype}' AND language != '${req.body.language}'`;
 
         // 프로젝트에서 사용되는 언어를 새로운 버전이 생길때 같이 버전업
         const add_list_result = connection.query(add_list_query);

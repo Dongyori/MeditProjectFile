@@ -4,7 +4,7 @@ var mysql = require('sync-mysql');
 
 const connection = mysql2.createConnection({
     host: 'localhost',
-    user: 'medit',
+    user: 'root',
     password: '0000',
     database: 'medit_project'
 });
@@ -13,7 +13,7 @@ module.exports.connection = connection;
 
 module.exports.sync = () => new mysql({
     host: 'localhost',
-    user: 'medit',
+    user: 'root',
     password: '0000',
     database: 'medit_project',
     multipleStatements: true,
