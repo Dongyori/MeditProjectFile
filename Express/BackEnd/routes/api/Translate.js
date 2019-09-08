@@ -273,10 +273,16 @@ exports.ExportData = async function (req, res)
             return;
         }
 
+
         const buildver_subquery_string = '(SELECT MAX(buildver) FROM project_version WHERE ' + `language = '${req.body.language}' AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver} AND hotfixver = ${req.body.hotfixver} AND projectid = ${req.body.projectid} AND resourcetype = '${req.body.resourcetype}')`;
 
+        let buildver = buildver_subquery_string;
+
+        if (typeof (req.body.buildver) == 'number')
+            buildver = req.body.buildver;
+
         const table_string = `transdata_${req.body.projectid}_${req.body.resourcetype}`;
-        const where_string = `language = '${req.body.language}' AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver} AND hotfixver = ${req.body.hotfixver} AND buildver = ${buildver_subquery_string}`;
+        const where_string = `language = '${req.body.language}' AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver} AND hotfixver = ${req.body.hotfixver} AND buildver = ${buildver}`;
         const query_string = `SELECT * FROM ${table_string} WHERE ${where_string} ORDER BY transid`;
 
 
@@ -402,11 +408,11 @@ exports.ExportDataLated = async function (req, res)
                 xw.endElement();
                 xw.endDocument();
                 result_array.data = xw.toString();
-                result_array.filename = `${req.body.projectid}_${req.body.language}${lated_ver_result.majorver}_${lated_ver_result.minorver}.lan`;
+                result_array.filename = `${project_query.projectname}_${req.body.language}${lated_ver_result.majorver}_${lated_ver_result.minorver}.lan`;
                 break;
             case 'web':
                 result_array.data = await startUP.MakeJsObject(query_result);
-                result_array.filename = `${req.body.projectid}_${req.body.language}${lated_ver_result.majorver}_${lated_ver_result.minorver}.js`;
+                result_array.filename = `${project_query.projectname}_${req.body.language}${lated_ver_result.majorver}_${lated_ver_result.minorver}.js`;
                 break;
         }
     }
