@@ -270,6 +270,7 @@ exports.ExportData = async function (req, res)
             startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
             return;
         }
+
         const buildver_subquery_string = '(SELECT MAX(buildver) FROM project_version WHERE ' + `language = '${req.body.language}' AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver} AND hotfixver = ${req.body.hotfixver} AND projectid = ${req.body.projectid} AND resourcetype = '${req.body.resourcetype}')`;
 
         const table_string = `transdata_${req.body.projectid}_${req.body.resourcetype}`;
