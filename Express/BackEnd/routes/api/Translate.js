@@ -317,11 +317,11 @@ exports.ExportData = async function (req, res)
                 xw.endElement();
                 xw.endDocument();
                 result_array.data = xw.toString();
-                result_array.filename = `${project_query.projectname}_${req.body.language}${req.body.majorver}_${req.body.minorver}.lan`;
+                result_array.filename = `${project_query[0].projectname}_${req.body.language}${req.body.majorver}_${req.body.minorver}.lan`;
                 break;
             case 'web':
                 result_array.data = await startUP.MakeJsObject(query_result);
-                result_array.filename = `${project_query.projectname}_${req.body.language}${req.body.majorver}_${req.body.minorver}.js`;
+                result_array.filename = `${project_query[0].projectname}_${req.body.language}${req.body.majorver}_${req.body.minorver}.js`;
                 break;
         }
     }
@@ -408,11 +408,11 @@ exports.ExportDataLated = async function (req, res)
                 xw.endElement();
                 xw.endDocument();
                 result_array.data = xw.toString();
-                result_array.filename = `${project_query.projectname}_${req.body.language}${lated_ver_result.majorver}_${lated_ver_result.minorver}.lan`;
+                result_array.filename = `${project_query[0].projectname}_${req.body.language}${lated_ver_result.majorver}_${lated_ver_result.minorver}.lan`;
                 break;
             case 'web':
                 result_array.data = await startUP.MakeJsObject(query_result);
-                result_array.filename = `${project_query.projectname}_${req.body.language}${lated_ver_result.majorver}_${lated_ver_result.minorver}.js`;
+                result_array.filename = `${project_query[0].projectname}_${req.body.language}${lated_ver_result.majorver}_${lated_ver_result.minorver}.js`;
                 break;
         }
     }
