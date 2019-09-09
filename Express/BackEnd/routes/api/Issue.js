@@ -72,14 +72,14 @@ exports.CreateIssue = async function (req, res)
             }
         }
 
-        const buildver_subquery_string = `(SELECT IFNULL(MAX(buildver), 0) FROM project_version WHERE projectid = ${req.body.projectid} AND resourcetype = '${req.body.resourcetype}' AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver} AND hotfixver = ${req.body.hotfixver})`;
+        const buildver_subquery_string = `(SELECT IFNULL(MAX(buildver), 0) AS buildver FROM project_version WHERE projectid = ${req.body.projectid} AND resourcetype = '${req.body.resourcetype}' AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver} AND hotfixver = ${req.body.hotfixver})`;
 
         // 쿼리 마지막
         table_string += `, \`status\`, \`buildver\`)`;
         value_string += `, 0, ${buildver_subquery_string})`;
 
         const query_string = `INSERT INTO ${table_string} VALUES ${value_string}`;
-
+        var buildver = connection.query(buildver_subquery_string)[0];
 
         connection.query(query_string);
         // auto increment 값 가져오기 (issueid)
@@ -96,11 +96,13 @@ exports.CreateIssue = async function (req, res)
 
     // mail for assignor
     const email = connection.query(`SELECT email FROM account WHERE accountid = ${req.body.assignor}`)[0].email;
+    const projectname = connection.query(`SELECT projectname FROM project where projectid = ${req.body.projectid}`)[0].projectname;
+    //console.log(projectname);
     var option =
     {
         to: `${email}`,
         subject: `[Medit Ling] 이슈 ${req.body.subject}가 생성되었습니다`,
-        text: `Project : ${req.body.projectname}\nVerSion : ${req.body.majorver}.${req.body.minorver}.${req.body.hotfixver}.${req.body.buildver} \nLanguage : ${req.body.language}`
+        text: `Project : ${projectname}\nVerSion : ${req.body.majorver}.${req.body.minorver}.${req.body.hotfixver}.${buildver.buildver} \nLanguage : ${req.body.language}\n`
     }
     // mail for reference
     if (typeof (req.body.reference) != 'undefined')
@@ -317,7 +319,7 @@ exports.StartIssue = async function (req, res)
     const issue_info = connection.query(`SELECT * FROM issue WHERE issueid = ${req.body.issueid}`)[0];
     if (issue_info.length != 0)
     {
-        const email = connection.query(`SELECT email FROM account WHERE accountid = ${issue_info.creator}`)[0].email;
+        const email = connection.query(`SELECT email FROM account WHERE accountid = ${issue_info.assignor}`)[0].email;
         var option =
         {
             to: `${email}`,
@@ -378,7 +380,7 @@ exports.resolveIssue = async function (req, res)
     const issue_info = connection.query(`SELECT * FROM issue WHERE issueid = ${req.body.issueid}`)[0];
     if (issue_info.length != 0)
     {
-        const email = connection.query(`SELECT email FROM account WHERE accountid = ${issue_info.creator}`)[0].email;
+        const email = connection.query(`SELECT email FROM account WHERE accountid = ${issue_info.assignor}`)[0].email;
         var option =
         {
             to: `${email}`,

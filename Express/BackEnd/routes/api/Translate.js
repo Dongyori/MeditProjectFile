@@ -143,7 +143,7 @@ exports.ImportData = async function (req, res)
 
                     value_string = value_string.substring(0, value_string.length - 2);
                     var query_string = `INSERT INTO ${table_string} VALUES ${value_string}`/*` ON DUPLICATE KEY UPDATE original = '${original}', translation = '${translated}'`*/;
-                    console.log(query_string);
+                    //console.log(query_string);
                     connection.query(query_string);
                     other_language_value_string = other_language_value_string.substring(0, other_language_value_string.length - 2);
                     if (add_list_result.length != 0)
@@ -317,11 +317,11 @@ exports.ExportData = async function (req, res)
                 xw.endElement();
                 xw.endDocument();
                 result_array.data = xw.toString();
-                result_array.filename = `${req.body.projectid}_${req.body.language}${req.body.majorver}_${req.body.minorver}.lan`;
+                result_array.filename = `${project_query.projectname}_${req.body.language}${req.body.majorver}_${req.body.minorver}.lan`;
                 break;
             case 'web':
                 result_array.data = await startUP.MakeJsObject(query_result);
-                result_array.filename = `${req.body.projectid}_${req.body.language}${req.body.majorver}_${req.body.minorver}.js`;
+                result_array.filename = `${project_query.projectname}_${req.body.language}${req.body.majorver}_${req.body.minorver}.js`;
                 break;
         }
     }
@@ -686,11 +686,9 @@ exports.AddData = async function (req, res)
 
                         if (target != req.body.data)
                         {
-                            
-                            translation = target[row.transkey];
-                            if(translation == 'undefined' || translation ==='undefined' || translation == null) {
-                               console.log('다르네잉');
-                            } else {
+                            if (target[row.transkey] != null)
+                            {
+                                translation = target[row.transkey];
                                 translation = translation.replace(/\\n/gi, "\\\\n");
                                 translation = translation.replace(/'/gi, "''");
                             }
@@ -768,11 +766,14 @@ exports.UpdateData = async function (req, res)
                     const data = JSON.parse(req.body.data);
                     for (let item of data)
                     {
-                        //item.translation.replace(/'/gi, "''");
                         if (item.translation == null)
                             query_string += `UPDATE ${table_string} SET \`translation\` = NULL WHERE \`transid\` = ${item.transid};\n`;
                         else
+                        {
+                            item.translation = item.translation.replace(/'/gi, "''");
+                            item.translation = item.translation.replace(/\\n/gi, "\\\\n");
                             query_string += `UPDATE ${table_string} SET \`translation\` = '${item.translation}' WHERE \`transid\` = ${item.transid};\n`;
+                        }
                     }
                     break;
                 }
