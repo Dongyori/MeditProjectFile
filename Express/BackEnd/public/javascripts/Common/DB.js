@@ -6,7 +6,9 @@ const connection = mysql2.createConnection({
     host: 'localhost',
     user: 'root',
     password: '0000',
-    database: 'medit_project'
+    database: 'medit_project',
+    multipleStatements: true,
+    dateStrings: 'date'
 });
 
 module.exports.connection = connection;

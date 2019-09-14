@@ -60,6 +60,9 @@ Date.prototype.yyyymm = function ()
     return yyyy + (mm[1] ? mm : '0' + mm[0]);
 }
 
+
+
+var AsyncConnection = DB.connection;
 var connection = DB.sync();
 module.exports.MakeValueString = Fun.MakeValueString;
 module.exports.MakeJsObject = Fun.MakeJsObject;
@@ -68,6 +71,7 @@ module.exports.FindPreVer = Fun.FindPreVer;
 module.exports.Query = DB.query;
 module.exports.DB = DB;
 module.exports.Connection = connection;
+module.exports.AsyncConnection = AsyncConnection;
 module.exports.ErrorCode = ErrorCode;
 module.exports.ErrorResponse = ErrorResponse;
 module.exports.CheckBody = CheckBody;

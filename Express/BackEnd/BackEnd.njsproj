@@ -35,6 +35,9 @@
     <Content Include="public\javascripts\Common\DB.js">
       <SubType>Code</SubType>
     </Content>
+    <Content Include="public\javascripts\NewAPIFun.js">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="public\javascripts\Common\ResultCode.js">
       <SubType>Code</SubType>
     </Content>
@@ -62,6 +65,15 @@
     <Content Include="routes\api\Project.js" />
     <Content Include="routes\api\Translate.js" />
     <Content Include="routes\index.js" />
+    <Content Include="routes\newapi\Accout.js" />
+    <Content Include="routes\newapi\Comment.js" />
+    <Content Include="routes\newapi\Description.js" />
+    <Content Include="routes\newapi\Issue.js" />
+    <Content Include="routes\newapi\Language.js" />
+    <Content Include="routes\newapi\Project.js" />
+    <Content Include="routes\newapi\Translate.js">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="routes\users.js" />
     <Content Include="package.json" />
     <Content Include="public\stylesheets\main.css" />
@@ -81,6 +93,7 @@
     <Folder Include="public\stylesheets\" />
     <Folder Include="routes\" />
     <Folder Include="routes\api\" />
+    <Folder Include="routes\newapi\" />
     <Folder Include="views\" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\Node.js Tools\Microsoft.NodejsToolsV2.targets" />

@@ -8,13 +8,23 @@ const DomParser = require('dom-parser');
 const fs = require('fs');
 
 // 데이터 요청 모듈
-const account = require('./api/Accout');
-const project = require('./api/Project');
-const issue = require('./api/Issue');
-const translate = require('./api/Translate');
-const comment = require('./api/Comment');
-const description = require('./api/Description');
-const language = require('./api/Language');
+//const account = require('./api/Accout');
+//const project = require('./api/Project');
+//const issue = require('./api/Issue');
+//const translate = require('./api/Translate');
+//const comment = require('./api/Comment');
+//const description = require('./api/Description');
+//const language = require('./api/Language');
+
+// 데이터 요청 모듈 , 5자리 버전 사용
+const account = require('./newapi/Accout');
+const project = require('./newapi/Project');
+const issue = require('./newapi/Issue');
+const translate = require('./newapi/Translate');
+const comment = require('./newapi/Comment');
+const description = require('./newapi/Description');
+const language = require('./newapi/Language');
+
 
 //const mysql = require('../public/javascripts/Common/DB');
 
@@ -60,8 +70,8 @@ router.post('/issue/comment/delete_comment', comment.DeleteComment);
 
 router.post('/translate/import_data', translate.ImportData);
 router.post('/translate/export_data', translate.ExportData);
-router.post('/translate/export_late_data', translate.ExportDataLated);
-router.post('/translate/select_data', translate.SelectData);
+//router.post('/translate/export_late_data', translate.ExportDataLated);
+//router.post('/translate/select_data', translate.SelectData);
 router.post('/translate/add_data', translate.AddData);
 router.post('/translate/update_data', translate.UpdateData);
 router.post('/translate/select_domain', translate.SelectDomain);

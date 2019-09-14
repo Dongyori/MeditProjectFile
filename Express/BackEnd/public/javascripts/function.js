@@ -1,16 +1,16 @@
 ﻿
-async function MakeValueString(table, jsonString, treedata, language, majorver, minorver, hotfixver, buildver, noteng = false, pre_ver_data = null)
+async function MakeValueString(table, jsonString, treedata, language, majorver, minorver, hotfixver, buildver, revisionver, noteng = false, pre_ver_data = null)
 {
     let valueString = '';
     for (inner in jsonString)
     {
         if (typeof (jsonString[inner]) == 'object')
         {
-            valueString += await MakeValueString(table, jsonString[inner], treedata + '/' + inner, language, majorver, minorver, hotfixver, buildver, noteng, pre_ver_data);
+            valueString += await MakeValueString(table, jsonString[inner], treedata + '/' + inner, language, majorver, minorver, hotfixver, buildver, revisionver, noteng, pre_ver_data);
         }
         else
         {
-            const subquery = `(SELECT IFNULL(MAX(descriptioncount),0) FROM ${table} temp WHERE tree = '${treedata}' AND transkey = '${inner}' ORDER BY majorver DESC, minorver DESC, hotfixver DESC, buildver DESC LIMIT 1)`;
+            const subquery = `(SELECT IFNULL(MAX(descriptioncount),0) FROM ${table} temp WHERE tree = '${treedata}' AND transkey = '${inner}' ORDER BY majorver DESC, minorver DESC, hotfixver DESC, buildver DESC, revisionver DESC LIMIT 1)`;
 
             var translation = 'NULL';
             if (typeof (jsonString[inner]) == 'undefined' || noteng)
@@ -32,7 +32,7 @@ async function MakeValueString(table, jsonString, treedata, language, majorver, 
                 translation = `'${jsonString[inner]}'`;
             }
             
-            valueString += `\n('${treedata}', '${inner}', ${translation}, "${language}", ${majorver}, ${minorver},${hotfixver},${buildver}, ${subquery}),\n`;
+            valueString += `\n('${treedata}', '${inner}', ${translation}, "${language}", ${majorver}, ${minorver}, ${hotfixver},${buildver}, ${revisionver}, ${subquery}),\n`;
         }
     }
     return valueString;
@@ -79,7 +79,7 @@ async function MakeDescriptionValueString(jsonString, treedata, valuepart)
     return valueString;
 }
 
-function FindPreVer(ver_list, majorver, minorver, hotfixver, buildver)
+function FindPreVer(ver_list, majorver, minorver, hotfixver, buildver, revision = null)
 {
     var premax_ver = null;
     var checked = false;
@@ -97,7 +97,15 @@ function FindPreVer(ver_list, majorver, minorver, hotfixver, buildver)
                 if (ver.hotfixver ==hotfixver)
                 {
                     if (ver.buildver == buildver)
-                        checked = true;
+                    {
+                        if (revision == null)
+                            checked = true;
+                        else
+                        {
+                            if (ver.revisionver == revision)
+                                checked = true;
+                        }    
+                    }
                 }
             }
         }
