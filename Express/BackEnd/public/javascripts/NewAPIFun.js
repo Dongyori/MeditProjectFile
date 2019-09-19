@@ -1,4 +1,5 @@
 ﻿const startUP = require('./Common/StartUP');
+const Fun = require('./Function');
 const Translate = require('../../routes/newapi/Translate');
 
 module.exports.ExportData = async function (req)
@@ -13,16 +14,28 @@ module.exports.ExportData = async function (req)
     try
     {
         // 가장 최신 버전 찾기
-        const lated_ver = `SELECT * FROM project_version WHERE projectid = ${req.body.projectid} AND language = '${req.body.language}' AND resourcetype = '${req.body.resourcetype}' ORDER BY majorver DESC, minorver DESC, hotfixver DESC, buildver DESC, revisionver DESC LIMIT 1`;
-        const lated_ver_result = Connection.query(lated_ver)[0];
+        const lated_ver = `SELECT * FROM project_version WHERE projectid = ${req.body.projectid} AND language = '${req.body.language}' AND resourcetype = '${req.body.resourcetype}' ORDER BY majorver DESC, minorver DESC, hotfixver DESC, buildver DESC, revisionver DESC`;
 
+        const lated_ver_query_result = Connection.query(lated_ver);
+        let lated_ver_result = lated_ver_query_result[0];
 
         // 리비전 버전 추가
         const table_string = `transdata_${req.body.projectid}_${req.body.resourcetype}`;
-        const where_string = `language = '${req.body.language}' AND majorver = ${lated_ver_result.majorver} AND minorver = ${lated_ver_result.minorver} AND hotfixver = ${lated_ver_result.hotfixver} AND buildver = ${lated_ver_result.buildver} AND revisionver = ${lated_ver_result.revisionver}`;
+        let where_string = `language = '${req.body.language}' AND majorver = ${lated_ver_result.majorver} AND minorver = ${lated_ver_result.minorver} AND hotfixver = ${lated_ver_result.hotfixver} AND buildver = ${lated_ver_result.buildver} AND revisionver = ${lated_ver_result.revisionver}`;
         var query_string = `SELECT * FROM ${table_string} WHERE ${where_string}`;
 
         var query_result = Connection.query(query_string);
+
+        if (data.length > 1 || typeof(data[0].revisionver) != 'undefined')
+        {
+            const pre_ver = Fun.FindPreVer(lated_ver_query_result, data[0].majorver, data[0].minorver, data[0].hotfixver, data[0].buildver, data[0].revisionver);
+            if (pre_ver != null)
+            {
+                where_string = `language = '${req.body.language}' AND majorver = ${pre_ver.majorver} AND minorver = ${pre_ver.minorver} AND hotfixver = ${pre_ver.hotfixver} AND buildver = ${pre_ver.buildver} AND revisionver = ${pre_ver.revisionver}`;
+                query_string = `SELECT * FROM ${table_string} WHERE ${where_string}`;
+                var query_result2 = Connection.query(query_string);
+            }
+        }
     }
     catch (err)
     {
@@ -30,14 +43,14 @@ module.exports.ExportData = async function (req)
     }
 
     // array안에 있는 요청된 버전 모두 조회
-    for (const work of data)
+    for (let work of data)
     {
         try
         {
             // 리비전 버전이 없으면 찾아야함
             if (typeof (work.revisionver) == 'undefined')
             {
-                const max_revision_query = `SELECT revisionver FROM project_version WHERE majorver = ${work.majorver} AND minover = ${work.minorver} AND hotfixver = ${work.hotfixver} AND buildver = ${work.buildver} ORDER BY revisionver DESC LIMIT 1`;
+                const max_revision_query = `SELECT revisionver FROM project_version WHERE projectid = ${req.body.projectid} AND resourcetype = '${req.body.resourcetype}' AND language = '${req.body.language}' AND majorver = ${work.majorver} AND minorver = ${work.minorver} AND hotfixver = ${work.hotfixver} AND buildver = ${work.buildver} ORDER BY revisionver DESC LIMIT 1`;
                 work.revisionver = Connection.query(max_revision_query)[0].revisionver;
             }
 
@@ -58,6 +71,8 @@ module.exports.ExportData = async function (req)
     }
     // query_result의 범위는 처음에 조회한 최신버전 var query_result
     result_data.push(query_result);
+    if (typeof(query_result2) != 'undefined')
+        result_data.push(query_result2);
 
     return result_data;
 }
@@ -130,7 +145,7 @@ module.exports.CreateVersion = async function CreateVersion (req)
         var Connection = startUP.Connection;
 
         var revision = null;
-        if (typeof(req.body.revisionver) == 'number')
+        if (typeof(req.body.revisionver) != 'undefined')
         {
             // 리비전이 담긴것은 영어버전이 들어온 후 그곳에서 재귀호출 되거나
             // 기타 등등 사유로 딱 이 버전만 추가하면 되는경우
@@ -155,9 +170,14 @@ module.exports.CreateVersion = async function CreateVersion (req)
                 revision = revisionver_result[0].revisionver;
                 req.body.revisionver = revision;
                 // 리비전 버전 넣고 재귀호출
-                await this.CreateVersion(req);
+                //await this.CreateVersion(req);
+                // HACK:: 재귀호출 제거
+                const table_string = `project_version(\`projectid\`, \`majorver\`, \`minorver\`, \`language\`, \`resourcetype\`, \`hotfixver\`, \`buildver\`, \`revisionver\`)`;
+                const value_string = `(${req.body.projectid}, ${req.body.majorver}, ${req.body.minorver}, '${req.body.language}', '${req.body.resourcetype}', ${req.body.hotfixver}, ${req.body.buildver}, ${revision})`;
+                const query_string = `INSERT INTO ${table_string} VALUES ${value_string}`;
+                Connection.query(query_string);
                 // 영어가 아닌경우 데이터를 추가해줘야하므로
-                Translate.AddData(req)
+               Translate.AddData(req)
             }
             else
             {
@@ -179,7 +199,8 @@ module.exports.CreateVersion = async function CreateVersion (req)
                 const query_string = `INSERT INTO ${table_string} VALUES ${value_string}`;
 
                 Connection.query(query_string);
-                Translate.ImportData(req);
+                req.body.revisionver = revision;
+                await Translate.ImportData(req);
 
                 // 프로젝트에서 사용되는 영어 외 언어를 구한다
                 // 사용이 된다는건 전버전의 번역 데이터가 존재함을 의미한다
@@ -190,8 +211,8 @@ module.exports.CreateVersion = async function CreateVersion (req)
                 // 리비전버전을 포함해서 재귀호출
                 for (const language of language_list_result)
                 {
-                    req.body.language = language;
-                    this.CreateVersion(req);
+                    req.body.language = language.language;
+                    await this.CreateVersion(req);
                 }
             }
         }

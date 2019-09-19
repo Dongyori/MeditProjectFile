@@ -102,8 +102,8 @@ exports.CreateIssue = async function (req, res)
     {
         to: `${email}`,
         subject: `[Medit Ling] 이슈 ${req.body.subject}가 생성되었습니다`,
-        text: `Project : ${projectname}\nVerSion : ${req.body.majorver}.${req.body.minorver}.${req.body.hotfixver}.${req.body.buildver} \nLanguage : ${req.body.language}\n`
-    }
+        text: `Project : ${projectname}\nVerSion : ${req.body.majorver}.${req.body.minorver}.${req.body.hotfixver}.${req.body.buildver} \nLanguage : ${req.body.language}\n\n Description : ${req.body.description}\n`
+    };
     // mail for reference
     if (typeof (req.body.reference) != 'undefined')
     {
@@ -166,7 +166,7 @@ exports.SelectIssue = async function (req, res)
 
         var connection = startUP.Connection;
 
-        const table_string = '`issue` LEFT JOIN (SELECT accountid, email, position FROM `account`) temp ON issue.assignor = temp.accountid';
+        const table_string = '(SELECT issue.*, project.usebuildver FROM `issue` LEFT JOIN `project` ON issue.projectid = project.projectid) temp2 LEFT JOIN (SELECT accountid, email, position FROM `account`) temp ON temp2.assignor = temp.accountid';
         const where_string_create = `\`creator\` = ${req.body.accountid}`;
         const where_string_assign = `\`assignor\` = ${req.body.accountid}`;
         //const select_string = 'issueid, subject, projectid, creator, assignor, type, priority, description, majorver, minorver, hotfixver, language, resourcetype AS `resource_type`, link, status, createtime, starttime, deadline, endtime, reopentime, email, transid_min, transid_max';
@@ -265,8 +265,8 @@ exports.UpdateIssue = async function (req, res)
     {
         to: `${email}`,
         subject: `이슈 ${req.body.subject}가 업데이트되었습니다`,
-        text: `majorver : ${req.body.majorver}\nminorver : ${req.body.minorver}\nhotfixver : ${req.body.hotfixver}\n\ndeadline : ${req.body.deadline}`
-    }
+        text: `Project : ${projectname}\nVerSion : ${req.body.majorver}.${req.body.minorver}.${req.body.hotfixver}.${req.body.buildver} \nLanguage : ${req.body.language}\n\n Description : ${req.body.description}\n`
+    };
     // mail for reference
     if (typeof (req.body.reference) != 'undefined')
     {

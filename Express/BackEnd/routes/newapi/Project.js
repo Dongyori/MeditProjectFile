@@ -107,7 +107,7 @@ exports.SelectProject = async function (req, res) {
         const connection = startUP.Connection;
 
         const table_string = 'project';
-        const query_string = `SELECT projectname AS \`project_name\`, projectid FROM ${table_string}`;
+        const query_string = `SELECT projectname AS \`project_name\`, projectid, usebuildver FROM ${table_string}`;
 
 
         var query_result = connection.query(query_string);
@@ -171,23 +171,27 @@ exports.DeleteProject = async function (req, res) {
 //           resultCode = 0 (성공) or 실패 데이터
 //       }
 /*----------------*////////////////////////*----------------*/
-exports.CreateVersion = async function (req, res) {
+exports.CreateVersion = async function (req, res) 
+{
     var result_array = Object();
     result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
-    try {
+    try 
+    {
         startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
 
         // post로 받은 데이터중 필수로 있어야 하는것 체크
         const check = await startUP.CheckBody(req.body, ['projectid', 'language', 'resourcetype', 'majorver', 'minorver', 'hotfixver', 'buildver']);
-        if (check != true) {
+        if (check != true) 
+        {
             result_array.resultCode = check;
             res.send(result_array);
             return;
         }
 
-        result_array.revisionver = APIFun.CreateVersion(req);
+        result_array.revisionver = await APIFun.CreateVersion(req);
     }
-    catch (err) {
+    catch (err) 
+    {
         result_array.resultCode = err.code;
         result_array.message = err.message;
     }
@@ -212,7 +216,8 @@ exports.CreateVersion = async function (req, res) {
 //           ]
 //       }
 /*----------------*////////////////////////*----------------*/
-exports.SelectVersion = async function (req, res) {
+exports.SelectVersion = async function (req, res) 
+{
     var result_array = Object();
     result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
     try {
@@ -244,7 +249,8 @@ exports.SelectVersion = async function (req, res) {
         result_array.data = query_result;
         result_array.data2 = query_result1;
     }
-    catch (err) {
+    catch (err) 
+    {
         result_array.resultCode = err.code;
         result_array.message = err.message;
     }

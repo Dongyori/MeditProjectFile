@@ -19,7 +19,7 @@ exports.CreateComment = async function (req, res)
         var result_array = Object();
         result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
 
-        const check = await startUP.CheckBody(req.body, ['accountid', 'issueid']);
+        const check = await startUP.CheckBody(req.body, ['accountid', 'issueid', 'comment']);
         if (check != true)
         {
             result_array.resultCode = check;
@@ -31,9 +31,44 @@ exports.CreateComment = async function (req, res)
 
         req.body.comment = req.body.comment.replace(/'/gi, "''");
 
-        const insert_string = `issue_comment(\`issueid\`, \`time\`, \`accountid\`, \`comment\`)`;
-        const values_string = `(${req.body.issueid}, NOW(), ${req.body.accountid}, '${req.body.comment}')`;
-        const query_string = `INSERT INTO ${insert_string} VALUES ${values_string}`;
+        // DB issue 테이블의 컬럼 목록을 가져와 insert문을 생성한다
+        // 이렇게 하면 컬럼이 추가되도 이부분을 수정하지 않아도 됨
+        let columns = connection.query("show full columns from `issue_comment`");
+
+        // 쿼리 생성을 간편하게 하기위한 초기 subject
+        let table_string = "issue_comment(`time`";
+        let value_string = `(NOW()`;
+
+        // 컬럼 목록을 순회
+        for (let column of columns)
+        {
+            // 쿼리생성을 간편하게 하기위한 코드 -- (,) 처리
+            if (column.Field == 'time')
+                continue;
+
+            // 컬럼중 post로 받은게 있다면 쿼리에 추가
+            if (req.body[column.Field] != null)
+            {
+                table_string += `, \`${column.Field}\``;
+                if (column.Type == 'int(11)')
+                    value_string += `, ${req.body[column.Field]}`;
+                else
+                {
+                    req.body[column.Field] = req.body[column.Field].replace(/'/gi, "''");
+                    value_string += `, '${req.body[column.Field]}'`;
+                }
+            }
+        }
+
+        // 쿼리 마지막
+        table_string += `)`;
+        value_string += `)`;
+
+        const query_string = `INSERT INTO ${table_string} VALUES ${value_string}`;
+
+        //const insert_string = `issue_comment(\`issueid\`, \`time\`, \`accountid\`, \`comment\`)`;
+        //const values_string = `(${req.body.issueid}, NOW(), ${req.body.accountid}, '${req.body.comment}')`;
+        //const query_string = `INSERT INTO ${insert_string} VALUES ${values_string}`;
 
         connection.query(query_string);
         var result_ai = connection.query('SELECT LAST_INSERT_ID() AS AI');
@@ -100,10 +135,10 @@ exports.SelectComment = async function (req, res)
         }
 
         const connection = startUP.Connection;
-
-        const table_string = '`issue_comment`';
+        //SELECT issue_comment.*, account.email FROM`issue_comment` LEFT JOIN`account` ON issue_comment.accountid = account.accountid
+        const table_string = '`issue_comment` LEFT JOIN `account` ON issue_comment.accountid = account.accountid';
         const where_string = `issueid = ${req.body.issueid}`;
-        const query_string = `SELECT * FROM ${table_string} WHERE ${where_string}`;
+        const query_string = `SELECT issue_comment.*, account.email FROM ${table_string} WHERE ${where_string}`;
         const query_result = connection.query(query_string);
         result_array.data = query_result;
     }
