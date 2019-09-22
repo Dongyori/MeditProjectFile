@@ -166,7 +166,7 @@ exports.SelectIssue = async function (req, res)
 
         var connection = startUP.Connection;
 
-        const table_string = '(SELECT issue.*, project.usebuildver FROM `issue` LEFT JOIN `project` ON issue.projectid = project.projectid) temp2 LEFT JOIN (SELECT accountid, email, position FROM `account`) temp ON temp2.assignor = temp.accountid';
+        const table_string = '(SELECT issue.*, project.usebuildver, project.projectname FROM `issue` LEFT JOIN `project` ON issue.projectid = project.projectid) temp2 LEFT JOIN (SELECT accountid, email, position FROM `account`) temp ON temp2.assignor = temp.accountid';
         const where_string_create = `\`creator\` = ${req.body.accountid}`;
         const where_string_assign = `\`assignor\` = ${req.body.accountid}`;
         //const select_string = 'issueid, subject, projectid, creator, assignor, type, priority, description, majorver, minorver, hotfixver, language, resourcetype AS `resource_type`, link, status, createtime, starttime, deadline, endtime, reopentime, email, transid_min, transid_max';
