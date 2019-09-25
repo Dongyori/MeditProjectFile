@@ -1,7 +1,6 @@
 // Issue 관련 API
 
 const startUP = require('../../public/javascripts/Common/StartUP');
-
 /*----------------------------------------------------------*/
 // CreateIssue
 // 설명 : 이슈를 생성하는 API함수
@@ -79,7 +78,7 @@ exports.CreateIssue = async function (req, res)
         value_string += `, 0, ${revision_subquery_string})`;
 
         const query_string = `INSERT INTO ${table_string} VALUES ${value_string}`;
-        var revisionver = connection.query(revision_subquery_string)[0];
+        //var revisionver = connection.query(revision_subquery_string)[0];
 
         connection.query(query_string);
         // auto increment 값 가져오기 (issueid)
@@ -102,7 +101,7 @@ exports.CreateIssue = async function (req, res)
     {
         to: `${email}`,
         subject: `[Medit Ling] 이슈 ${req.body.subject}가 생성되었습니다`,
-        text: `Project : ${projectname}\nVerSion : ${req.body.majorver}.${req.body.minorver}.${req.body.hotfixver}.${req.body.buildver} \nLanguage : ${req.body.language}\n\n Description : ${req.body.description}\n`
+        text: `Project : ${projectname}\nVerSion : ${req.body.majorver}.${req.body.minorver}.${req.body.hotfixver}.${req.body.buildver} \nLanguage : ${req.body.language}\n\n Description : ${req.body.description}\n \n\n Link: http://${startUP.VueAddress}/loginCheck/${result_array.issueid}`
     };
     // mail for reference
     if (typeof (req.body.reference) != 'undefined')
@@ -156,29 +155,54 @@ exports.SelectIssue = async function (req, res)
         var result_array = Object();
         result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
 
-        const check = await startUP.CheckBody(req.body, ['accountid']);
-        if (check != true)
-        {
-            result_array.resultCode = check;
-            res.send(result_array);
-            return;
-        }
-
         var connection = startUP.Connection;
 
         const table_string = '(SELECT issue.*, project.usebuildver, project.projectname FROM `issue` LEFT JOIN `project` ON issue.projectid = project.projectid) temp2 LEFT JOIN (SELECT accountid, email, position FROM `account`) temp ON temp2.assignor = temp.accountid';
-        const where_string_create = `\`creator\` = ${req.body.accountid}`;
-        const where_string_assign = `\`assignor\` = ${req.body.accountid}`;
-        //const select_string = 'issueid, subject, projectid, creator, assignor, type, priority, description, majorver, minorver, hotfixver, language, resourcetype AS `resource_type`, link, status, createtime, starttime, deadline, endtime, reopentime, email, transid_min, transid_max';
-        const select_string = '*, resourcetype AS `resource_type`';
-        const query_string_create = `SELECT ${select_string} FROM ${table_string} WHERE ${where_string_create} ORDER BY issueid DESC`;
-        const query_string_assign = `SELECT ${select_string} FROM ${table_string} WHERE ${where_string_assign} ORDER BY deadline`;
+        if (typeof (req.body.issueid) == 'undefined')
+        {
+            const check = await startUP.CheckBody(req.body, ['accountid']);
+            if (check != true)
+            {
+                result_array.resultCode = check;
+                res.send(result_array);
+                return;
+            }
 
+            const account_result = connection.query(`SELECT * FROM account WHERE accountid = ${req.body.accountid}`);
+            if (account_result.length == 0)
+            {
+                result_array.resultCode = 'no id';
+                res.send(result_array);
+                return;
+            }
 
-        var query_result_create = connection.query(query_string_create);
-        var query_result_assign = connection.query(query_string_assign);
-        result_array.data_create = query_result_create;
-        result_array.data_assign = query_result_assign;
+            const accountemail = account_result[0].email;
+            
+            const where_string_create = `\`creator\` = ${req.body.accountid}`;
+            const where_string_assign = `\`assignor\` = ${req.body.accountid}`;
+            const where_string_reference = `\`reference\` LIKE '% ${accountemail} %'`;
+            //const select_string = 'issueid, subject, projectid, creator, assignor, type, priority, description, majorver, minorver, hotfixver, language,  resourcetype AS `resource_type`, link, status, createtime, starttime, deadline, endtime, reopentime, email, transid_min, transid_max';
+            const select_string = '*, resourcetype AS `resource_type`';
+            const query_string_create = `SELECT ${select_string} FROM ${table_string} WHERE ${where_string_create} ORDER BY issueid DESC`;
+            const query_string_assign = `SELECT ${select_string} FROM ${table_string} WHERE ${where_string_assign} ORDER BY deadline`;
+            const query_string_reference = `SELECT ${select_string} FROM ${table_string} WHERE ${where_string_reference} ORDER BY issueid DESC`;
+
+            const query_result_create = connection.query(query_string_create);
+            const query_result_assign = connection.query(query_string_assign);
+            const query_result_reference = connection.query(query_string_reference);
+            result_array.data_create = query_result_create;
+            result_array.data_assign = query_result_assign;
+            result_array.data_reference = query_result_reference;
+        }
+        else
+        {
+            const where_string = `\`issueid\` = ${req.body.issueid}`;
+            const select_string = '*, resourcetype AS `resource_type`';
+            const query_string = `SELECT ${select_string} FROM ${table_string} WHERE ${where_string}`;
+
+            const query_result = connection.query(query_string);
+            result_array.data = query_result;
+        }
     }
     catch (err)
     {
@@ -264,8 +288,8 @@ exports.UpdateIssue = async function (req, res)
     var option =
     {
         to: `${email}`,
-        subject: `이슈 ${req.body.subject}가 업데이트되었습니다`,
-        text: `Project : ${projectname}\nVerSion : ${req.body.majorver}.${req.body.minorver}.${req.body.hotfixver}.${req.body.buildver} \nLanguage : ${req.body.language}\n\n Description : ${req.body.description}\n`
+        subject: `[Medit Ling] 이슈 ${req.body.subject}가 업데이트되었습니다`,
+        text: `Project : ${projectname}\nVerSion : ${req.body.majorver}.${req.body.minorver}.${req.body.hotfixver}.${req.body.buildver} \nLanguage : ${req.body.language}\n\n Description : ${req.body.description}\n \n\n Link: http://${startUP.VueAddress}/loginCheck/${req.body.issueid}`
     };
     // mail for reference
     if (typeof (req.body.reference) != 'undefined')
@@ -327,7 +351,7 @@ exports.StartIssue = async function (req, res)
         {
             to: `${email}`,
             subject: `이슈 ${issue_info.subject}가 Start상태가 되었습니다.`,
-            text: `majorver : ${issue_info.majorver}\nminorver : ${issue_info.minorver}\nhotfixver : ${issue_info.hotfixver}\n\ndeadline :  ${issue_info.deadline}`
+            text: `majorver : ${issue_info.majorver}\nminorver : ${issue_info.minorver}\nhotfixver : ${issue_info.hotfixver}\n\ndeadline :  ${issue_info.deadline}\n\n Link: http://${startUP.VueAddress}/loginCheck/${req.body.issueid}`
         }
         // mail for reference
         if (typeof (issue_info.reference) != 'undefined')
@@ -387,8 +411,8 @@ exports.resolveIssue = async function (req, res)
         var option =
         {
             to: `${email}`,
-            subject: `이슈 ${issue_info.subject}가 Resolve상태가 되었습니다.`,
-            text: `majorver : ${issue_info.majorver}\nminorver : ${issue_info.minorver}\nhotfixver : ${issue_info.hotfixver}\n\ndeadline :  ${issue_info.deadline}`
+            subject: `[Medit Ling] 이슈 ${issue_info.subject}가 Resolve상태가 되었습니다.`,
+            text: `majorver : ${issue_info.majorver}\nminorver : ${issue_info.minorver}\nhotfixver : ${issue_info.hotfixver}\n\ndeadline :  ${issue_info.deadline}\n\n Link: http://${startUP.VueAddress}/loginCheck/${req.body.issueid}`
         }
         // mail for reference
         if (typeof (issue_info.reference) != 'undefined')
@@ -448,8 +472,8 @@ exports.reopenIssue = async function (req, res)
         var option =
         {
             to: `${email}`,
-            subject: `이슈 ${issue_info.subject}가 Reopen상태가 되었습니다.`,
-            text: `majorver : ${issue_info.majorver}\nminorver : ${issue_info.minorver}\nhotfixver : ${issue_info.hotfixver}\n\ndeadline :  ${issue_info.deadline}`
+            subject: `[Medit Ling] 이슈 ${issue_info.subject}가 Reopen상태가 되었습니다.`,
+            text: `majorver : ${issue_info.majorver}\nminorver : ${issue_info.minorver}\nhotfixver : ${issue_info.hotfixver}\n\ndeadline :  ${issue_info.deadline}\n\n Link: http://${startUP.VueAddress}/loginCheck/${req.body.issueid}`
         }
         // mail for reference
         if (typeof (issue_info.reference) != 'undefined')

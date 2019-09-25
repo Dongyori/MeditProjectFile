@@ -86,6 +86,69 @@ router.post('/language/add_language', language.AddLanguage);
 router.post('/language/select_language', language.SelectLanguage);
 
 
+router.get('/clearproject', async function (req, res)
+{
+    let result = Object();
+    let status_project = 'project TABLE에서 삭제 실패';
+    let status_project_version = 'project_version TABLE에서 삭제 실패';
+    let status_transdata_app = 'transdata_app TABLE 삭제 실패';
+    let status_transdata_web = 'transdata_web TABLE 삭제 실패';
+    let status_transdata_description = 'transdata_description TABLE에서 삭제 실패'
+    try
+    {
+        if (typeof (req.query.projectid) == 'undefined')
+        {
+            result.resultCode = 'no projectid';
+            res.send(result);
+            return;
+        }
+
+        const projectid = req.query.projectid;
+        const connection = startUP.Connection;
+
+        const delete_query_project = `DELETE FROM project WHERE projectid = ${projectid}`;
+        connection.query(delete_query_project);
+        status_project = 'project TABLE에서 삭제 성공';
+
+        const delete_query_description = `DELETE FROM transdata_description WHERE projectid = ${projectid}`;
+        connection.query(delete_query_description);
+        status_transdata_description = 'transdata_description TABLE에서 삭제 성공'
+
+        const projectver_app = connection.query(`SELECT * FROM project_version WHERE projectid = ${projectid} AND resourcetype = 'app'`);
+        const projectver_web = connection.query(`SELECT * FROM project_version WHERE projectid = ${projectid} AND resourcetype = 'web'`);
+
+        if (projectver_app.length != 0)
+        {
+            const delete_projectver_query = `DELETE FROM project_version WHERE projectid = ${projectid} AND resourcetype = 'app'`;
+            const delete_transdata_query = `DROP TABLE transdata_${projectid}_app`;
+            connection.query(delete_projectver_query);
+            status_project_version = 'project_version TABLE에서 삭제 성공';
+            connection.query(delete_transdata_query);
+            status_transdata_app = 'transdata_app TABLE 삭제 성공';
+        }
+
+        if (projectver_web.length != 0)
+        {
+            const delete_projectver_query = `DELETE FROM project_version WHERE projectid = ${projectid} AND resourcetype = 'web'`;
+            const delete_transdata_query = `DROP TABLE transdata_${projectid}_web`;
+            connection.query(delete_projectver_query);
+            status_project_version = 'project_version TABLE에서 삭제 성공';
+            connection.query(delete_transdata_query);
+            status_transdata_web = 'transdata_web TABLE 삭제 성공';
+        }
+
+
+    }
+    catch (err)
+    {
+        result.message += err.code + '\n';
+    }
+    result.message += status_project + '\n' + status_project_version + '\n' + status_transdata_app + '\n' + status_transdata_web + '\n' + status_transdata_description;
+    result.resultCode = 0;
+    res.send(result);
+    return;
+})
+
 router.get('/logview', async function (req, res)
 {
     const connection = startUP.Connection;

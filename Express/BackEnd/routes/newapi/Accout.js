@@ -36,7 +36,7 @@ exports.LoginCheck = async function (req, res)
         // 동기 DB
         const connection = startUP.Connection;
 
-        const query_string = `SELECT accountid, email, position, password FROM account WHERE email = '${req.body.email}'`;
+        const query_string = `SELECT accountid, email, position, password FROM account WHERE email = '${req.body.email}' AND active = 1`;
 
         // 동기 쿼리
         var query_result = connection.query(query_string);
@@ -160,11 +160,14 @@ exports.SelectAccount = async function (req, res)
 
         // 쿼리 생성
         const table_string = '`account`';
-        const query_string = `SELECT accountID, email, position FROM ${table_string}`;
+        const query_string = `SELECT accountID, email, position FROM ${table_string} WHERE active = 1`;
 
         // 동기 쿼리
         var query_result = connection.query(query_string);
         result_array.data = query_result;
+
+        const query_inactive_result = connect.query(`SELECT accountID, email, position FROM ${table_string} WHERE active = 0`);
+        result_array_data2 = query_inactive_result;
     }
     catch (err)
     {
@@ -243,6 +246,8 @@ exports.UpdateAccount = async function (req, res)
     startUP.SystemLog(req.url, req.ip, JSON.stringify(result_array));
 };
 
+// 실제 계정 삭제가 아닌 InActive상태로 바꾼다
+// 할당된 이슈가 있으면 하면 안된다
 exports.DeleteAccount = async function (req, res)
 {
     try
@@ -263,9 +268,16 @@ exports.DeleteAccount = async function (req, res)
 
         const table_string = 'account';
         const where_string = `accountid = ${req.body.accountid}`;
-        const query_string = `DELETE FROM ${table_string} WHERE ${where_string}`;
+        //const query_string = `DELETE FROM ${table_string} WHERE ${where_string}`;
+        const query_string = `UPDATE ${table_string} SET active = 0 WHERE ${where_string}`;
 
-        connection.query(query_string);
+        // 이슈 있으면 안된다
+        const issue = connection.query(`SELECT * FROM issue WHERE assignor = ${req.body.accountid} AND status != 2`);
+        if(issue.length == 0)
+            connection.query(query_string);
+        else
+            result_array.resultCode = 'assigned issue exist';
+
     }
     catch (err)
     {

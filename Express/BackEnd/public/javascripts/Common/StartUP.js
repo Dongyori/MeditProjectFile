@@ -4,6 +4,7 @@ const Fun = require('../Function');
 const Mailer = require('../Mailer');
 
 //DB.Connect();
+const VueAddress = 'localhost:8080';
 
 function ErrorResponse(array, code)
 {
@@ -69,7 +70,7 @@ Date.prototype.yyyymm = function ()
 }
 
 
-
+module.exports.VueAddress = VueAddress;
 var AsyncConnection = DB.connection;
 var connection = DB.sync();
 module.exports.MakeValueString = Fun.MakeValueString;

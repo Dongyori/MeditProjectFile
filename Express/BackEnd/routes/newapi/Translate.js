@@ -200,10 +200,10 @@ exports.ImportData = async function (req)
                         var translation = null;
                         if (typeof (item.translation) != 'undefined')
                         {
-                            translated = item.translation;
-                            translated = translated.replace(/'/gi, "\\'");
-                            translated = translated.replace(/\\n/gi, "\\\\n");
-                            translated = "'" + translated + "'";
+                            translation = item.translation;
+                            translation = translation.replace(/'/gi, "\\'");
+                            translation = translation.replace(/\\n/gi, "\\\\n");
+                            translation = "'" + translation + "'";
                         }
                             
 
@@ -225,9 +225,12 @@ exports.ImportData = async function (req)
                                 if (typeof (language_pre_data[tag]) != 'undefined')
                                 {
                                     translated = language_pre_data[tag];
-                                    translated = translated.replace(/'/gi, "''");
-                                    translated = translated.replace(/\\n/gi, "\\\\n");
-                                    translated = "'" + translated + "'";
+                                    if (translated != null)
+                                    {
+                                        translated = translated.replace(/'/gi, "''");
+                                        translated = translated.replace(/\\n/gi, "\\\\n");
+                                        translated = "'" + translated + "'";
+                                    }
                                 }
                             }
 
@@ -322,9 +325,12 @@ exports.ImportData = async function (req)
                                 if (typeof (language_data[item.transkey]) != 'undefined')
                                 {
                                     translation = language_data[item.transkey];
-                                    translation = translation.replace(/'/gi, "''");
-                                    translation = translation.replace(/\\n/gi, "\\\\n");
-                                    translation = "'" + translation + "'";
+                                    if (translation != null)
+                                    {
+                                        translation = translation.replace(/'/gi, "''");
+                                        translation = translation.replace(/\\n/gi, "\\\\n");
+                                        translation = "'" + translation + "'";
+                                    }
                                 }
                                 const subquery = `(SELECT IFNULL(MAX(descriptioncount),0) FROM transdata_${req.body.projectid}_${req.body.resourcetype} temp WHERE tree = '${item.tree}' AND transkey = '${item.transkey}' ORDER BY majorver DESC, minorver DESC, hotfixver DESC, buildver DESC, revisionver DESC LIMIT 1)`;
 
