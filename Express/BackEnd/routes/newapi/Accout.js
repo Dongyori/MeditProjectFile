@@ -166,7 +166,7 @@ exports.SelectAccount = async function (req, res)
         var query_result = connection.query(query_string);
         result_array.data = query_result;
 
-        const query_inactive_result = connect.query(`SELECT accountID, email, position FROM ${table_string} WHERE active = 0`);
+        const query_inactive_result = connection.query(`SELECT accountID, email, position FROM ${table_string} WHERE active = 0`);
         result_array_data2 = query_inactive_result;
     }
     catch (err)
