@@ -133,7 +133,8 @@ exports.SelectDescription = async function (req, res)
         const connection = startUP.Connection;
 
         const table_string = 'transdata_description';
-        const where_string = `projectid = ${req.body.projectid} AND transkey = '${req.body.transkey}' AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver} AND hotfixver = ${req.body.hotfixver} AND buildver = ${req.body.buildver} AND resourcetype = '${req.body.resourcetype}'`;
+        //const where_string = `projectid = ${req.body.projectid} AND transkey = '${req.body.transkey}' AND majorver = ${req.body.majorver} AND minorver = ${req.body.minorver} AND hotfixver = ${req.body.hotfixver} AND buildver = ${req.body.buildver} AND resourcetype = '${req.body.resourcetype}'`;
+        const where_string = `projectid = ${req.body.projectid} AND transkey = '${req.body.transkey}' AND resourcetype = '${req.body.resourcetype}'`;
         const query_string = `SELECT * FROM ${table_string} WHERE ${where_string}`;
 
         const query_result = connection.query(query_string);
