@@ -14,8 +14,8 @@ var mysql = require('sync-mysql');
 //module.exports.connection = connection;
 
 const sync_mysql = new mysql({
-    host: 'localhost',
-    user: 'medit',
+    host: '172.25.4.117',
+    user: 'root',
     password: '0000',
     database: 'medit_project',
     multipleStatements: true,

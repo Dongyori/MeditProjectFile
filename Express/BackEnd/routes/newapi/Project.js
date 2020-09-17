@@ -1,53 +1,53 @@
-
+ï»¿
 const startUP = require('../../public/javascripts/Common/StartUP');
 const APIFun = require('../../public/javascripts/NewAPIFun');
 
 /*----------------------------------------------------------*/
 // CreateProject
-// ¼³¸í : ÇÁ·ÎÁ§Æ®¸¦ »ı¼ºÇÏ´Â APIÇÔ¼ö
-// ÀÔ·Â : projectname
-// ¸®ÅÏ : result_array
+// ì„¤ëª… : í”„ë¡œì íŠ¸ë¥¼ ìƒì„±í•˜ëŠ” APIí•¨ìˆ˜
+// ì…ë ¥ : projectname
+// ë¦¬í„´ : result_array
 //       {
-//           resultCode = 0 (¼º°ø) or ½ÇÆĞ µ¥ÀÌÅÍ
+//           resultCode = 0 (ì„±ê³µ) or ì‹¤íŒ¨ ë°ì´í„°
 //       }
 /*----------------*////////////////////////*----------------*/
 exports.CreateProject = async function (req, res)
 {
-    // res·Î ÀÀ´äÇÒ ³»¿ë ÃÊ±â¼¼ÆÃ
+    // resë¡œ ì‘ë‹µí•  ë‚´ìš© ì´ˆê¸°ì„¸íŒ…
     var result_array = Object();
     result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
     try
     {
         startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
 
-        // post·Î ¹ŞÀº µ¥ÀÌÅÍÁß ÇÊ¼ö·Î ÀÖ¾î¾ß ÇÏ´Â°Í Ã¼Å©
+        // postë¡œ ë°›ì€ ë°ì´í„°ì¤‘ í•„ìˆ˜ë¡œ ìˆì–´ì•¼ í•˜ëŠ”ê²ƒ ì²´í¬
         const check = await startUP.CheckBody(req.body, ['projectname']);
         if (check != true)
         {
-            // resultCode¿¡ ÀÀ´äÄÚµå¸¦ ³²±ä´Ù
-            // ResultCode¿¡ Á¤ÀÇÇÑ Á¤¼ö°ªÀ» »ç¿ëÇÒÁö stringÀÚÃ¼¸¦ ´ãÀ»Áö °áÁ¤ÇØ¾ßÇÔ
+            // resultCodeì— ì‘ë‹µì½”ë“œë¥¼ ë‚¨ê¸´ë‹¤
+            // ResultCodeì— ì •ì˜í•œ ì •ìˆ˜ê°’ì„ ì‚¬ìš©í• ì§€ stringìì²´ë¥¼ ë‹´ì„ì§€ ê²°ì •í•´ì•¼í•¨
             result_array.resultCode = check;
             res.send(result_array);
             return;
         }
 
-        // µ¿±â DB
+        // ë™ê¸° DB
         const connection = startUP.Connection;
 
         const columns = connection.query("show full columns from `project`");
 
-        // Äõ¸® »ı¼ºÀ» °£ÆíÇÏ°Ô ÇÏ±âÀ§ÇÑ ÃÊ±â subject
+        // ì¿¼ë¦¬ ìƒì„±ì„ ê°„í¸í•˜ê²Œ í•˜ê¸°ìœ„í•œ ì´ˆê¸° subject
         let table_string = 'project(`projectname`';
         let value_string = `('${req.body.projectname}'`;
 
-        // ÄÃ·³ ¸ñ·ÏÀ» ¼øÈ¸
+        // ì»¬ëŸ¼ ëª©ë¡ì„ ìˆœíšŒ
         for (let column of columns)
         {
-            // Äõ¸®»ı¼ºÀ» °£ÆíÇÏ°Ô ÇÏ±âÀ§ÇÑ ÄÚµå -- (,) Ã³¸®
+            // ì¿¼ë¦¬ìƒì„±ì„ ê°„í¸í•˜ê²Œ í•˜ê¸°ìœ„í•œ ì½”ë“œ -- (,) ì²˜ë¦¬
             if (column.Field == 'projectname')
                 continue;
 
-            // ÄÃ·³Áß post·Î ¹ŞÀº°Ô ÀÖ´Ù¸é Äõ¸®¿¡ Ãß°¡
+            // ì»¬ëŸ¼ì¤‘ postë¡œ ë°›ì€ê²Œ ìˆë‹¤ë©´ ì¿¼ë¦¬ì— ì¶”ê°€
             if (req.body[column.Field] != null)
             {
                 table_string += `, \`${column.Field}\``;
@@ -58,14 +58,14 @@ exports.CreateProject = async function (req, res)
             }
         }
 
-        // Äõ¸® ¸¶Áö¸·
+        // ì¿¼ë¦¬ ë§ˆì§€ë§‰
         table_string += ')';
         value_string += ')';
         const query_string = `INSERT INTO ${table_string} VALUES ${value_string}`;
 
 
         connection.query(query_string);
-        // auto increment °ª °¡Á®¿À±â (projectid)
+        // auto increment ê°’ ê°€ì ¸ì˜¤ê¸° (projectid)
         const result_ai = connection.query("SELECT LAST_INSERT_ID() AS AI");
         result_array.projectid = result_ai[0].AI;
     }
@@ -82,28 +82,29 @@ exports.CreateProject = async function (req, res)
 
 /*----------------------------------------------------------*/
 // SelectProject
-// ¼³¸í : ÇÁ·ÎÁ§Æ®¸¦ ¸ñ·ÏÀ» Á¶È¸ÇÏ´Â APIÇÔ¼ö
-// ÀÔ·Â :
-// ¸®ÅÏ : result_array
+// ì„¤ëª… : í”„ë¡œì íŠ¸ë¥¼ ëª©ë¡ì„ ì¡°íšŒí•˜ëŠ” APIí•¨ìˆ˜
+// ì…ë ¥ :
+// ë¦¬í„´ : result_array
 //       {
 //           resultCode
 //           data :
 //           [
 //               {
+//                  project_name,
 //                  projectid,
-//                  projectname
+//                  userbuildver
 //               },
 //           ]
 //       }
 /*----------------*////////////////////////*----------------*/
 exports.SelectProject = async function (req, res) {
-    // res·Î ÀÀ´äÇÒ ³»¿ë ÃÊ±â¼¼ÆÃ
+    // resë¡œ ì‘ë‹µí•  ë‚´ìš© ì´ˆê¸°ì„¸íŒ…
     var result_array = Object();
     result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
     try {
         startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
 
-        // µ¿±â DB
+        // ë™ê¸° DB
         const connection = startUP.Connection;
 
         const table_string = 'project';
@@ -124,11 +125,11 @@ exports.SelectProject = async function (req, res) {
 
 /*----------------------------------------------------------*/
 // DeleteProject
-// ¼³¸í : ÇÁ·ÎÁ§Æ®¸¦ »èÁ¦ÇÏ´Â APIÇÔ¼ö
-// ÀÔ·Â : projectid
-// ¸®ÅÏ : result_array
+// ì„¤ëª… : í”„ë¡œì íŠ¸ë¥¼ ì‚­ì œí•˜ëŠ” APIí•¨ìˆ˜
+// ì…ë ¥ : projectid
+// ë¦¬í„´ : result_array
 //      {
-//          resultCode = 0 (¼º°ø) or ½ÇÆĞ µ¥ÀÌÅÍ
+//          resultCode = 0 (ì„±ê³µ) or ì‹¤íŒ¨ ë°ì´í„°
 //      }
 /*----------------*////////////////////////*----------------*/
 exports.DeleteProject = async function (req, res) {
@@ -136,7 +137,7 @@ exports.DeleteProject = async function (req, res) {
     result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
     try {
         startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
-        // res·Î ÀÀ´äÇÒ ³»¿ë ÃÊ±â¼¼ÆÃ
+        // resë¡œ ì‘ë‹µí•  ë‚´ìš© ì´ˆê¸°ì„¸íŒ…
 
         const check = await startUP.CheckBody(req.body, ['projectid']);
         if (check != true) {
@@ -145,7 +146,7 @@ exports.DeleteProject = async function (req, res) {
             return;
         }
 
-        // µ¿±â DB
+        // ë™ê¸° DB
         const connection = startUP.Connection;
 
         const query_string = `DELETE FROM project WHERE projectid = ${req.body.projectid}`;
@@ -164,11 +165,11 @@ exports.DeleteProject = async function (req, res) {
 
 /*----------------------------------------------------------*/
 // CreateVersion
-// ¼³¸í : ¹öÀüÀ» »ı¼ºÇÏ´Â APIÇÔ¼ö
-// ÀÔ·Â : projectid, majorver, minorver, hotfixver, buildver, [revisionver], language
-// ¸®ÅÏ : result_array
+// ì„¤ëª… : ë²„ì „ì„ ìƒì„±í•˜ëŠ” APIí•¨ìˆ˜
+// ì…ë ¥ : projectid, majorver, minorver, hotfixver, buildver, [revisionver], language
+// ë¦¬í„´ : result_array
 //       {
-//           resultCode = 0 (¼º°ø) or ½ÇÆĞ µ¥ÀÌÅÍ
+//           resultCode = 0 (ì„±ê³µ) or ì‹¤íŒ¨ ë°ì´í„°
 //       }
 /*----------------*////////////////////////*----------------*/
 exports.CreateVersion = async function (req, res) 
@@ -179,7 +180,8 @@ exports.CreateVersion = async function (req, res)
     {
         startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
 
-        // post·Î ¹ŞÀº µ¥ÀÌÅÍÁß ÇÊ¼ö·Î ÀÖ¾î¾ß ÇÏ´Â°Í Ã¼Å©
+        // postë¡œ ë°›ì€ ë°ì´í„°ì¤‘ í•„ìˆ˜ë¡œ ìˆì–´ì•¼ í•˜ëŠ”ê²ƒ ì²´í¬
+        console.log(req.body)
         const check = await startUP.CheckBody(req.body, ['projectid', 'language', 'resourcetype', 'majorver', 'minorver', 'hotfixver', 'buildver']);
         if (check != true) 
         {
@@ -201,9 +203,9 @@ exports.CreateVersion = async function (req, res)
 
 /*----------------------------------------------------------*/
 // SelectVersion
-// ¼³¸í : ¹öÀüÀ» Á¶È¸ÇÏ´Â APIÇÔ¼ö
-// ÀÔ·Â : projectid
-// ¸®ÅÏ : result_array
+// ì„¤ëª… : ë²„ì „ì„ ì¡°íšŒí•˜ëŠ” APIí•¨ìˆ˜
+// ì…ë ¥ : projectid
+// ë¦¬í„´ : result_array
 //       {
 //           resultCode
 //           data :
@@ -224,17 +226,17 @@ exports.SelectVersion = async function (req, res)
         startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
 
 
-        // post·Î ¹ŞÀº µ¥ÀÌÅÍÁß ÇÊ¼ö·Î ÀÖ¾î¾ß ÇÏ´Â°Í Ã¼Å©
+        // postë¡œ ë°›ì€ ë°ì´í„°ì¤‘ í•„ìˆ˜ë¡œ ìˆì–´ì•¼ í•˜ëŠ”ê²ƒ ì²´í¬
         const check = await startUP.CheckBody(req.body, ['projectid', 'resourcetype']);
         if (check != true) {
-            // resultCode¿¡ ÀÀ´äÄÚµå¸¦ ³²±ä´Ù
-            // ResultCode¿¡ Á¤ÀÇÇÑ Á¤¼ö°ªÀ» »ç¿ëÇÒÁö stringÀÚÃ¼¸¦ ´ãÀ»Áö °áÁ¤ÇØ¾ßÇÔ
+            // resultCodeì— ì‘ë‹µì½”ë“œë¥¼ ë‚¨ê¸´ë‹¤
+            // ResultCodeì— ì •ì˜í•œ ì •ìˆ˜ê°’ì„ ì‚¬ìš©í• ì§€ stringìì²´ë¥¼ ë‹´ì„ì§€ ê²°ì •í•´ì•¼í•¨
             result_array.resultCode = check;
             res.send(result_array);
             return;
         }
 
-        // µ¿±â DB
+        // ë™ê¸° DB
         const connection = startUP.Connection;
 
         const table_string = `project_version JOIN project ON project_version.projectid = project.projectid`;
@@ -261,9 +263,9 @@ exports.SelectVersion = async function (req, res)
 
 /*----------------------------------------------------------*/
 // SelectAllVersion
-// ¼³¸í : ¸ğµç ¹öÀüÀ» Á¶È¸ÇÏ´Â APIÇÔ¼ö
-// ÀÔ·Â : 
-// ¸®ÅÏ : result_array
+// ì„¤ëª… : ëª¨ë“  ë²„ì „ì„ ì¡°íšŒí•˜ëŠ” APIí•¨ìˆ˜
+// ì…ë ¥ : 
+// ë¦¬í„´ : result_array
 //       {
 //           resultCode
 //           data :
@@ -282,7 +284,7 @@ exports.SelectAllVersion = async function (req, res) {
     try {
         startUP.SystemLog(req.url, req.ip, JSON.stringify(req.body));
 
-        // µ¿±â DB
+        // ë™ê¸° DB
         const connection = startUP.Connection;
 
         const table_string = `project_version JOIN project ON project_version.projectid = project.projectid`;
@@ -303,9 +305,9 @@ exports.SelectAllVersion = async function (req, res) {
 
 /*----------------------------------------------------------*/
 // SelectLanguage
-// ¼³¸í : ¹öÀüÀÇ ¾ğ¾î¸¦ Á¶È¸ÇÏ´Â APIÇÔ¼ö
-// ÀÔ·Â : projectid, majorver, minorver, hotfixver
-// ¸®ÅÏ : result_array
+// ì„¤ëª… : ë²„ì „ì˜ ì–¸ì–´ë¥¼ ì¡°íšŒí•˜ëŠ” APIí•¨ìˆ˜
+// ì…ë ¥ : projectid, majorver, minorver, hotfixver
+// ë¦¬í„´ : result_array
 //       {
 //           resultCode
 //           data :
@@ -323,17 +325,17 @@ exports.SelectLanguage = async function (req, res) {
         var result_array = Object();
         result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
 
-        // post·Î ¹ŞÀº µ¥ÀÌÅÍÁß ÇÊ¼ö·Î ÀÖ¾î¾ß ÇÏ´Â°Í Ã¼Å©
+        // postë¡œ ë°›ì€ ë°ì´í„°ì¤‘ í•„ìˆ˜ë¡œ ìˆì–´ì•¼ í•˜ëŠ”ê²ƒ ì²´í¬
         const check = await startUP.CheckBody(req.body, ['projectid', 'resourcetype', 'majorver', 'minorver', 'hotfixver', 'buildver']);
         if (check != true) {
-            // resultCode¿¡ ÀÀ´äÄÚµå¸¦ ³²±ä´Ù
-            // ResultCode¿¡ Á¤ÀÇÇÑ Á¤¼ö°ªÀ» »ç¿ëÇÒÁö stringÀÚÃ¼¸¦ ´ãÀ»Áö °áÁ¤ÇØ¾ßÇÔ
+            // resultCodeì— ì‘ë‹µì½”ë“œë¥¼ ë‚¨ê¸´ë‹¤
+            // ResultCodeì— ì •ì˜í•œ ì •ìˆ˜ê°’ì„ ì‚¬ìš©í• ì§€ stringìì²´ë¥¼ ë‹´ì„ì§€ ê²°ì •í•´ì•¼í•¨
             result_array.resultCode = check;
             res.send(result_array);
             return;
         }
 
-        // µ¿±â DB
+        // ë™ê¸° DB
         const connection = startUP.Connection;
 
         const table_string = `project_version`;
@@ -354,12 +356,12 @@ exports.SelectLanguage = async function (req, res) {
 };
 
 /*----------------------------------------------------------*/
-// DeleteVersion (Æó±â, ¹öÀü ¼¼ºĞÈ­·Î ÀÎÇÑ »ç¿ëºÒ°¡)
-// ¼³¸í : ¹öÀüÀ» »èÁ¦ÇÏ´Â APIÇÔ¼ö
-// ÀÔ·Â : projectid, majorver, minorver, hotfixver, language
-// ¸®ÅÏ : result_array
+// DeleteVersion (íê¸°, ë²„ì „ ì„¸ë¶„í™”ë¡œ ì¸í•œ ì‚¬ìš©ë¶ˆê°€)
+// ì„¤ëª… : ë²„ì „ì„ ì‚­ì œí•˜ëŠ” APIí•¨ìˆ˜
+// ì…ë ¥ : projectid, majorver, minorver, hotfixver, language
+// ë¦¬í„´ : result_array
 //       {
-//           resultCode = 0 (¼º°ø) or ½ÇÆĞ µ¥ÀÌÅÍ
+//           resultCode = 0 (ì„±ê³µ) or ì‹¤íŒ¨ ë°ì´í„°
 //       }
 /*----------------*////////////////////////*----------------*/
 exports.DeleteVersion = async function (req, res) {
@@ -370,17 +372,17 @@ exports.DeleteVersion = async function (req, res) {
         var result_array = Object();
         result_array.resultCode = startUP.ErrorCode.RESULT_SUCCESS;
 
-        // post·Î ¹ŞÀº µ¥ÀÌÅÍÁß ÇÊ¼ö·Î ÀÖ¾î¾ß ÇÏ´Â°Í Ã¼Å©
+        // postë¡œ ë°›ì€ ë°ì´í„°ì¤‘ í•„ìˆ˜ë¡œ ìˆì–´ì•¼ í•˜ëŠ”ê²ƒ ì²´í¬
         const check = await startUP.CheckBody(req.body, ['projectid', 'majorver', 'minorver', 'language']);
         if (check != true) {
-            // resultCode¿¡ ÀÀ´äÄÚµå¸¦ ³²±ä´Ù
-            // ResultCode¿¡ Á¤ÀÇÇÑ Á¤¼ö°ªÀ» »ç¿ëÇÒÁö stringÀÚÃ¼¸¦ ´ãÀ»Áö °áÁ¤ÇØ¾ßÇÔ
+            // resultCodeì— ì‘ë‹µì½”ë“œë¥¼ ë‚¨ê¸´ë‹¤
+            // ResultCodeì— ì •ì˜í•œ ì •ìˆ˜ê°’ì„ ì‚¬ìš©í• ì§€ stringìì²´ë¥¼ ë‹´ì„ì§€ ê²°ì •í•´ì•¼í•¨
             result_array.resultCode = check;
             res.send(result_array);
             return;
         }
 
-        // µ¿±â DB
+        // ë™ê¸° DB
         const connection = startUP.Connection;
 
         const table_string = `project_version`;

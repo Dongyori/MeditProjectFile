@@ -25,7 +25,7 @@ async function CheckBody(req_body, checklist)
 // SystemLog(req.url, req.body);
 async function SystemLog(url, ip, message)
 {
-    return;
+    // return;
     const connection = DB.sync();
     var table_string = `systemlog_` + (new Date()).yyyymm();
     var insert_table_string = table_string + `(date, AccountNo, Action, Message)`;
@@ -39,6 +39,7 @@ async function SystemLog(url, ip, message)
     var query_string = `INSERT INTO ${insert_table_string} VALUES ${values_string}`;
     try
     {
+        console.log(query_string);
         connection.query(query_string);
     }
     catch (err)
